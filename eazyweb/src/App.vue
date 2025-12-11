@@ -2,7 +2,7 @@
   <div class="app">
     <header>
       <h1>EazyClass</h1>
-      <!-- Здесь можно добавить NavBar позже, если нужно: <NavBar /> -->
+      <!-- добавить NavBar позже -->
     </header>
     <main>
       <router-view />  <!-- Рендерит HomeView или другие views -->
