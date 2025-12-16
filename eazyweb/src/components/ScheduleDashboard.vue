@@ -26,27 +26,31 @@
             <!-- Ряд 2 -->
             <div class="header-bottom">
                 <div class="calendar-wrapper">
-                    <button class="calendar-button" @click="toggleCalendar">
+                    <button ref="calendarButtonRef" class="calendar-button" @click="toggleCalendar">
                         {{ currentMonthYear }} 
                         <span class="dropdown-arrow">▼</span>
                     </button>
+                </div>
 
+                <!-- Прозрачный оверлей, который блокирует клики по остальным элементам страницы -->
+                <div v-if="calendarVisible" class="overlay" @click="calendarVisible = false">
+                  <div
+                    class="calendar-popup"
+                    :style="popupStyle"
+                    @click.stop
+                  >
                     <VueDatePicker
-                    v-if="calendarVisible"
-                    v-model="selectedWeek" 
-                    week-picker
-                    inline
-                    auto-apply
-                    :min-date="minDateObj"
-                    :max-date="maxDateObj"
-                    :time-config="{ enableTimePicker: false }"
-                    :config="{ 
-                      closeOnScroll: true, 
-                      onClickOutside: () => calendarVisible = false
-                      }"
-                    :locale="ru"
-                    @update:model-value="onWeekSelected"
-                    class="dashboard-datepicker" />
+                      v-model="selectedWeek"
+                      week-picker
+                      inline
+                      auto-apply
+                      :min-date="minDateObj"
+                      :max-date="maxDateObj"
+                      :time-config="{ enableTimePicker: false }"
+                      :locale="ru"
+                      @update:model-value="onWeekSelected"
+                      class="dashboard-datepicker" />
+                  </div>
                 </div>
 
                 <button v-if="!(isCurrentWeek)" class="today-button" @click="goToCurrentWeek">
@@ -70,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits, watch } from 'vue'
+import { ref, computed, defineProps, defineEmits, watch, nextTick, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 
@@ -103,8 +107,8 @@ const isSubscribed = computed(() => {
 const currentMode = ref('daily')
 const currentWeekOffset = ref(0)
 
-const MIN_OFFSET = -52  // год назад
-const MAX_OFFSET = 1    // +2 недели вперёд
+const MIN_OFFSET = -52  // недели назад
+const MAX_OFFSET = 1    // недели вперёд
 
 const isPrevDisabled = computed(() => currentWeekOffset.value <= MIN_OFFSET )
 const isNextDisabled = computed(() => currentWeekOffset.value >= MAX_OFFSET )
@@ -157,6 +161,30 @@ const currentWeekEnd = computed(() => {
 // Календарь
 const calendarVisible = ref(false)
 const selectedWeek = ref(null)  // [Date, Date] — понедельник и воскресенье
+const calendarButtonRef = ref(null)
+const popupStyle = ref({})
+let rafId = null
+
+function handleReposition() {
+  if (rafId) cancelAnimationFrame(rafId)
+  rafId = requestAnimationFrame(() => {
+    positionPopupNearButton()
+  })
+}
+
+function addRepositionListeners() {
+  window.addEventListener('resize', handleReposition, { passive: true })
+  window.addEventListener('scroll', handleReposition, { passive: true })
+}
+
+function removeRepositionListeners() {
+  window.removeEventListener('resize', handleReposition)
+  window.removeEventListener('scroll', handleReposition)
+  if (rafId) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
+}
 
 // Синхронизация: при открытии календаря показываем текущую неделю
 watch(calendarVisible, (visible) => {
@@ -170,6 +198,14 @@ watch(calendarVisible, (visible) => {
     sunday.setDate(monday.getDate() + 6)
 
     selectedWeek.value = [monday, sunday]
+
+    // добавить слушатели и позиционировать
+    nextTick(() => {
+      positionPopupNearButton()
+      addRepositionListeners()
+    })
+  } else {
+    removeRepositionListeners()
   }
 })
 
@@ -184,10 +220,35 @@ function onWeekSelected(weekArray) {
   calendarVisible.value = false
 }
 
+function positionPopupNearButton() {
+  const btn = calendarButtonRef.value
+  if (!btn) return
+  const rect = btn.getBoundingClientRect()
+  const vw = window.innerWidth
+  const pickerWidth = 320 // приблизительная ширина попапа
+
+  let left = rect.left
+  if (left + pickerWidth > vw - 8) left = Math.max(8, vw - pickerWidth - 8)
+
+  const top = rect.bottom + 8
+
+  popupStyle.value = {
+    position: 'absolute',
+    top: `${top}px`,
+    left: `${left}px`
+  }
+}
+
 function toggleCalendar() {
-  calendarVisible.value 
-    ? calendarVisible.value = false
-    : calendarVisible.value = true
+  if (calendarVisible.value) {
+    calendarVisible.value = false
+    return
+  }
+
+  calendarVisible.value = true
+  nextTick(() => {
+    positionPopupNearButton()
+  })
 }
 
 // Остальные функции
@@ -227,9 +288,9 @@ function goToCurrentWeek() {
   currentWeekOffset.value = 0
 }
 
-function onClickOutsideCalendar() {
-  calendarVisible.value = false
-}
+onBeforeUnmount(() => {
+  removeRepositionListeners()
+})
 
 </script>
 
@@ -482,15 +543,8 @@ function onClickOutsideCalendar() {
 
 /* Popover-календарь — строго под кнопкой, фиксированная ширина из коробки */
 .dashboard-datepicker {
-  position: absolute;
-  top: 100%;           /* Непосредственно под кнопкой */
-  left: 0;             /* Выравнивание по левому краю кнопки */
-  margin-top: 8px;     /* Небольшой отступ */
-  z-index: 1000;
-
-  /* Не трогаем ширину — оставляем стандартную от библиотеки */
-  width: max-content;
-
+  /* позиция задаётся внешним контейнером (`.calendar-popup`) */
+  z-index: 1001;
   background: white;
   border-radius: 16px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
@@ -498,7 +552,19 @@ function onClickOutsideCalendar() {
   overflow: hidden;
 }
 
-/* Убираем стрелочку вверх, если она тебе не нужна */
+/* Полноэкранный прозрачный оверлей, который блокирует клики по странице */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0); /* полностью прозрачный, но перехватывает клики */
+  z-index: 1000;
+}
+
+.calendar-popup {
+  position: absolute; /* позиционируется относительно окна через inline-стиль */
+  z-index: 1002;
+}
+
 .dashboard-datepicker::before {
   display: none;
 }
