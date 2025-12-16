@@ -25,11 +25,16 @@
 
             <!-- Ряд 2 -->
             <div class="header-bottom">
+
                 <div class="calendar-wrapper">
-                    <button ref="calendarButtonRef" class="calendar-button" @click="toggleCalendar">
-                        {{ currentMonthYear }} 
-                        <span class="dropdown-arrow">▼</span>
-                    </button>
+                  <button ref="calendarButtonRef" class="calendar-button" @click="toggleCalendar">
+                    {{ currentMonthYear }} 
+                    <span class="dropdown-arrow">▼</span>
+                  </button>
+
+                  <button v-if="!(isCurrentWeek)" class="today-button" @click="goToCurrentWeek">
+                    {{ todayDay }}
+                  </button>
                 </div>
 
                 <!-- Прозрачный оверлей, который блокирует клики по остальным элементам страницы -->
@@ -53,9 +58,6 @@
                   </div>
                 </div>
 
-                <button v-if="!(isCurrentWeek)" class="today-button" @click="goToCurrentWeek">
-                    Сегодня
-                </button>
                 <div class="week-nav">
                     <button @click="prevWeek" class="nav-arrow" :disabled="isPrevDisabled">‹</button>
                     <button @click="nextWeek" class="nav-arrow" :disabled="isNextDisabled">›</button>
@@ -65,10 +67,9 @@
 
         <!-- Контент (режимы) -->
         <main class="dashboard-content">
-            <p>Режим: {{ currentMode === 'daily' ? 'Дни недели' : 'Неделя списком' }}</p>
-            <p>Выбрана неделя: {{ currentWeekStart }} – {{ currentWeekEnd }}</p>
-            <p>Entity: {{ entityType }} ID {{ entityId }}</p>
-            <!-- Здесь будут уроки (шаг 5) -->
+          <component :is="currentMode === 'daily' ? DailyMode : WeeklyMode"
+                 :weekStart="weekStartIso"
+                 :lessons="lessons" />
         </main>
     </div>
 </template>
@@ -87,6 +88,9 @@ import {
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { ru } from 'date-fns/locale'  // Русская локаль
+import { format } from 'date-fns'
+import DailyMode from './DailyMode.vue'
+import WeeklyMode from './WeeklyMode.vue'
 
 const props = defineProps({
   entityId: { type: String, required: true },
@@ -142,6 +146,11 @@ const currentMonthYear = computed(() => {
 
 const isCurrentWeek = computed(() => currentWeekOffset.value === 0)
 
+const todayDay = computed(() => {
+  const d = new Date()
+  return d.getDate()
+})
+
 const currentWeekStart = computed(() => {
   const d = new Date(today)
   const day = d.getDay()
@@ -157,6 +166,18 @@ const currentWeekEnd = computed(() => {
   d.setDate(diff + currentWeekOffset.value * 7 + 6)
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '')
 })
+
+// weekStart ISO для передачи в режимы
+const weekStartIso = computed(() => {
+  const d = new Date(today)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  d.setDate(diff + currentWeekOffset.value * 7)
+  return format(d, 'yyyy-MM-dd')
+})
+
+// Заглушка уроков — передавать сюда данные json:api.data
+const lessons = ref([])
 
 // Календарь
 const calendarVisible = ref(false)
@@ -354,7 +375,7 @@ onBeforeUnmount(() => {
         0 2px 8px rgba(0, 0, 0, 0.06),
         0 1px 0 rgba(0, 0, 0, 0.04);
 
-    padding: 12px 16px 8px;
+    padding: 8px 16px 8px;
 }
 
 /* ============== HEADER ROWS ============ */
@@ -362,8 +383,6 @@ onBeforeUnmount(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    padding-bottom: 8px;
     margin-bottom: 8px;
     /* border-bottom: 1px solid #f0f0f0; */
 }
@@ -478,22 +497,26 @@ onBeforeUnmount(() => {
    TODAY BUTTON
 ================================ */
 .today-button {
-    background: #e8f4fc;
-    color: #27A7E7;
+  background: #ffffff;
+  color: #27A7E7;
 
-    border: none;
-    border-radius: 10px;
+  border: 2px solid #27A7E7;
+  border-radius: 8px;
 
-    padding: 8px 14px;
-    font-size: 0.9rem;
-    font-weight: 500;
+  
 
-    cursor: pointer;
-    transition: background 0.2s;
+  padding: 4px 8px;
+  min-width: 36px;
+  font-size: 0.95rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
 }
 
 .today-button:hover {
-    background: #d8ecfa;
+  background: #f0fbff;
+  transform: translateY(-1px);
 }
 
 /* ================================
@@ -532,13 +555,15 @@ onBeforeUnmount(() => {
    CONTENT
 ================================ */
 .dashboard-content {
-    padding: 20px 16px;
+    padding: 8px 16px;
     color: #555;
 }
 
 .calendar-wrapper {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
 }
 
 /* Popover-календарь — строго под кнопкой, фиксированная ширина из коробки */
