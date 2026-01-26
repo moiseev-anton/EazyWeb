@@ -46,7 +46,7 @@
       <nav class="sidebar-nav">
         <router-link
           to="/schedule"
-          class="nav-item"
+          class="nav-item"~
           :class="{ active: isActive('schedule') }"
         >
           <span class="icon" v-html="icons.schedule"></span>
@@ -97,7 +97,7 @@ const router = useRouter()
 const route = useRoute()
 
 const authStore = useAuthStore()
-const { isAuthenticated, subscription } = storeToRefs(authStore)
+const { isAuthenticated, subscription, user } = storeToRefs(authStore)
 
 /** Twemoji как в Telegram */
 const icons = {
@@ -111,9 +111,13 @@ const icons = {
 let windowWidth = ref(window.innerWidth)
 const isMobile = computed(() => windowWidth.value < 768)
 
-const profileLabel = computed(() =>
-  isAuthenticated.value ? 'Профиль' : 'Войти'
-)
+const profileLabel = computed(() => {
+  if (!isAuthenticated.value) return 'Войти'
+  const u = user.value || {}
+  const first = u.firstName || u.first_name || ''
+  const username = u.username || ''
+  return first || username || 'Профиль'
+})
 
 // const isActive = computed(() => (name) => route.name === name)
 const isActive = (name) => route.name === name

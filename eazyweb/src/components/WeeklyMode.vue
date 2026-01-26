@@ -24,6 +24,24 @@
             <div class="time">{{ lesson.attributes.startTime }} — {{ lesson.attributes.endTime }}</div>
             <div class="subject">{{ lesson.attributes.subject }}</div>
             <div class="meta">№{{ lesson.attributes.number }} · {{ lesson.attributes.classroom }}</div>
+
+            <div class="lesson-relation">
+              <button
+                v-if="entityType === 'group' && lesson._resolved?.teacher"
+                class="relation-btn"
+                @click="() => emit('open-entity', { id: lesson._resolved.teacher.id, type: 'teacher', name: lesson._resolved.teacher.shortName || lesson._resolved.teacher.fullName, endpoint: lesson._resolved.teacher.endpoint })"
+              >
+                {{ lesson._resolved.teacher.shortName || lesson._resolved.teacher.fullName }}
+              </button>
+
+              <button
+                v-else-if="entityType === 'teacher' && lesson._resolved?.group"
+                class="relation-btn"
+                @click="() => emit('open-entity', { id: lesson._resolved.group.id, type: 'group', name: lesson._resolved.group.title, endpoint: lesson._resolved.group.endpoint })"
+              >
+                {{ lesson._resolved.group.title }}
+              </button>
+            </div>
           </li>
         </ul>
         <div v-if="!(lessonsMap[d.iso] && lessonsMap[d.iso].length)" class="no-lessons">Нет уроков</div>
@@ -39,8 +57,11 @@ import { ru } from 'date-fns/locale'
 
 const props = defineProps({
   weekStart: { type: [String, Date], required: true },
-  lessons: { type: Array, default: () => [] }
+  lessons: { type: Array, default: () => [] },
+  entityType: { type: String, default: 'group' }
 })
+
+const emit = defineEmits(['open-entity'])
 
 const weekStartDate = computed(() => {
   const v = props.weekStart
@@ -149,4 +170,8 @@ function toggle(i) {
 .subject { font-weight:600; margin-top:6px }
 .meta { font-size:0.85rem; color:#666; margin-top:4px }
 .no-lessons { color:#888; padding:8px 0 }
+
+.lesson-relation { margin-top: 8px }
+.relation-btn { background: transparent; border: none; color: #0b6fb1; font-weight: 600; cursor: pointer; padding: 4px 0 }
+.relation-btn:hover { text-decoration: underline }
 </style>

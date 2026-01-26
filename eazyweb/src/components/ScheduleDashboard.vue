@@ -69,7 +69,9 @@
         <main class="dashboard-content">
           <component :is="currentMode === 'daily' ? DailyMode : WeeklyMode"
                  :weekStart="weekStartIso"
-                 :lessons="lessons" />
+                 :lessons="lessons"
+                 :entityType="props.entityType"
+                 @open-entity="(e) => emit('open-entity', e)" />
         </main>
     </div>
 </template>
@@ -91,6 +93,7 @@ import { ru } from 'date-fns/locale'  // Русская локаль
 import { format } from 'date-fns'
 import DailyMode from './DailyMode.vue'
 import WeeklyMode from './WeeklyMode.vue'
+import { fetchLessons } from '../api/lessonsService'
 
 const props = defineProps({
   entityId: { type: String, required: true },
@@ -99,7 +102,7 @@ const props = defineProps({
   showBackButton: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['back'])
+const emit = defineEmits(['back', 'open-entity'])
 
 const authStore = useAuthStore()
 const { subscription } = storeToRefs(authStore)
@@ -176,8 +179,29 @@ const weekStartIso = computed(() => {
   return format(d, 'yyyy-MM-dd')
 })
 
-// Заглушка уроков — передавать сюда данные json:api.data
+// Уроки в формате json:api (массив объектов с полем _resolved)
 const lessons = ref([])
+
+// Загрузка уроков при смене выбранной сущности или недели
+async function loadLessons() {
+  const dateFrom = weekStartIso.value
+  // compute week end (date_from + 6 days)
+  const d = new Date(weekStartIso.value)
+  d.setDate(d.getDate() + 6)
+  const dateTo = d.toISOString().slice(0,10)
+
+  try {
+    const opts = { date_from: dateFrom, date_to: dateTo }
+    if (props.entityType === 'group') opts.group = props.entityId
+    else if (props.entityType === 'teacher') opts.teacher = props.entityId
+
+    const res = await fetchLessons(opts)
+    lessons.value = res.lessons
+  } catch (e) {
+    console.error('Failed to load lessons', e)
+    lessons.value = []
+  }
+}
 
 // Календарь
 const calendarVisible = ref(false)
@@ -312,6 +336,11 @@ function goToCurrentWeek() {
 onBeforeUnmount(() => {
   removeRepositionListeners()
 })
+
+// watch for week or entity changes
+watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
+  loadLessons()
+}, { immediate: true })
 
 </script>
 

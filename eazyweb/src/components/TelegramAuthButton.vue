@@ -1,141 +1,89 @@
 <template>
-  <button class="tg-btn" @click="handleAuth" :disabled="loading">
-    {{ loading ? 'Подождите...' : 'Войти через Telegram' }}
-  </button>
+  <div class="tg-auth">
+    <div v-if="authStore.isAuthenticated" class="logged">
+      <div class="user-line">Войти как <strong>{{ displayName }}</strong></div>
+      <button class="tg-logout" @click="logout">Выйти</button>
+    </div>
+
+    <div v-else>
+      <button class="tg-btn" @click="handleAuth" :disabled="loading">
+        <span v-if="!loading">Войти через Telegram</span>
+        <span v-else>Ожидание подтверждения в боте…</span>
+      </button>
+      <div v-if="message" class="tg-message">{{ message }}</div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { inject } from 'vue'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useAuthStore } from '../stores/auth'
+import api from '../api/axios'
 
-const emit = defineEmits(['success'])
-const tg = inject('tg')
-const router = useRouter()
-
+const authStore = useAuthStore()
 const loading = ref(false)
-let pollInterval = null
-let currentNonce = null
-let pollAttempts = 0
-const maxAttempts = 24
+const message = ref('')
+
+const displayName = computed(() => {
+  const u = authStore.user
+  if (!u) return ''
+  return u.username || u.shortName || `${u.firstName || ''} ${u.lastName || ''}`.trim()
+})
+
+function logout() {
+  authStore.logout()
+}
 
 async function handleAuth() {
-  if (tg?.initDataUnsafe?.user) {
-    // В TWA: fallback, если авто-авторизация не сработала (см. HomeView)
-    alert('Вы уже в Telegram! Авторизация автоматическая.')
-    return
-  }
-
   loading.value = true
+  message.value = 'Открываем Telegram, ожидайте подтверждения…'
   try {
-    // GET deeplink + nonce
-    const response = await axios.get('/api/v1/deeplink/telegram/')
-    const { deeplink, nonce } = response.data
-    currentNonce = nonce
+    const result = await authStore.startDeeplink('telegram')
+    // после успешного pollToken стор уже содержит accessToken и возможно user
+    message.value = 'Авторизация успешна'
 
-    // Переход по deeplink
-    window.location.href = deeplink 
+    // ensure we have up-to-date user info; try to fetch /users/me/
+    try {
+      const me = await api.get('/users/me/', { withCredentials: true })
+      const udata = me.data?.data?.attributes
+      if (udata) {
+        authStore.user = {
+          id: me.data?.data?.id || null,
+          username: udata.username,
+          firstName: udata.firstName,
+          lastName: udata.lastName,
+          notifyScheduleUpdates: udata.notifyScheduleUpdates,
+          notifyUpcomingLessons: udata.notifyUpcomingLessons
+        }
+      }
+    } catch (e) {
+      // ignore — store may already have user
+    }
 
-    // Стартуем поллинг (5 сек интервал, max 2 мин)
-    pollNonce()
-  } catch (error) {
-    console.error('Deeplink fetch failed:', error)
-    const msg = error.response?.data?.message || 'Ошибка получения ссылки. Попробуйте позже.'
-    alert(msg)
+  } catch (err) {
+    console.error('Telegram deeplink auth failed', err)
+    message.value = err.response?.data?.message || err.message || 'Ошибка авторизации'
   } finally {
     loading.value = false
-  }
-}
-
-async function pollNonce() {
-  let attempts = 0
-  const maxAttempts = 24  // ~2 мин
-
-  pollInterval = setInterval(async () => {
-    attempts++
-    try {
-      const response = await axios.post('/api/v1/token/', { nonce: currentNonce })
-      const { success, access, refresh, message } = response.data
-
-      if (success) {
-        saveToken(access, refresh)
-        emit('success', { name: 'Пользователь' })  // Здесь можно передать user из ответа, если сервер вернёт
-        clearInterval(pollInterval)
-        alert('Авторизация успешна!')
-      } else {
-        // Обработка ошибок по сообщению
-        handleError(message)
-        if (message === 'invalid_nonce' || attempts >= maxAttempts) {
-          clearInterval(pollInterval)
-          alert('Срок действия истёк. Попробуйте заново.')
-        }
-        // Для 'auth_in_progress' — продолжаем поллинг
-      }
-    } catch (error) {
-      console.error('Poll failed:', error)
-      const msg = error.response?.data?.message || 'Ошибка проверки. Попробуйте позже.'
-      handleError(msg)
-      if (attempts >= maxAttempts) {
-        clearInterval(pollInterval)
-        alert('Таймаут. Авторизация не удалась.')
-      }
-    }
-  }, 5000)
-}
-
-
-function handleError(message) {
-  // Маппинг на user-friendly тексты (на основе твоих default_error_messages)
-  const errorMap = {
-    'no_active_account': 'Аккаунт не найден. Зарегистрируйтесь.',
-    'service_unavailable': 'Сервис недоступен, попробуйте позже.',
-    'invalid_nonce': 'Неверный или истёкший код.',
-    'auth_in_progress': 'Ожидание подтверждения в боте...',
-    'invalid_token': 'Неверный токен.',
-  }
-  const userMsg = errorMap[message] || message || 'Неизвестная ошибка.'
-  // Пока alert, позже — toast (npm i vue-toastification)
-  if (message !== 'auth_in_progress') {  // Не спамить при ожидании
-    alert(userMsg)
-  }
-}
-
-
-function saveToken(access, refresh = null) {
-  const isBrowser = typeof document !== 'undefined'
-  const isTWA = !!tg
-
-  if (isBrowser && !isTWA) {
-    // Браузер: access в localStorage (или используй в axios headers), refresh в cookie (сервер)
-    localStorage.setItem('access', access)
-    // Устанавливаем axios interceptor для cookies (если нужно для будущих запросов)
-    axios.defaults.withCredentials = true
-  } else {
-    // TWA/мобильный: оба JWT в localStorage, используй в headers
-    localStorage.setItem('access', access)
-    if (refresh) localStorage.setItem('refresh', refresh)
-    // Interceptor для headers
-    axios.interceptors.request.use(config => {
-      const token = localStorage.getItem('access')
-      if (token) config.headers.Authorization = `Bearer ${token}`
-      return config
-    })
+    setTimeout(() => { message.value = '' }, 4000)
   }
 }
 </script>
 
 <style scoped>
+.tg-auth { display:flex; flex-direction:column; align-items:flex-start; gap:8px }
 .tg-btn {
-  background: #27A7E7;
+  background: linear-gradient(90deg,#27A7E7,#1CA0D6);
   color: white;
-  padding: 14px 24px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 15px;
   cursor: pointer;
-  min-width: 200px;
 }
-.tg-btn:hover:not(:disabled) { background: #1c8ac6; }
-.tg-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.tg-btn:disabled { opacity:0.7; cursor:not-allowed }
+.tg-message { color:#666; font-size:13px; margin-top:4px }
+.logged { display:flex; gap:8px; align-items:center }
+.tg-logout { background:transparent; border:1px solid #e0e0e0; padding:6px 10px; border-radius:8px; cursor:pointer }
+.user-line { color:#333 }
 </style>

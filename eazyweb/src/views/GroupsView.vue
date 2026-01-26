@@ -1,67 +1,53 @@
 <template>
-
-  <ScheduleDashboard v-if="selectedEntity" :entityId="selectedEntity.id" :entityType="'group'"
-    :entityName="selectedEntity.name" :showBackButton="true" @back="selectedEntity = null" />
+  <ScheduleDashboard
+    v-if="selectedEntity"
+    :entityId="selectedEntity.id"
+    :entityType="selectedEntity.type"
+    :entityName="selectedEntity.name"
+    :showBackButton="true"
+    @back="selectedEntity = null"
+    @open-entity="handleOpenEntity"
+  />
 
   <div v-else class="groups-view">
-    <h2>Группы</h2>
-    <!-- Твой аккордеон факультетов -->
-    <div class="accordion">
-      <button @click="toggleFaculty('it')">Факультет IT</button>
-      <div v-if="openFaculty === 'it'">
-        <button @click="selectGroup({ id: '101', name: 'Группа ИТ-101' })">Группа ИТ-101</button>
-        <!-- Другие группы -->
-      </div>
+    <div class="groups-container">
+      <FacultyAccordion @group-selected="selectGroup" />
     </div>
-
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import ScheduleDashboard from '../components/ScheduleDashboard.vue'
+import FacultyAccordion from '../components/FacultyAccordion.vue'
+
 
 const selectedEntity = ref(null)
-const openFaculty = ref(null)
 
-function toggleFaculty(fac) {
-  openFaculty.value = openFaculty.value === fac ? null : fac
+function selectGroup(group) {
+  selectedEntity.value = { ...group, type: 'group' }
 }
 
-function selectGroup(entity) {
-  selectedEntity.value = entity
+function handleOpenEntity(entity) {
+  // open other entity (teacher or group) in the same view
+  selectedEntity.value = { ...entity }
 }
 </script>
 
 <style scoped>
 .groups-view {
-  padding: 20px;
-}
-
-.accordion-header {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  background: #f0f0f0;
-}
-
-.accordion-content {
-  display: none;
-}
-
-/* Позже: v-show */
-.course-divider {
-  padding: 8px;
-  font-weight: bold;
-  border-top: 1px solid #eee;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #fff;
 }
 
-.group-btn {
-  display: block;
-  padding: 12px;
-  text-decoration: none;
-  border-bottom: 1px solid #eee;
+.groups-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
 }
 </style>
