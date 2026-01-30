@@ -50,6 +50,80 @@ export const useAuthStore = defineStore('auth', () => {
     return data
   }
 
+  // Create a new subscription on the server for given entity { id, name, type }
+  async function createSubscription(entity) {
+    if (!entity || !entity.id || !entity.type) throw new Error('Invalid entity')
+
+    try {
+      let url = null
+      let body = null
+      if (entity.type === 'group') {
+        url = '/group-subscriptions/'
+        body = {
+          data: {
+            type: 'group-subscriptions',
+            relationships: {
+              group: { data: { id: entity.id, type: 'groups' } }
+            }
+          }
+        }
+      } else if (entity.type === 'teacher') {
+        url = '/teacher-subscriptions/'
+        body = {
+          data: {
+            type: 'teacher-subscriptions',
+            relationships: {
+              teacher: { data: { id: entity.id, type: 'teachers' } }
+            }
+          }
+        }
+      } else {
+        throw new Error('Unsupported subscription type')
+      }
+
+      const res = await api.post(url, body, { withCredentials: true, headers: { 'Content-Type': 'application/vnd.api+json', 'Accept': 'application/vnd.api+json' } })
+      // Refresh local subscription state from server
+      await loadSubscription()
+      return res.data
+    } catch (e) {
+      throw e
+    }
+  }
+
+  // Delete current subscription record on server
+  async function deleteSubscription() {
+    if (!subscription.value) return null
+    const subRecId = subscription.value.subscriptionId || null
+    const subType = subscription.value.type || null
+
+    if (!subRecId) {
+      // Try to reload subscription to obtain record id
+      await loadSubscription()
+    }
+
+    const idToDelete = (subscription.value && subscription.value.subscriptionId) ? subscription.value.subscriptionId : null
+    const typeToDelete = (subscription.value && subscription.value.type) ? subscription.value.type : subType
+
+    if (!idToDelete || !typeToDelete) {
+      // nothing to delete
+      subscription.value = null
+      return null
+    }
+
+    try {
+      if (typeToDelete === 'group') {
+        await api.delete(`/group-subscriptions/${idToDelete}/`, { withCredentials: true })
+      } else if (typeToDelete === 'teacher') {
+        await api.delete(`/teacher-subscriptions/${idToDelete}/`, { withCredentials: true })
+      }
+
+      subscription.value = null
+      return { success: true }
+    } catch (e) {
+      throw e
+    }
+  }
+
   async function refreshToken() {
     // ensure single refresh in progress
     if (refreshPromise) return refreshPromise
@@ -77,26 +151,31 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     try {
-      await api.post('/token/logout/', null, { withCredentials: true })
+      const res = await api.post('/token/logout/', null, { withCredentials: true })
+      accessToken.value = ''
+      isAuthenticated.value = false
+      user.value = null
+      subscription.value = null
+      notifications.value = { changes: true, reminders: true }
+      return res.data || { success: true }
     } catch (e) {
-      // ignore
+      // ensure local cleanup even if server fails
+      accessToken.value = ''
+      isAuthenticated.value = false
+      user.value = null
+      subscription.value = null
+      notifications.value = { changes: true, reminders: true }
+      throw e
     }
-    accessToken.value = ''
-    isAuthenticated.value = false
-    user.value = null
-    subscription.value = null
-    notifications.value = { changes: true, reminders: true }
   }
 
-  function subscribe(entity) {
-    if (subscription.value && subscription.value.id !== entity.id) {
-      console.warn('Замена подписки!')
-    }
-    subscription.value = entity
+  // Async wrappers to perform server operations and keep local state in sync
+  async function subscribe(entity) {
+    return createSubscription(entity)
   }
 
-  function unsubscribe() {
-    subscription.value = null
+  async function unsubscribe() {
+    return deleteSubscription()
   }
 
   function updateNotifications(newSettings) {
@@ -109,15 +188,53 @@ export const useAuthStore = defineStore('auth', () => {
   const accessTokenStr = computed(() => accessToken.value)
 
   // Provide a small initializer to wire interceptors from main.js if needed
-  function init() {
+  async function init() {
     try {
       setupInterceptors({ accessToken, refreshToken, logout })
     } catch (e) {
       // ignore, will setup later when login runs
     }
+
+    // If we already have an access token in memory, try to load subscription
     if (accessToken.value) {
-      // best-effort load of subscription
       loadSubscription().catch(() => {})
+      return
+    }
+
+    // Try to refresh access token using httponly refresh cookie
+    try {
+      const res = await api.post('/token/refresh/', null, { withCredentials: true })
+      const data = res.data || {}
+      if (data.access) {
+        accessToken.value = data.access
+        isAuthenticated.value = true
+        // ensure interceptors see the new token
+        try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+
+        // Fetch current user if possible
+        try {
+          const me = await api.get('/users/me/', { withCredentials: true })
+          const meData = me.data?.data || null
+          const a = meData?.attributes || null
+          if (a) {
+            user.value = {
+              id: meData.id || null,
+              username: a.username || a.user_name || a.login || null,
+              firstName: a.firstName || a.first_name || null,
+              lastName: a.lastName || a.last_name || null,
+              notifyScheduleUpdates: a.notifyScheduleUpdates ?? a.notify_schedule_updates ?? null,
+              notifyUpcomingLessons: a.notifyUpcomingLessons ?? a.notify_upcoming_lessons ?? null
+            }
+          }
+        } catch (e) {
+          // ignore failures to fetch user
+        }
+
+        // load subscription after successful refresh
+        try { await loadSubscription() } catch (_) {}
+      }
+    } catch (e) {
+      // refresh failed or no refresh cookie — remain unauthenticated
     }
   }
 
@@ -159,7 +276,9 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       if (target) {
-        subscription.value = { id: target.id, name: target.name, type: targetType, endpoint: target.endpoint }
+        // first.id is the subscription record id (resource id)
+        const subscriptionRecordId = first.id || null
+        subscription.value = { subscriptionId: subscriptionRecordId, id: target.id, name: target.name, type: targetType, endpoint: target.endpoint }
         return subscription.value
       }
 

@@ -3,7 +3,10 @@ import axios from 'axios'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/',
   withCredentials: true, // important for httponly refresh cookie
-  timeout: 15000
+  timeout: 15000,
+  headers: {
+    'X-Client-Type': 'browser',
+  },
 })
 
 // Setup interceptors with a provided auth store

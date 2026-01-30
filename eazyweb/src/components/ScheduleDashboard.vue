@@ -65,6 +65,27 @@
             </div>
         </header>
 
+        <!-- Replace-confirm modal -->
+        <div v-if="showReplaceConfirm" class="overlay modal-overlay" @click="cancelReplaceSubscription">
+          <div class="modal-dialog" @click.stop>
+            <p>Текущая подписка на <strong>{{ subscription?.name }}</strong> будет заменена. Продолжить?</p>
+            <div class="modal-actions">
+              <button class="modal-btn primary" @click="confirmReplaceSubscription">Ок</button>
+              <button class="modal-btn" @click="cancelReplaceSubscription">Отмена</button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="showUnsubscribeConfirm" class="overlay modal-overlay" @click="cancelUnsubscribe">
+          <div class="modal-dialog" @click.stop>
+            <p>Отписаться от <strong>{{ subscription?.name }}</strong>?</p>
+            <div class="modal-actions">
+              <button class="modal-btn primary" @click="confirmUnsubscribe">Ок</button>
+              <button class="modal-btn" @click="cancelUnsubscribe">Отмена</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Контент (режимы) -->
         <main class="dashboard-content">
           <component :is="currentMode === 'daily' ? DailyMode : WeeklyMode"
@@ -78,6 +99,7 @@
 
 <script setup>
 import { ref, computed, defineProps, defineEmits, watch, nextTick, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 
@@ -105,6 +127,7 @@ const props = defineProps({
 const emit = defineEmits(['back', 'open-entity'])
 
 const authStore = useAuthStore()
+const router = useRouter()
 const { subscription } = storeToRefs(authStore)
 
 const isSubscribed = computed(() => {
@@ -297,11 +320,15 @@ function toggleCalendar() {
 }
 
 // Остальные функции
-function toggleSubscription() {
+const showReplaceConfirm = ref(false)
+const pendingNewEntity = ref(null)
+const showUnsubscribeConfirm = ref(false)
+
+async function toggleSubscription() {
   if (isSubscribed.value) {
-    if (confirm('Отписаться от этого расписания?')) {
-      authStore.unsubscribe()
-    }
+    // show custom modal for unsubscribe
+    showUnsubscribeConfirm.value = true
+    return
   } else {
     const newEntity = {
       id: props.entityId,
@@ -309,12 +336,50 @@ function toggleSubscription() {
       type: props.entityType
     }
 
-    if (subscription.value && confirm('Заменить текущую подписку на эту?')) {
-      authStore.subscribe(newEntity)
-    } else if (!subscription.value) {
-      authStore.subscribe(newEntity)
+    if (subscription.value) {
+      // show custom replace confirmation
+      pendingNewEntity.value = newEntity
+      showReplaceConfirm.value = true
+    } else {
+      try {
+        await authStore.subscribe(newEntity)
+        // после успешной подписки перейти на вкладку Расписание
+        router.push({ name: 'schedule' })
+      } catch (e) { console.error(e) }
     }
   }
+}
+
+async function confirmReplaceSubscription() {
+  if (!pendingNewEntity.value) return cancelReplaceSubscription()
+  showReplaceConfirm.value = false
+  try {
+    await authStore.subscribe(pendingNewEntity.value)
+    // после успешной подписки перейти на вкладку Расписание
+    router.push({ name: 'schedule' })
+  } catch (e) {
+    console.error(e)
+  } finally {
+    pendingNewEntity.value = null
+  }
+}
+
+function cancelReplaceSubscription() {
+  showReplaceConfirm.value = false
+  pendingNewEntity.value = null
+}
+
+async function confirmUnsubscribe() {
+  showUnsubscribeConfirm.value = false
+  try {
+    await authStore.unsubscribe()
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+function cancelUnsubscribe() {
+  showUnsubscribeConfirm.value = false
 }
 
 function toggleMode() {
@@ -612,6 +677,45 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   inset: 0;
   background: rgba(0,0,0,0); /* полностью прозрачный, но перехватывает клики */
   z-index: 1000;
+}
+
+/* Модальное подтверждение замены подписки */
+.modal-overlay {
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-dialog {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 420px;
+  width: calc(100% - 48px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.modal-btn {
+  background: #fff;
+  border: 1px solid #d0d0d0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modal-btn.primary {
+  background: #27A7E7;
+  color: white;
+  border-color: #27A7E7;
 }
 
 .calendar-popup {
