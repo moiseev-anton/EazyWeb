@@ -1,26 +1,23 @@
-<template>
+﻿<template>
   <div class="lesson-card-root">
     <div class="period-line">
       <div class="number">{{ periodNumber }}</div>
       <div class="time">{{ timeRange }}</div>
-      <div class="main-area">
-        <template v-if="single">
-          <LessonInfo :lesson="lessons[0]" :groupsMap="groupsMap" :teachersMap="teachersMap" :showSubject="showSubject" :prefer="prefer" />
-        </template>
-        <template v-else-if="sameSubject">
-          <div class="subject-main" v-if="showSubject">{{ commonSubject }}</div>
-          <LessonInfo v-if="showSubject" class="info-collapsed" :lesson="lessons[0]" :groupsMap="groupsMap" :teachersMap="teachersMap" :showSubject="false" :prefer="prefer" />
-        </template>
-        <template v-else>
-          <!-- no subject in main area when multiple different subjects -->
-        </template>
-      </div>
+    </div>
+
+    <div class="second-row">
+      <template v-if="single">
+        <LessonInfo @open-entity="(e) => emit('open-entity', e)" :lesson="lessons[0]" :groupsMap="groupsMap" :teachersMap="teachersMap" :showSubject="showSubject" :prefer="prefer" />
+      </template>
+      <template v-else-if="sameSubject">
+        <div class="subject-main" v-if="showSubject">{{ commonSubject }}</div>
+      </template>
     </div>
 
     <!-- multiple lessons blocks -->
     <div v-if="!single" class="multiple-blocks">
       <div v-for="l in lessons" :key="l.id" class="inner-block">
-        <LessonInfo :lesson="l" :groupsMap="groupsMap" :teachersMap="teachersMap" :showSubject="!sameSubject" :prefer="prefer" />
+        <LessonInfo @open-entity="(e) => emit('open-entity', e)" :lesson="l" :groupsMap="groupsMap" :teachersMap="teachersMap" :showSubject="!sameSubject" :prefer="prefer" />
       </div>
     </div>
   </div>
@@ -29,6 +26,7 @@
 <script setup>
 import { computed } from 'vue'
 import LessonInfo from './LessonInfo.vue'
+const emit = defineEmits(['open-entity'])
 
 const props = defineProps({
   lessons: { type: Array, required: true },
@@ -55,17 +53,63 @@ const sameSubject = computed(() => lessons.value.length > 1 && subjects.value.ev
 </script>
 
 <style scoped>
-.lesson-card-root { display: flex; flex-direction: column; gap: 8px }
-.period-line { display: flex; gap: 12px; align-items: flex-start }
-.number { width: 36px; height: 36px; border-radius: 8px; background: #eef9ff; color: #0b6fb1; display:flex; align-items:center; justify-content:center; font-weight:700 }
-.time { color: #666; font-size: 0.9rem; min-width: 98px }
+.lesson-card-root {
+  --card-max-width: 420px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: min(var(--card-max-width), 100%);
+  min-width: 0;
+  padding: 11px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #d8e9fd 0%, #cde7ff 100%);
+  box-shadow: 0 8px 22px rgba(10, 40, 80, 0.06);
+  border: 1px solid rgba(11, 111, 177, 0.08);
+}
+
+.period-line {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.number {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #e7f4ff;
+  color: #0b6fb1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgba(11, 111, 177, 0.1);
+}
+
+.time {
+  color: #4f5965;
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 98px;
+}
+
 .main-area { flex: 1 1 0 }
-.subject-main { font-weight:700; margin-bottom:6px }
+.subject-main { font-weight: 700 }
 .info-collapsed { opacity: 0.9 }
 
-.multiple-blocks { display: flex; flex-direction: column; gap: 8px; margin-top: 6px }
-.inner-block { background: #fbfcff; border: 1px solid #e9f1fb; padding: 8px; border-radius: 8px }
+.multiple-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-/* compact card look */
-.lesson-card-root { padding: 8px; border-radius: 10px; background: white; border: 1px solid #eef5fa }
+.inner-block {
+  background: #e0eef7 ;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(11, 111, 177, 0.08);
+}
 </style>

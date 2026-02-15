@@ -10,10 +10,17 @@
   />
 
   <div v-else class="teachers-view">
-    <h2>Преподаватели</h2>
-
-    <div v-if="isLoading" class="center-state">Загрузка преподавателей...</div>
-    <div v-else-if="error" class="center-state error">Ошибка: {{ error }}</div>
+    <div v-if="isLoading" class="teachers-skeleton">
+      <div class="letter-skel" v-for="n in 5" :key="n">
+        <div class="sk-letter"></div>
+        <div class="sk-teachers">
+          <span class="sk-pill" v-for="m in 3" :key="m"></span>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="error" class="error-offset">
+      <LoadError :detail="' преподавателей'" @retry="load" />
+    </div>
     <div v-else-if="groups.length === 0" class="center-state">На данный момент нет данных о преподавателях</div>
 
     <div v-else class="teachers-container">
@@ -38,6 +45,7 @@
 import { ref, onMounted } from 'vue'
 import ScheduleDashboard from '../components/ScheduleDashboard.vue'
 import { fetchTeachers, groupTeachersByLetter } from '../api/teachersService'
+import LoadError from '../components/LoadError.vue'
 
 const selectedEntity = ref(null)
 const isLoading = ref(false)
@@ -86,7 +94,7 @@ onMounted(() => load())
 }
 
 .center-state.error {
-  color: #c0392b;
+  color: #666;
 }
 
 .teachers-container {
@@ -136,4 +144,16 @@ onMounted(() => load())
   .letter-header{ padding:4px 6px; font-size:14px }
   .group-btn{ min-width:100px; font-size:13px }
 }
+
+/* Teachers skeleton */
+.teachers-skeleton { display:flex; flex-direction:column; gap:12px; padding:12px }
+.letter-skel { background:#fff; padding:10px; border-radius:8px; box-shadow:0 6px 18px rgba(20,40,80,0.04) }
+.sk-letter { height:14px; width:120px; border-radius:6px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite; margin-bottom:8px }
+.sk-teachers { display:flex; gap:8px; flex-wrap:wrap }
+.teachers-skeleton .sk-pill { width:120px; height:36px; border-radius:10px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite }
+
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+/* error offset: 30% from top */
+.error-offset { margin-top: 30vh; display:flex; justify-content:center }
 </style>

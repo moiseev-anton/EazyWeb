@@ -1,89 +1,127 @@
-<template>
-    <div class="profile-view">
-        <h2>Профиль</h2>
-
-        <!-- Toasts (global for this view) -->
-        <div class="toasts" aria-live="polite">
-            <div v-for="t in toasts" :key="t.id" :class="['toast', t.type]">{{ t.message }}</div>
-        </div>
-
-        <div v-if="!isAuthenticated">
-            <p>Авторизуйтесь для доступа.</p>
-        </div>
-
-        <div v-else class="cards">
-            <section class="card profile-card">
-                <header class="card-header">
-                    <h3>Данные профиля</h3>
-                </header>
-
-                <div class="card-body">
-                    <div v-if="!editMode" class="display-fields">
-                        <div class="field"><span class="label">Логин</span><span class="value">{{ user?.username || '—' }}</span></div>
-                        <div class="field"><span class="label">Имя</span><span class="value">{{ user?.firstName || user?.first_name || '—' }}</span></div>
-                        <div class="field"><span class="label">Фамилия</span><span class="value">{{ user?.lastName || user?.last_name || '—' }}</span></div>
-                    </div>
-
-                    <form v-else class="edit-form" @submit.prevent="saveProfile">
-                        <div class="row">
-                            <label>Логин</label>
-                            <input v-model="local.username" :maxlength="30" />
-                            <div v-if="errors.username" class="error">{{ errors.username }}</div>
-                        </div>
-
-                        <div class="row two-cols">
-                            <div class="col">
-                                <label>Имя</label>
-                                <input v-model="local.firstName" :maxlength="150" />
-                                <div v-if="errors.firstName" class="error">{{ errors.firstName }}</div>
-                            </div>
-                            <div class="col">
-                                <label>Фамилия</label>
-                                <input v-model="local.lastName" :maxlength="150" />
-                                <div v-if="errors.lastName" class="error">{{ errors.lastName }}</div>
-                            </div>
-                        </div>
-
-                        <!-- actions moved to unified controls below -->
-                    </form>
-                </div>
-                <!-- unified controls: Edit / Save+Cancel -->
-                <div class="card-controls">
-                    <button class="edit-main" v-if="!editMode" @click="enterEdit">Изменить</button>
-                    <div v-else class="edit-actions">
-                        <button class="save" @click="saveProfile">Сохранить</button>
-                        <button class="cancel" @click="cancelEdit">Отмена</button>
+﻿<template>
+    <div class="profile-page">
+        <div class="profile-shell">
+            <header class="hero">
+                <div class="hero-user">
+                    
+                    <div>
+                        <h1 class="hero-title">Профиль</h1>
+                        <p class="hero-subtitle">{{ displayName }}</p>
                     </div>
                 </div>
-            </section>
+                <span class="status-pill" :class="{ online: isAuthenticated }">{{ isAuthenticated ? 'Авторизован' : 'Гость' }}</span>
+            </header>
 
-            <section class="card notify-card">
-                <header class="card-header"><h3>Уведомления</h3></header>
-                <div class="card-body">
-                    <label class="switch">
-                        <input type="checkbox" :checked="notifications?.changes" @change="toggleNotify('changes', $event.target.checked)" />
-                        <span class="slider"></span>
-                        <span class="switch-label">Изменения расписания в TG</span>
-                    </label>
-                    <label class="switch">
-                        <input type="checkbox" :checked="notifications?.reminders" @change="toggleNotify('reminders', $event.target.checked)" />
-                        <span class="slider"></span>
-                        <span class="switch-label">Напоминания о занятии в TG</span>
-                    </label>
-                </div>
-            </section>
-        </div>
-
-            <!-- main logout action container -->
-            <div class="profile-actions">
-                <button class="logout-main" @click="handleLogout">Выйти из профиля</button>
+            <div class="toasts" aria-live="polite">
+                <div v-for="t in toasts" :key="t.id" :class="['toast', t.type]">{{ t.message }}</div>
             </div>
 
+            <section v-if="!isAuthenticated" class="empty-state">
+                <h2>Нет доступа к данным профиля</h2>
+                <p>Авторизуйтесь, чтобы редактировать информацию и управлять уведомлениями.</p>
+            </section>
+
+            <div v-else class="content-grid">
+                <section class="panel profile-panel">
+                    <div class="panel-head">
+                        <h2>Личные данные</h2>
+                        <button v-if="!editMode" class="ghost-btn" @click="enterEdit">Изменить</button>
+                    </div>
+
+                    <div class="panel-body">
+                        <div v-if="!editMode" class="info-list">
+                            <div class="info-row">
+                                <span>Логин</span>
+                                <strong>{{ user?.username || '—' }}</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Имя</span>
+                                <strong>{{ user?.firstName || user?.first_name || '—' }}</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Фамилия</span>
+                                <strong>{{ user?.lastName || user?.last_name || '—' }}</strong>
+                            </div>
+                        </div>
+
+                        <form v-else class="edit-form" @submit.prevent="saveProfile">
+                            <label class="input-row">
+                                <span>Логин</span>
+                                <input v-model="local.username" maxlength="30" autocomplete="username" />
+                                <small v-if="errors.username" class="error">{{ errors.username }}</small>
+                            </label>
+
+                            <div class="split">
+                                <label class="input-row">
+                                    <span>Имя</span>
+                                    <input v-model="local.firstName" maxlength="150" autocomplete="given-name" />
+                                    <small v-if="errors.firstName" class="error">{{ errors.firstName }}</small>
+                                </label>
+                                <label class="input-row">
+                                    <span>Фамилия</span>
+                                    <input v-model="local.lastName" maxlength="150" autocomplete="family-name" />
+                                    <small v-if="errors.lastName" class="error">{{ errors.lastName }}</small>
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div v-if="editMode" class="panel-actions">
+                        <button class="primary-btn" :disabled="saving" @click="saveProfile">{{ saving ? 'Сохранение...' : 'Сохранить' }}</button>
+                        <button class="ghost-btn" :disabled="saving" @click="cancelEdit">Отмена</button>
+                    </div>
+                </section>
+
+                <section class="panel notify-panel">
+                    <div class="panel-head">
+                        <h2>Уведомления</h2>
+                    </div>
+
+                    <div class="panel-body notify-list">
+                        <label class="notify-item">
+                            <div>
+                                <strong>Изменения расписания</strong>
+                                <p>Моментальные обновления в Telegram при переносах и заменах.</p>
+                            </div>
+                            <span class="switch">
+                                <input
+                                    type="checkbox"
+                                    :checked="Boolean(notifications?.changes)"
+                                    :disabled="saving"
+                                    @change="toggleNotify('changes', $event.target.checked)"
+                                />
+                                <span class="slider"></span>
+                            </span>
+                        </label>
+
+                        <label class="notify-item">
+                            <div>
+                                <strong>Напоминания о занятиях</strong>
+                                <p>Авто-напоминание перед началом пары в Telegram.</p>
+                            </div>
+                            <span class="switch">
+                                <input
+                                    type="checkbox"
+                                    :checked="Boolean(notifications?.reminders)"
+                                    :disabled="saving"
+                                    @change="toggleNotify('reminders', $event.target.checked)"
+                                />
+                                <span class="slider"></span>
+                            </span>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <footer v-if="isAuthenticated" class="page-actions">
+                <button class="danger-btn" :disabled="saving" @click="handleLogout">Выйти из профиля</button>
+            </footer>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -96,6 +134,22 @@ const router = useRouter()
 const editMode = ref(false)
 const saving = ref(false)
 const toasts = ref([])
+
+const displayName = computed(() => {
+    if (!isAuthenticated.value) return 'Не авторизован'
+    const first = user.value?.firstName || user.value?.first_name || ''
+    const last = user.value?.lastName || user.value?.last_name || ''
+    const full = `${first} ${last}`.trim()
+    return full || user.value?.username || 'Пользователь'
+})
+
+const initials = computed(() => {
+    const first = (user.value?.firstName || user.value?.first_name || user.value?.username || '').trim()
+    const last = (user.value?.lastName || user.value?.last_name || '').trim()
+    const a = first ? first[0] : ''
+    const b = last ? last[0] : ''
+    return `${a}${b}`.toUpperCase() || 'U'
+})
 
 function showToast(message, type = 'info', timeout = 3500) {
     const id = Date.now() + Math.random()
@@ -187,8 +241,13 @@ async function saveProfile() {
                 notifyScheduleUpdates: a.notifyScheduleUpdates ?? a.notify_schedule_updates ?? user.value?.notifyScheduleUpdates,
                 notifyUpcomingLessons: a.notifyUpcomingLessons ?? a.notify_upcoming_lessons ?? user.value?.notifyUpcomingLessons
             }
+            notifications.value = {
+                changes: a.notifyScheduleUpdates ?? a.notify_schedule_updates ?? notifications.value?.changes,
+                reminders: a.notifyUpcomingLessons ?? a.notify_upcoming_lessons ?? notifications.value?.reminders
+            }
         }
         editMode.value = false
+        showToast('Профиль обновлен', 'success')
     } catch (e) {
         showToast('Не удалось сохранить изменения на сервере', 'error')
     } finally {
@@ -196,9 +255,7 @@ async function saveProfile() {
     }
 }
 
-// Toggle notifications immediately (send patch only for flags)
 async function toggleNotify(kind, value) {
-    // kind: 'changes' -> notifyScheduleUpdates, 'reminders' -> notifyUpcomingLessons
     const attrName = kind === 'changes' ? 'notifyScheduleUpdates' : 'notifyUpcomingLessons'
 
     if (saving.value) return
@@ -211,6 +268,7 @@ async function toggleNotify(kind, value) {
             showToast('Неизвестный идентификатор пользователя', 'error')
             return
         }
+
         const res = await api.patch(`/users/${uid}/`, payload, { withCredentials: true, headers: { 'Content-Type': 'application/vnd.api+json', 'Accept': 'application/vnd.api+json' } })
         const d = res.data?.data
         if (d && d.attributes) {
@@ -240,92 +298,422 @@ async function handleLogout() {
         const res = await authStore.logout()
         const msg = res?.detail || (res?.success ? 'Выход выполнен' : null)
         if (msg) showToast(msg, 'success')
-        // navigate to schedule/home after logout
         router.push('/schedule')
     } catch (e) {
         const status = e?.response?.status
         if (status === 401) showToast('Ошибка: неавторизован', 'error')
         else if (status === 500) showToast('Ошибка сервера при выходе', 'error')
         else showToast('Не удалось выйти', 'error')
-        // still navigate away or refresh? keep user on page
     }
 }
 </script>
 
 <style scoped>
-.profile-view {
+.profile-page {
+    min-height: 100%;
     padding: 20px;
+    background:
+        radial-gradient(130% 120% at 0% 0%, rgba(39, 167, 231, 0.14) 0%, rgba(39, 167, 231, 0) 55%),
+        radial-gradient(120% 100% at 100% 0%, rgba(8, 145, 178, 0.15) 0%, rgba(8, 145, 178, 0) 60%),
+        #f4f8fc;
 }
 
-.cards {
+.profile-shell {
+    max-width: 1120px;
+    margin: 0 auto;
     display: flex;
+    flex-direction: column;
     gap: 18px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    
 }
 
-.card {
-    background: #ffffff;
-    border-radius: 12px;
-    /* box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06); */
-    
-    /* padding: 16px; */
-    min-width: 280px;
-    flex: 1 1 320px;
-    border:2px solid #d1d5db
-}
-
-.card-header {
+.hero {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(11, 111, 177, 0.18);
+    background: linear-gradient(135deg, #ffffff 0%, #ebf6ff 100%);
+    box-shadow: 0 12px 30px rgba(11, 111, 177, 0.08);
 }
 
-.card-body { padding-top: 4px; }
-
-.field { display:flex; justify-content:space-between; padding:8px 0; }
-.label { color:#6b7280; font-size:0.9rem }
-.value { font-weight:600 }
-
-.edit-btn { background:transparent; border:1px solid #e5e7eb; padding:6px 10px; border-radius:8px; cursor:pointer }
-
-.card-controls { display:flex; justify-content:flex-end; gap:8px; margin-top:12px }
-.edit-main { background:transparent; border:1px solid #e5e7eb; padding:8px 12px; border-radius:8px; cursor:pointer }
-
-.logout-main { background: #fff; color:#374151; border:2px solid #d1d5db; padding:8px 14px; border-radius:10px; cursor:pointer }
-.logout-main:hover { background:#fee2e2; border-color:#fca5a5; color:#b91c1c }
-
-/* Switch */
-.switch { display:flex; align-items:center; gap:12px; margin:10px 0 }
-.switch input { width:0; height:0; opacity:0 }
-.slider { position:relative; width:44px; height:24px; background:#e5e7eb; border-radius:999px; display:inline-block; transition:0.18s }
-.slider:before { content:''; position:absolute; left:4px; top:4px; width:16px; height:16px; background:#fff; border-radius:50%; transition:0.18s }
-.switch input:checked + .slider { background:#43cc68 }
-.switch input:checked + .slider:before { transform: translateX(20px) }
-.switch-label { color:#374151 }
-
-.row { margin-bottom:12px }
-.two-cols { display:flex; gap:12px }
-.col { flex:1 }
-.actions { display:flex; gap:8px; margin-top:10px }
-.save { background:#27A7E7; color:#fff; border:none; padding:8px 12px; border-radius:8px }
-.cancel { background:#f3f4f6; border:none; padding:8px 12px; border-radius:8px }
-.error { color:#b91c1c; font-size:0.85rem; margin-top:6px }
-
-.check { display:flex; align-items:center; gap:10px; margin:10px 0 }
-
-/* Toasts */
-.toasts { position: fixed; right: 20px; bottom: 20px; display:flex; flex-direction:column; gap:8px; z-index:2000 }
-.toast { background:#111827; color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.12); min-width:180px }
-.toast.success { background: #059669 }
-.toast.error { background: #dc2626 }
-.toast.info { background: #111827 }
-
-@media (max-width:720px) {
-    .cards { flex-direction: column }
+.hero-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
 }
 
-.profile-actions { margin-top:16px; display:flex; justify-content:right }
+
+
+.hero-title {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #0f172a;
+    text-align: left;
+}
+
+.hero-subtitle {
+    margin: 4px 0 0;
+    color: #475569;
+    text-align: left;
+}
+
+.status-pill {
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    padding: 7px 12px;
+    color: #334155;
+    background: #fff;
+    font-size: 0.86rem;
+    white-space: nowrap;
+}
+
+.status-pill.online {
+    border-color: rgba(16, 185, 129, 0.28);
+    background: rgba(16, 185, 129, 0.09);
+    color: #065f46;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 16px;
+}
+
+.panel {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.panel-head h2 {
+    margin: 0;
+    font-size: 1.04rem;
+    color: #0f172a;
+}
+
+.panel-body {
+    padding: 14px 18px 18px;
+}
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 10px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.info-row span {
+    color: #64748b;
+}
+
+.info-row strong {
+    color: #0f172a;
+    text-align: right;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-row span {
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.input-row input {
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    padding: 0 12px;
+    font-size: 0.95rem;
+    color: #0f172a;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fff;
+}
+
+.input-row input:focus {
+    outline: none;
+    border-color: #27a7e7;
+    box-shadow: 0 0 0 4px rgba(39, 167, 231, 0.16);
+}
+
+.error {
+    color: #b91c1c;
+    font-size: 0.82rem;
+}
+
+.panel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 18px 16px;
+}
+
+.notify-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notify-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.notify-item strong {
+    display: block;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.notify-item p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.switch {
+    position: relative;
+    width: 48px;
+    height: 28px;
+    flex: 0 0 auto;
+}
+
+.switch input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    z-index: 2;
+}
+
+.slider {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: #dbe4ee;
+    display: block;
+    position: relative;
+    transition: background 0.2s ease;
+}
+
+.slider::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    top: 4px;
+    left: 4px;
+    box-shadow: 0 1px 5px rgba(15, 23, 42, 0.25);
+    transition: transform 0.2s ease;
+}
+
+.switch input:checked + .slider {
+    background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+.switch input:disabled {
+    cursor: not-allowed;
+}
+
+.primary-btn,
+.ghost-btn,
+.danger-btn {
+    border: none;
+    border-radius: 11px;
+    padding: 9px 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+.primary-btn {
+    color: #fff;
+    background: linear-gradient(135deg, #0891b2 0%, #27a7e7 100%);
+    box-shadow: 0 8px 16px rgba(39, 167, 231, 0.25);
+}
+
+.primary-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.ghost-btn {
+    color: #334155;
+    background: #f1f5f9;
+}
+
+.ghost-btn:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+
+.danger-btn {
+    color: #fff;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 10px 20px rgba(220, 38, 38, 0.24);
+}
+
+.danger-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.primary-btn:disabled,
+.ghost-btn:disabled,
+.danger-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.page-actions {
+    display: flex;
+    justify-content: flex-end;
+    background: none;
+}
+
+.empty-state {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+}
+
+.empty-state h2 {
+    margin: 0 0 8px;
+    color: #0f172a;
+}
+
+.empty-state p {
+    margin: 0;
+    color: #64748b;
+}
+
+.toasts {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 2000;
+}
+
+.toast {
+    min-width: 220px;
+    color: #fff;
+    background: #0f172a;
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.24);
+}
+
+.toast.success {
+    background: #059669;
+}
+
+.toast.error {
+    background: #dc2626;
+}
+
+@media (max-width: 880px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-actions {
+        justify-content: stretch;
+    }
+
+    .danger-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-page {
+        padding: 14px;
+    }
+
+    .hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .status-pill {
+        align-self: flex-start;
+    }
+
+    .split {
+        grid-template-columns: 1fr;
+    }
+
+    .notify-item {
+        align-items: flex-start;
+    }
+
+    .switch {
+        margin-top: 2px;
+    }
+
+    .panel-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
 </style>

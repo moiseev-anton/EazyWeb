@@ -17,12 +17,23 @@
     </section>
 
     <section v-else>
-      <div v-if="auth.subscription">
+      <div v-if="selectedEntity">
+        <ScheduleDashboard
+          :entityId="selectedEntity.id"
+          :entityType="selectedEntity.type"
+          :entityName="selectedEntity.name"
+          :showBackButton="true"
+          @back="selectedEntity = null"
+          @open-entity="handleOpenEntity"
+        />
+      </div>
+      <div v-else-if="auth.subscription">
         <ScheduleDashboard
           :entityId="auth.subscription.id"
           :entityType="auth.subscription.type"
           :entityName="auth.subscription.name"
           :showBackButton="false"
+          @open-entity="handleOpenEntity"
         />
       </div>
       <div v-else class="dashboard">
@@ -35,7 +46,7 @@
 </template>
 
 <script setup>
-import { inject, onMounted, computed } from 'vue'
+import { inject, onMounted, computed, ref } from 'vue'
 import TelegramAuthButton from '../components/TelegramAuthButton.vue'
 import ScheduleDashboard from '../components/ScheduleDashboard.vue'
 import { useAuthStore } from '../stores/auth'
@@ -45,6 +56,8 @@ const auth = useAuthStore()
 
 const isAuthenticated = computed(() => auth.isAuthenticated)
 const userName = computed(() => auth.fullName || (auth.user && (auth.user.first_name || auth.user.name)) || '')
+
+const selectedEntity = ref(null)
 
 // Инициализируем интерцепторы и пробуем авто-логин в TWA
 onMounted(async () => {
@@ -63,6 +76,10 @@ onMounted(async () => {
 
 function onAuthSuccess(userData) {
   // auth.startDeeplink / TelegramAuthButton уже обновляют стор; ничего дополнительно не нужно.
+}
+
+function handleOpenEntity(entity) {
+  selectedEntity.value = { ...entity }
 }
 
 function logout() {

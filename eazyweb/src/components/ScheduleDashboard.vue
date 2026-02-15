@@ -89,10 +89,13 @@
         <!-- Контент (режимы) -->
         <main class="dashboard-content">
           <component :is="currentMode === 'daily' ? DailyMode : WeeklyMode"
-                 :weekStart="weekStartIso"
-                 :lessons="lessons"
-                 :entityType="props.entityType"
-                 @open-entity="(e) => emit('open-entity', e)" />
+            :weekStart="weekStartIso"
+            :lessons="lessons"
+            :entityType="props.entityType"
+            :loading="loading"
+            :loadError="loadError"
+            @open-entity="(e) => emit('open-entity', e)"
+            @retry="loadLessons" />
         </main>
     </div>
 </template>
@@ -204,6 +207,8 @@ const weekStartIso = computed(() => {
 
 // Уроки в формате json:api (массив объектов с полем _resolved)
 const lessons = ref([])
+const loading = ref(false)
+const loadError = ref(null)
 
 // Загрузка уроков при смене выбранной сущности или недели
 async function loadLessons() {
@@ -213,6 +218,11 @@ async function loadLessons() {
   d.setDate(d.getDate() + 6)
   const dateTo = d.toISOString().slice(0,10)
 
+  loading.value = true
+  loadError.value = null
+  // очистим старые карточки, чтобы не было смешения при смене entity
+  lessons.value = []
+
   try {
     const opts = { date_from: dateFrom, date_to: dateTo }
     if (props.entityType === 'group') opts.group = props.entityId
@@ -221,8 +231,10 @@ async function loadLessons() {
     const res = await fetchLessons(opts)
     lessons.value = res.lessons
   } catch (e) {
-    console.error('Failed to load lessons', e)
+    loadError.value = (e.response?.data?.message) || e.message || 'Ошибка при загрузке занятий.'
     lessons.value = []
+  } finally {
+    loading.value = false
   }
 }
 
@@ -649,7 +661,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
    CONTENT
 ================================ */
 .dashboard-content {
-    padding: 8px 16px;
+    padding: 8px 8px;
     color: #555;
 }
 
@@ -726,6 +738,18 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .dashboard-datepicker::before {
   display: none;
 }
+
+/* Loading skeleton */
+.loading-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
+.skeleton-card { background: #fff; border-radius: 10px; padding: 12px; min-height: 70px; box-shadow: 0 6px 18px rgba(20,40,80,0.04); }
+.skeleton-line { height: 10px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size: 200% 100%; animation: shimmer 1.1s linear infinite; border-radius: 6px }
+.skeleton-line.title { width: 60%; height: 14px; margin-bottom: 8px }
+.skeleton-line.meta { width: 40%; height: 10px; margin-bottom: 8px }
+.skeleton-line.row { width: 90%; height: 10px }
+
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+.load-error { color: #c0392b; padding: 16px; text-align: center }
 
 /* На мобильных — тоже фиксированная ширина, без растяжки */
 @media (max-width: 767px) {

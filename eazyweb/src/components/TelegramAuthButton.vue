@@ -71,7 +71,7 @@ async function handleAuth() {
 </script>
 
 <style scoped>
-.tg-auth { display:flex; flex-direction:column; align-items:flex-start; gap:8px }
+.tg-auth { display:flex; flex-direction:column; align-items:center; gap:8px }
 .tg-btn {
   background: linear-gradient(90deg,#27A7E7,#1CA0D6);
   color: white;

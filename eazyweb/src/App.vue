@@ -5,7 +5,9 @@
     </header> -->
     <Navigation />
     <main class="main-content">
-      <router-view />
+      <div class="content-inner">
+        <router-view />
+      </div>
     </main>
     
     <!-- <footer v-if="$route.name === 'schedule' && !isAuthenticated">
@@ -38,6 +40,8 @@ header {
 .main-content {
   flex: 1;
   margin-bottom: 60px;  /* Для bottom nav */
+  display: flex;
+  justify-content: flex-start; /* по умолчанию «прилипаем» к сайдбару */
 }
 footer {
   background: #f0f0f0; padding: 1rem; text-align: center;
@@ -46,5 +50,14 @@ footer {
 @media (min-width: 768px) {
   .app { margin-left: 250px; margin-bottom: 0; }
   .main-content { margin-bottom: 0; }
+  .content-inner { width: 100%; max-width: 768px; }
 }
+
+/* Когда ширина окна больше ширины сайдбара + контента (250 + 768 = 1018),
+   центрируем контент в оставшейся области справа от сайдбара */
+@media (min-width: 1018px) {
+  .main-content { justify-content: center; }
+}
+
+.content-inner { width: 100%; }
 </style>

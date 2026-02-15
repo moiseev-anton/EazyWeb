@@ -1,15 +1,23 @@
 <template>
   <div class="faculty-accordion">
-    <!-- Loading state -->
+    <!-- Loading state (skeleton) -->
     <div v-if="isLoading" class="accordion-loading">
-      <div class="spinner"></div>
-      <p>Загрузка групп и факультетов...</p>
+      <div class="faculty-skeleton">
+        <div class="faculty-item" v-for="n in 4" :key="n">
+          <div class="sk-header"></div>
+          <div class="sk-course">
+            <div class="sk-course-line short"></div>
+            <div class="sk-groups">
+              <span class="sk-pill" v-for="m in 4" :key="m"></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Error state -->
-    <div v-else-if="error" class="accordion-error">
-      <p>⚠️ Ошибка при загрузке данных: {{ error }}</p>
-      <button @click="retry" class="retry-btn">Повторить попытку</button>
+    <div v-else-if="error" class="error-offset">
+      <LoadError :detail="' группы'" @retry="retry" />
     </div>
 
     <!-- Empty state -->
@@ -69,6 +77,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { fetchGroupsWithFaculties, organizedGroupsByFacultyAndCourse } from '../api/groupsService'
+import LoadError from './LoadError.vue'
 
 const emit = defineEmits(['group-selected'])
 
@@ -133,54 +142,29 @@ onMounted(() => {
 .accordion-loading {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 16px;
+  align-items: stretch;
+  justify-content: flex-start;
+  /* allow skeleton to sit at top of container */
+  height: auto;
+  gap: 12px;
   color: #666;
+  padding: 8px;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f0f0f0;
-  border-top: 4px solid #007bff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
+/* Skeleton inside accordion */
+.faculty-skeleton { width: 100%; padding: 8px; display:flex; flex-direction:column; gap:10px }
+.faculty-item { background: #fff; border-radius: 8px; padding: 10px; box-shadow: 0 6px 18px rgba(20,40,80,0.04) }
+.sk-header { height: 14px; width: 60%; border-radius: 6px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite; margin-bottom: 8px }
+.sk-course { display:flex; flex-direction:column; gap:8px }
+.sk-course-line.short { height: 10px; width: 35%; border-radius:6px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite }
+.sk-groups { display:flex; gap:8px; flex-wrap:wrap }
+.sk-pill { width: 100px; height: 32px; border-radius: 16px; display:inline-block; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
 
-/* Error state */
-.accordion-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 16px;
-  color: #d32f2f;
-  padding: 20px;
-  text-align: center;
-}
+/* error offset: 30% from top */
+.error-offset { margin-top: 30vh; display:flex; justify-content:center }
 
-.retry-btn {
-  padding: 8px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
-}
-
-.retry-btn:hover {
-  background: #0056b3;
-}
 
 /* Empty state */
 .accordion-empty {
@@ -197,10 +181,10 @@ onMounted(() => {
   flex: 1;
   overflow-y: auto;
   min-width: 280px;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 768px;
+  
   width: 100%;
-  padding: 16px;
+  padding: 8px;
 }
 
 /* Accordion item */
