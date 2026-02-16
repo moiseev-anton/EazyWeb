@@ -5,7 +5,7 @@
       <div class="time">{{ timeRange }}</div>
     </div>
 
-    <div class="second-row">
+    <div v-if="hasSecondRow" class="second-row">
       <template v-if="single">
         <LessonInfo @open-entity="(e) => emit('open-entity', e)" :lesson="lessons[0]" :groupsMap="groupsMap" :teachersMap="teachersMap" :showSubject="showSubject" :prefer="prefer" />
       </template>
@@ -50,11 +50,14 @@ const timeRange = computed(() => {
 const subjects = computed(() => lessons.value.map(l => l.attributes?.subject || ''))
 const commonSubject = computed(() => subjects.value[0] || '')
 const sameSubject = computed(() => lessons.value.length > 1 && subjects.value.every(s => s === subjects.value[0]))
+const hasSecondRow = computed(() => single.value || (sameSubject.value && props.showSubject))
 </script>
 
 <style scoped>
 .lesson-card-root {
   --card-max-width: 420px;
+  --card-inline-pad: 6px;
+  --content-inline-pad: 10px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -62,7 +65,7 @@ const sameSubject = computed(() => lessons.value.length > 1 && subjects.value.ev
   width: 100%;
   max-width: min(var(--card-max-width), 100%);
   min-width: 0;
-  padding: 11px;
+  padding: var(--card-inline-pad);
   border-radius: 14px;
   background: linear-gradient(180deg, #d8e9fd 0%, #cde7ff 100%);
   box-shadow: 0 8px 22px rgba(10, 40, 80, 0.06);
@@ -74,6 +77,7 @@ const sameSubject = computed(() => lessons.value.length > 1 && subjects.value.ev
   gap: 12px;
   justify-content: space-between;
   align-items: center;
+  /* padding-inline: var(--content-inline-pad); */
 }
 
 .number {
@@ -96,6 +100,11 @@ const sameSubject = computed(() => lessons.value.length > 1 && subjects.value.ev
   min-width: 98px;
 }
 
+.second-row {
+  padding-inline: 8px;
+  /* padding-inline: var(--content-inline-pad); */
+}
+
 .main-area { flex: 1 1 0 }
 .subject-main { font-weight: 700 }
 .info-collapsed { opacity: 0.9 }
@@ -103,13 +112,13 @@ const sameSubject = computed(() => lessons.value.length > 1 && subjects.value.ev
 .multiple-blocks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .inner-block {
   background: #e0eef7 ;
-  padding: 10px;
+  padding: 10px 8px;
   border-radius: 10px;
-  border: 1px solid rgba(11, 111, 177, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(11, 111, 177, 0.08);
 }
 </style>
