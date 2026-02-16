@@ -1,103 +1,102 @@
 <template>
-    <div class="dashboard">
-        <!-- Sticky заголовок -->
-        <header class="dashboard-header">
-            <!-- Ряд 1 -->
-            <div class="header-top">
-                <div class="left-group">
-                    <button v-if="showBackButton" class="back-button" @click="emit('back')" aria-label="Назад">
-                        <ArrowLeftCircleIcon class="back-icon" />
-                    </button>
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <div class="header-top">
+        <div class="left-group">
+          <button v-if="showBackButton" class="back-button" @click="emit('back')" aria-label="Назад">
+            <ArrowLeftCircleIcon class="back-icon" />
+          </button>
 
-                    <div class="entity-title">
-                        <h2>{{ entityName }}</h2>
-                        <button class="star-button" :class="{ subscribed: isSubscribed }" @click="toggleSubscription">
-                            {{ isSubscribed ? '★' : '☆' }}
-                        </button>
-                    </div>
-                </div>
-
-                <button class="mode-toggle-button" @click="toggleMode">
-                    <ViewColumnsIcon v-if="currentMode === 'daily'" class="mode-icon" />
-                    <QueueListIcon v-else class="mode-icon" />
-                </button>
-            </div>
-
-            <!-- Ряд 2 -->
-            <div class="header-bottom">
-
-                <div class="calendar-wrapper">
-                  <button ref="calendarButtonRef" class="calendar-button" @click="toggleCalendar">
-                    {{ currentMonthYear }} 
-                    <span class="dropdown-arrow">▼</span>
-                  </button>
-
-                  <button v-if="!(isCurrentWeek)" class="today-button" @click="goToCurrentWeek">
-                    {{ todayDay }}
-                  </button>
-                </div>
-
-                <!-- Прозрачный оверлей, который блокирует клики по остальным элементам страницы -->
-                <div v-if="calendarVisible" class="overlay" @click="calendarVisible = false">
-                  <div
-                    class="calendar-popup"
-                    :style="popupStyle"
-                    @click.stop
-                  >
-                    <VueDatePicker
-                      v-model="selectedWeek"
-                      week-picker
-                      inline
-                      auto-apply
-                      :min-date="minDateObj"
-                      :max-date="maxDateObj"
-                      :time-config="{ enableTimePicker: false }"
-                      :locale="ru"
-                      @update:model-value="onWeekSelected"
-                      class="dashboard-datepicker" />
-                  </div>
-                </div>
-
-                <div class="week-nav">
-                    <button @click="prevWeek" class="nav-arrow" :disabled="isPrevDisabled">‹</button>
-                    <button @click="nextWeek" class="nav-arrow" :disabled="isNextDisabled">›</button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Replace-confirm modal -->
-        <div v-if="showReplaceConfirm" class="overlay modal-overlay" @click="cancelReplaceSubscription">
-          <div class="modal-dialog" @click.stop>
-            <p>Текущая подписка на <strong>{{ subscription?.name }}</strong> будет заменена. Продолжить?</p>
-            <div class="modal-actions">
-              <button class="modal-btn primary" @click="confirmReplaceSubscription">Ок</button>
-              <button class="modal-btn" @click="cancelReplaceSubscription">Отмена</button>
-            </div>
+          <div class="entity-title">
+            <h2>{{ entityName }}</h2>
+            <button class="star-button" :class="{ subscribed: isSubscribed }" @click="toggleSubscription" :aria-label="isSubscribed ? 'Отписаться' : 'Подписаться'">
+              <StarSolidIcon v-if="isSubscribed" class="star-icon" />
+              <StarOutlineIcon v-else class="star-icon" />
+            </button>
           </div>
         </div>
 
-        <div v-if="showUnsubscribeConfirm" class="overlay modal-overlay" @click="cancelUnsubscribe">
-          <div class="modal-dialog" @click.stop>
-            <p>Отписаться от <strong>{{ subscription?.name }}</strong>?</p>
-            <div class="modal-actions">
-              <button class="modal-btn primary" @click="confirmUnsubscribe">Ок</button>
-              <button class="modal-btn" @click="cancelUnsubscribe">Отмена</button>
-            </div>
+        <button class="mode-toggle-button" @click="toggleMode" :aria-label="currentMode === 'daily' ? 'Переключить на недельный вид' : 'Переключить на дневной вид'">
+          <ViewColumnsIcon v-if="currentMode === 'daily'" class="mode-icon" />
+          <QueueListIcon v-else class="mode-icon" />
+        </button>
+      </div>
+
+      <div class="header-bottom">
+        <div class="week-block">
+          <div class="calendar-wrapper">
+            <button ref="calendarButtonRef" class="calendar-button" @click="toggleCalendar">
+              {{ currentMonthYear }}
+              <ChevronDownIcon class="dropdown-arrow" />
+            </button>
+
+            <button v-if="!isCurrentWeek" class="today-button" @click="goToCurrentWeek">
+              {{ todayDay }}
+            </button>
           </div>
         </div>
 
-        <!-- Контент (режимы) -->
-        <main class="dashboard-content">
-          <component :is="currentMode === 'daily' ? DailyMode : WeeklyMode"
-            :weekStart="weekStartIso"
-            :lessons="lessons"
-            :entityType="props.entityType"
-            :loading="loading"
-            :loadError="loadError"
-            @open-entity="(e) => emit('open-entity', e)"
-            @retry="loadLessons" />
-        </main>
+        <div class="week-nav">
+          <button @click="prevWeek" class="nav-arrow" :disabled="isPrevDisabled" aria-label="Предыдущая неделя">
+            <ChevronLeftIcon class="nav-arrow-icon" />
+          </button>
+          <button @click="nextWeek" class="nav-arrow" :disabled="isNextDisabled" aria-label="Следующая неделя">
+            <ChevronRightIcon class="nav-arrow-icon" />
+          </button>
+        </div>
+      </div>
+
+      <div v-if="calendarVisible" class="overlay" @click="calendarVisible = false">
+        <div class="calendar-popup" :style="popupStyle" @click.stop>
+          <VueDatePicker
+            v-model="selectedWeek"
+            week-picker
+            inline
+            auto-apply
+            :min-date="minDateObj"
+            :max-date="maxDateObj"
+            :time-config="{ enableTimePicker: false }"
+            :locale="ru"
+            @update:model-value="onWeekSelected"
+            class="dashboard-datepicker"
+          />
+        </div>
+      </div>
+    </header>
+
+    <div v-if="showReplaceConfirm" class="overlay modal-overlay" @click="cancelReplaceSubscription">
+      <div class="modal-dialog" @click.stop>
+        <p>Текущая подписка на <strong>{{ subscription?.name }}</strong> будет заменена. Продолжить?</p>
+        <div class="modal-actions">
+          <button class="modal-btn primary" @click="confirmReplaceSubscription">Ок</button>
+          <button class="modal-btn" @click="cancelReplaceSubscription">Отмена</button>
+        </div>
+      </div>
     </div>
+
+    <div v-if="showUnsubscribeConfirm" class="overlay modal-overlay" @click="cancelUnsubscribe">
+      <div class="modal-dialog" @click.stop>
+        <p>Отписаться от <strong>{{ subscription?.name }}</strong>?</p>
+        <div class="modal-actions">
+          <button class="modal-btn primary" @click="confirmUnsubscribe">Ок</button>
+          <button class="modal-btn" @click="cancelUnsubscribe">Отмена</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="dashboard-content">
+      <component
+        :is="currentMode === 'daily' ? DailyMode : WeeklyMode"
+        :weekStart="weekStartIso"
+        :lessons="lessons"
+        :entityType="props.entityType"
+        :loading="loading"
+        :loadError="loadError"
+        @open-entity="(e) => emit('open-entity', e)"
+        @retry="loadLessons"
+      />
+    </main>
+  </div>
 </template>
 
 <script setup>
@@ -109,12 +108,17 @@ import { useAuthStore } from '../stores/auth'
 import {
   ViewColumnsIcon,
   QueueListIcon,
-  ArrowLeftCircleIcon
+  ArrowLeftCircleIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  StarIcon as StarOutlineIcon
 } from '@heroicons/vue/24/outline'
+import { StarIcon as StarSolidIcon } from '@heroicons/vue/24/solid'
 
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
-import { ru } from 'date-fns/locale'  // Русская локаль
+import { ru } from 'date-fns/locale'
 import { format } from 'date-fns'
 import DailyMode from './DailyMode.vue'
 import WeeklyMode from './WeeklyMode.vue'
@@ -133,27 +137,23 @@ const authStore = useAuthStore()
 const router = useRouter()
 const { subscription } = storeToRefs(authStore)
 
-const isSubscribed = computed(() => {
-  return subscription.value !== null && subscription.value.id === props.entityId
-})
+const isSubscribed = computed(() => subscription.value !== null && subscription.value.id === props.entityId)
 
 const currentMode = ref('daily')
 const currentWeekOffset = ref(0)
 
-const MIN_OFFSET = -52  // недели назад
-const MAX_OFFSET = 1    // недели вперёд
+const MIN_OFFSET = -52
+const MAX_OFFSET = 1
 
-const isPrevDisabled = computed(() => currentWeekOffset.value <= MIN_OFFSET )
-const isNextDisabled = computed(() => currentWeekOffset.value >= MAX_OFFSET )
-
+const isPrevDisabled = computed(() => currentWeekOffset.value <= MIN_OFFSET)
+const isNextDisabled = computed(() => currentWeekOffset.value >= MAX_OFFSET)
 
 const today = new Date()
 
-// Ограничения дат
 const minDateObj = computed(() => {
   const monday = new Date(today)
   const day = monday.getDay()
-  const diff = monday.getDate() - day + (day === 0 ? -6 : 1)  // Текущий понедельник
+  const diff = monday.getDate() - day + (day === 0 ? -6 : 1)
   monday.setDate(diff + MIN_OFFSET * 7)
   return monday
 })
@@ -161,12 +161,11 @@ const minDateObj = computed(() => {
 const maxDateObj = computed(() => {
   const sunday = new Date(today)
   const day = sunday.getDay()
-  const diff = sunday.getDate() - day + (day === 0 ? -6 : 1)  // Текущий понедельник
-  sunday.setDate(diff + MAX_OFFSET * 7 + 6)  // Воскресенье +MAX_OFFSET недель
+  const diff = sunday.getDate() - day + (day === 0 ? -6 : 1)
+  sunday.setDate(diff + MAX_OFFSET * 7 + 6)
   return sunday
 })
 
-// Текущий месяц и год для кнопки
 const currentMonthYear = computed(() => {
   const d = new Date()
   d.setDate(d.getDate() + currentWeekOffset.value * 7)
@@ -180,23 +179,6 @@ const todayDay = computed(() => {
   return d.getDate()
 })
 
-const currentWeekStart = computed(() => {
-  const d = new Date(today)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Понедельник
-  d.setDate(diff + currentWeekOffset.value * 7)
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '')
-})
-
-const currentWeekEnd = computed(() => {
-  const d = new Date(today)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  d.setDate(diff + currentWeekOffset.value * 7 + 6)
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '')
-})
-
-// weekStart ISO для передачи в режимы
 const weekStartIso = computed(() => {
   const d = new Date(today)
   const day = d.getDay()
@@ -205,22 +187,18 @@ const weekStartIso = computed(() => {
   return format(d, 'yyyy-MM-dd')
 })
 
-// Уроки в формате json:api (массив объектов с полем _resolved)
 const lessons = ref([])
 const loading = ref(false)
 const loadError = ref(null)
 
-// Загрузка уроков при смене выбранной сущности или недели
 async function loadLessons() {
   const dateFrom = weekStartIso.value
-  // compute week end (date_from + 6 days)
   const d = new Date(weekStartIso.value)
   d.setDate(d.getDate() + 6)
-  const dateTo = d.toISOString().slice(0,10)
+  const dateTo = d.toISOString().slice(0, 10)
 
   loading.value = true
   loadError.value = null
-  // очистим старые карточки, чтобы не было смешения при смене entity
   lessons.value = []
 
   try {
@@ -231,16 +209,15 @@ async function loadLessons() {
     const res = await fetchLessons(opts)
     lessons.value = res.lessons
   } catch (e) {
-    loadError.value = (e.response?.data?.message) || e.message || 'Ошибка при загрузке занятий.'
+    loadError.value = e.response?.data?.message || e.message || 'Ошибка при загрузке занятий.'
     lessons.value = []
   } finally {
     loading.value = false
   }
 }
 
-// Календарь
 const calendarVisible = ref(false)
-const selectedWeek = ref(null)  // [Date, Date] — понедельник и воскресенье
+const selectedWeek = ref(null)
 const calendarButtonRef = ref(null)
 const popupStyle = ref({})
 let rafId = null
@@ -266,7 +243,6 @@ function removeRepositionListeners() {
   }
 }
 
-// Синхронизация: при открытии календаря показываем текущую неделю
 watch(calendarVisible, (visible) => {
   if (visible) {
     const monday = new Date(today)
@@ -279,7 +255,6 @@ watch(calendarVisible, (visible) => {
 
     selectedWeek.value = [monday, sunday]
 
-    // добавить слушатели и позиционировать
     nextTick(() => {
       positionPopupNearButton()
       addRepositionListeners()
@@ -289,14 +264,11 @@ watch(calendarVisible, (visible) => {
   }
 })
 
-// При выборе недели в календаре
 function onWeekSelected(weekArray) {
   if (!weekArray || weekArray.length < 2) return
-
   const monday = weekArray[0]
-  const diffDays = Math.round((monday - today) / (86400000)) // 86400000 = 24*60*60*1000
+  const diffDays = Math.round((monday - today) / 86400000)
   currentWeekOffset.value = Math.round(diffDays / 7)
-
   calendarVisible.value = false
 }
 
@@ -305,7 +277,7 @@ function positionPopupNearButton() {
   if (!btn) return
   const rect = btn.getBoundingClientRect()
   const vw = window.innerWidth
-  const pickerWidth = 320 // приблизительная ширина попапа
+  const pickerWidth = 320
 
   let left = rect.left
   if (left + pickerWidth > vw - 8) left = Math.max(8, vw - pickerWidth - 8)
@@ -331,33 +303,31 @@ function toggleCalendar() {
   })
 }
 
-// Остальные функции
 const showReplaceConfirm = ref(false)
 const pendingNewEntity = ref(null)
 const showUnsubscribeConfirm = ref(false)
 
 async function toggleSubscription() {
   if (isSubscribed.value) {
-    // show custom modal for unsubscribe
     showUnsubscribeConfirm.value = true
     return
-  } else {
-    const newEntity = {
-      id: props.entityId,
-      name: props.entityName,
-      type: props.entityType
-    }
+  }
 
-    if (subscription.value) {
-      // show custom replace confirmation
-      pendingNewEntity.value = newEntity
-      showReplaceConfirm.value = true
-    } else {
-      try {
-        await authStore.subscribe(newEntity)
-        // после успешной подписки перейти на вкладку Расписание
-        router.push({ name: 'schedule' })
-      } catch (e) { console.error(e) }
+  const newEntity = {
+    id: props.entityId,
+    name: props.entityName,
+    type: props.entityType
+  }
+
+  if (subscription.value) {
+    pendingNewEntity.value = newEntity
+    showReplaceConfirm.value = true
+  } else {
+    try {
+      await authStore.subscribe(newEntity)
+      router.push({ name: 'schedule' })
+    } catch (e) {
+      console.error(e)
     }
   }
 }
@@ -367,7 +337,6 @@ async function confirmReplaceSubscription() {
   showReplaceConfirm.value = false
   try {
     await authStore.subscribe(pendingNewEntity.value)
-    // после успешной подписки перейти на вкладку Расписание
     router.push({ name: 'schedule' })
   } catch (e) {
     console.error(e)
@@ -414,286 +383,245 @@ onBeforeUnmount(() => {
   removeRepositionListeners()
 })
 
-// watch for week or entity changes
 watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   loadLessons()
 }, { immediate: true })
-
 </script>
 
 <style scoped>
-/* ===== LEFT GROUP ===== */
-.left-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* ===== BACK BUTTON ===== */
-.back-button {
-    background: #ffffff00;
-
-    border: none;
-    border-radius: 10px;
-
-    width: 34px;
-    height: 34px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.back-button:hover {
-    background: #e9ecef;
-}
-
-.back-icon {
-    scale: 1.25;
-    color: #555;
-    /* тот же тон, что mode-icon */
-}
-
-/* ===== BASE ======== */
-.schedule-view {
-    padding: 0;
-    background: #f6f7f9;
-    min-height: 100vh;
-}
-
 .dashboard {
-    /* max-width: 900px; */
-    margin: 0 auto;
+  margin: 0 auto;
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
 }
 
-/* =====HEADER (Sticky Card) =========== */
 .dashboard-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-
-    background: #ffffff;
-    border-radius: 0 0 16px 16px;
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.06),
-        0 1px 0 rgba(0, 0, 0, 0.04);
-
-    padding: 8px 16px 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  border-radius: 0 0 18px 18px;
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  border-top: 0;
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(14, 165, 233, 0.16) 0%, rgba(14, 165, 233, 0) 58%),
+    linear-gradient(135deg, #ffffff 0%, #f2f9ff 100%);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
 }
 
-/* ============== HEADER ROWS ============ */
 .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    /* border-bottom: 1px solid #f0f0f0; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .header-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-/* ================================
-   ENTITY TITLE
-================================ */
+.left-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .entity-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .entity-title h2 {
-    margin: 0;
-    font-size: 1.35rem;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-    color: #1c1c1c;
+  margin: 0;
+  font-size: 1.22rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(68vw, 560px);
 }
 
-/* ================================
-   STAR BUTTON
-================================ */
+.back-button,
+.mode-toggle-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #d9e7f2;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+}
+
+.back-button:hover,
+.mode-toggle-button:hover {
+  background: #eef7ff;
+  border-color: #b8d9f2;
+}
+
+.back-icon,
+.mode-icon {
+  width: 21px;
+  height: 21px;
+  color: #334155;
+}
+
 .star-button {
-    background: none;
-    border: none;
-    cursor: pointer;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #c2ccd8;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, color 0.2s ease;
+}
 
-    font-size: 1.6rem;
-    line-height: 1;
-    padding: 4px;
-
-    color: #c0c0c0;
-    opacity: 0.7;
-    transition: color 0.2s, opacity 0.2s;
+.star-button:hover {
+  transform: scale(1.05);
 }
 
 .star-button.subscribed {
-    color: #f9a825;
-    opacity: 1;
+  color: #f59e0b;
 }
 
-/* ================================
-   MODE TOGGLE
-================================ */
-.mode-toggle-button {
-    background: #f4f6f8;
-    border: none;
-    border-radius: 10px;
-
-    padding: 6px;
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    transition: background 0.2s;
+.star-icon {
+  width: 20px;
+  height: 20px;
 }
 
-.mode-toggle-button:hover {
-    background: #e9ecef;
-}
-
-.mode-icon {
-    width: 22px;
-    height: 22px;
-    color: #555;
-}
-
-/* ================================
-   CALENDAR BUTTON
-================================ */
-.calendar-button {
-    /* background: #f6f7f9; */
-    border: none;
-    border-radius: 10px;
-
-    padding: 8px 12px;
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: #333;
-
-    transition: background 0.2s;
-}
-
-.calendar-button:hover {
-    background: #eceef1;
-}
-
-.dropdown-arrow {
-    font-size: 0.75rem;
-    opacity: 0.6;
-}
-
-/* ================================
-   TODAY BUTTON
-================================ */
-.today-button {
-  background: #ffffff;
-  color: #27A7E7;
-
-  border: 2px solid #27A7E7;
-  border-radius: 8px;
-
-  
-
-  padding: 4px 8px;
-  min-width: 36px;
-  font-size: 0.95rem;
-  font-weight: 700;
-
-  cursor: pointer;
-  transition: background 0.12s, transform 0.08s;
-}
-
-.today-button:hover {
-  background: #f0fbff;
-  transform: translateY(-1px);
-}
-
-/* ================================
-   WEEK NAV
-================================ */
-.week-nav {
-    display: flex;
-    gap: 4px;
-}
-
-.nav-arrow {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-
-    width: 28px;
-    height: 28px;
-    border-radius: 10px;
-
-    font-size: 1.2rem;
-    line-height: 1;
-
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    transition: background 0.2s, border-color 0.2s;
-}
-
-.nav-arrow:hover {
-    background: #f2f2f2;
-    border-color: #d0d0d0;
-}
-
-/* ================================
-   CONTENT
-================================ */
-.dashboard-content {
-    padding: 8px 8px;
-    color: #555;
+.week-block {
+  display: flex;
 }
 
 .calendar-wrapper {
-  position: relative;
   display: inline-flex;
   gap: 8px;
   align-items: center;
 }
 
-/* Popover-календарь — строго под кнопкой, фиксированная ширина из коробки */
+.calendar-button {
+  border: 1px solid #d5e5f2;
+  border-radius: 10px;
+  padding: 7px 12px;
+  background: #ffffff;
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: background 0.16s, border-color 0.16s;
+}
+
+.calendar-button:hover {
+  background: #f2f9ff;
+  border-color: #b8d9f2;
+}
+
+.dropdown-arrow {
+  width: 14px;
+  height: 14px;
+  color: #64748b;
+}
+
+.today-button {
+  border: 1px solid #89caec;
+  border-radius: 10px;
+  background: rgba(14, 165, 233, 0.08);
+  color: #075985;
+  padding: 7px 10px;
+  min-width: 36px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.16s ease, transform 0.1s ease;
+}
+
+.today-button:hover {
+  background: rgba(14, 165, 233, 0.16);
+  transform: translateY(-1px);
+}
+
+.week-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid #d5e5f2;
+  background: #ffffff;
+  color: #1f2937;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s;
+}
+
+.nav-arrow:hover:not(:disabled) {
+  background: #f2f9ff;
+  border-color: #b8d9f2;
+}
+
+.nav-arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nav-arrow-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.dashboard-content {
+  padding: 0 8px 10px;
+  min-width: 0;
+}
+
 .dashboard-datepicker {
-  /* позиция задаётся внешним контейнером (`.calendar-popup`) */
   z-index: 1001;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-  border: 1px solid #eee;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.16);
+  border: 1px solid #e6edf5;
   overflow: hidden;
 }
 
-/* Полноэкранный прозрачный оверлей, который блокирует клики по странице */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0); /* полностью прозрачный, но перехватывает клики */
+  background: rgba(0, 0, 0, 0);
   z-index: 1000;
 }
 
-/* Модальное подтверждение замены подписки */
+.calendar-popup {
+  position: absolute;
+  z-index: 1002;
+}
+
 .modal-overlay {
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -702,11 +630,16 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 
 .modal-dialog {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   max-width: 420px;
   width: calc(100% - 48px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.22);
+}
+
+.modal-dialog p {
+  margin: 0;
+  color: #1f2937;
 }
 
 .modal-actions {
@@ -718,47 +651,42 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 
 .modal-btn {
   background: #fff;
-  border: 1px solid #d0d0d0;
+  border: 1px solid #d0d7e1;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
 .modal-btn.primary {
-  background: #27A7E7;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   color: white;
-  border-color: #27A7E7;
+  border-color: #0284c7;
 }
 
-.calendar-popup {
-  position: absolute; /* позиционируется относительно окна через inline-стиль */
-  z-index: 1002;
-}
-
-.dashboard-datepicker::before {
-  display: none;
-}
-
-/* Loading skeleton */
-.loading-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
-.skeleton-card { background: #fff; border-radius: 10px; padding: 12px; min-height: 70px; box-shadow: 0 6px 18px rgba(20,40,80,0.04); }
-.skeleton-line { height: 10px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size: 200% 100%; animation: shimmer 1.1s linear infinite; border-radius: 6px }
-.skeleton-line.title { width: 60%; height: 14px; margin-bottom: 8px }
-.skeleton-line.meta { width: 40%; height: 10px; margin-bottom: 8px }
-.skeleton-line.row { width: 90%; height: 10px }
-
-@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
-
-.load-error { color: #c0392b; padding: 16px; text-align: center }
-
-/* На мобильных — тоже фиксированная ширина, без растяжки */
 @media (max-width: 767px) {
+  .dashboard-header {
+    padding: 10px 10px;
+    border-radius: 0 0 14px 14px;
+  }
+
+  .entity-title h2 {
+    font-size: 1.06rem;
+    max-width: min(62vw, 360px);
+  }
+
+  .header-bottom {
+    align-items: flex-end;
+  }
+
+  .dashboard-content {
+    padding: 0 2px 10px;
+  }
+
   .dashboard-datepicker {
     left: 0;
     right: auto;
     width: max-content;
-    max-width: calc(100vw - 32px); /* Чтобы не выходил за края экрана */
+    max-width: calc(100vw - 32px);
   }
 }
-
 </style>

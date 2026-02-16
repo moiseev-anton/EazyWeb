@@ -1,21 +1,22 @@
 <template>
   <div class="daily-mode">
-    <div class="days-row">
-      <button
-        v-for="(d, idx) in weekDates"
-        :key="d.iso"
-        class="day-button"
-        :class="{ today: d.isToday, selected: d.iso === selectedIso }
-        "
-        @click="selectDay(d.iso)">
-        <div class="day-number">{{ d.day }}</div>
-        <div class="day-name">{{ d.name }}</div>
-        <div class="lessons-count">{{ lessonsMap[d.iso]?.length || 0 }}</div>
-      </button>
+    <div class="days-wrap">
+      <div class="days-row">
+        <button
+          v-for="d in weekDates"
+          :key="d.iso"
+          class="day-button"
+          :class="{ today: d.isToday, selected: d.iso === selectedIso }"
+          @click="selectDay(d.iso)"
+        >
+          <span class="day-name">{{ d.name }}</span>
+          <div class="day-number">{{ d.day }}</div>
+          <span class="lessons-count">{{ lessonsMap[d.iso]?.length || 0 }}</span>
+        </button>
+      </div>
     </div>
 
     <div class="lessons-list">
-      <!-- <h3 class="lessons-title">{{ selectedLabel }}</h3> -->
       <div v-if="props.loading" class="cards skeleton-list">
         <li class="skeleton-card" v-for="n in 3" :key="n">
           <div class="sk-line top"></div>
@@ -24,13 +25,20 @@
         </li>
       </div>
       <div v-else-if="props.loadError">
-        <LoadError :detail="' занятий'" @retry="() => emit('retry')" />
+        <LoadError :detail="'занятий'" @retry="() => emit('retry')" />
       </div>
       <div v-else>
         <div v-if="(periodsMap[selectedIso] || []).length === 0" class="no-lessons">Нет занятий</div>
         <ul class="cards">
           <li v-for="group in periodsMap[selectedIso] || []" :key="group.key" class="lesson-card">
-            <LessonCard :lessons="group.items" :groupsMap="groupsMap" :teachersMap="teachersMap" :showSubject="true" :prefer="entityType === 'group' ? 'teacher' : 'group'" @open-entity="(e) => emit('open-entity', e)" />
+            <LessonCard
+              :lessons="group.items"
+              :groupsMap="groupsMap"
+              :teachersMap="teachersMap"
+              :showSubject="true"
+              :prefer="entityType === 'group' ? 'teacher' : 'group'"
+              @open-entity="(e) => emit('open-entity', e)"
+            />
           </li>
         </ul>
       </div>
@@ -43,14 +51,10 @@ import { ref, computed, watch } from 'vue'
 import LessonCard from './LessonCard.vue'
 import LoadError from './LoadError.vue'
 import { format, addDays, startOfWeek, isSameDay, parseISO } from 'date-fns'
-import { ru } from 'date-fns/locale'
 
 const props = defineProps({
-  // monday date of the week — ISO string or Date
   weekStart: { type: [String, Date], required: true },
-  // lessons array in json:api format
   lessons: { type: Array, default: () => [] },
-  // show counterpart entity: 'group' or 'teacher'
   entityType: { type: String, default: 'group' },
   loading: { type: Boolean, default: false },
   loadError: { type: String, default: null }
@@ -58,7 +62,6 @@ const props = defineProps({
 
 const emit = defineEmits(['open-entity', 'retry'])
 
-// helper: normalize weekStart to Date (monday)
 const weekStartDate = computed(() => {
   const v = props.weekStart
   return typeof v === 'string' ? parseISO(v) : new Date(v)
@@ -78,8 +81,6 @@ function buildWeekDates(monday) {
 
 const weekDates = computed(() => buildWeekDates(startOfWeek(weekStartDate.value, { weekStartsOn: 1 })))
 
-// map lessons by date (attributes.date expected in yyyy-mm-dd)
-// map lessons by date but grouped by period (date+number+startTime+endTime)
 const periodsMap = computed(() => {
   const m = {}
   for (const l of props.lessons || []) {
@@ -94,9 +95,8 @@ const periodsMap = computed(() => {
     }
     grp.items.push(l)
   }
-  // sort groups by number and startTime
   for (const k of Object.keys(m)) {
-    m[k].sort((a,b) => {
+    m[k].sort((a, b) => {
       const na = a.items[0].attributes.number || 0
       const nb = b.items[0].attributes.number || 0
       if (na !== nb) return na - nb
@@ -106,7 +106,6 @@ const periodsMap = computed(() => {
   return m
 })
 
-// build maps of included resolved entities (if lessons have _resolved)
 const groupsMap = computed(() => {
   const map = {}
   for (const l of props.lessons || []) {
@@ -125,7 +124,6 @@ const teachersMap = computed(() => {
   return map
 })
 
-// raw lessons map (for counts and compatibility)
 const lessonsMap = computed(() => {
   const m = {}
   for (const l of props.lessons || []) {
@@ -134,15 +132,12 @@ const lessonsMap = computed(() => {
     if (!m[date]) m[date] = []
     m[date].push(l)
   }
-  for (const k of Object.keys(m)) m[k].sort((a,b) => a.attributes.number - b.attributes.number)
+  for (const k of Object.keys(m)) m[k].sort((a, b) => a.attributes.number - b.attributes.number)
   return m
 })
 
-// selected day logic: if current week -> today else monday
 const isCurrentWeek = computed(() => {
-  const mondayIso = weekDates.value[0].iso
   const todayIso = format(new Date(), 'yyyy-MM-dd')
-  // current week if today is within weekDates
   return weekDates.value.some(d => d.iso === todayIso)
 })
 
@@ -152,18 +147,11 @@ function selectDay(iso) {
   selectedIso.value = iso
 }
 
-// При смене недели выбираем сегодняшний день, если это текущая неделя,
-// иначе — понедельник новой недели
 watch(weekDates, (newVal) => {
   if (!newVal || newVal.length === 0) return
   const todayIso = format(new Date(), 'yyyy-MM-dd')
   const isCur = newVal.some(d => d.iso === todayIso)
   selectedIso.value = isCur ? todayIso : newVal[0].iso
-})
-
-const selectedLabel = computed(() => {
-  const found = weekDates.value.find(d => d.iso === selectedIso.value)
-  return found ? `${found.name}, ${found.day}` : selectedIso.value
 })
 </script>
 
@@ -171,78 +159,189 @@ const selectedLabel = computed(() => {
 .daily-mode {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
+
+.days-wrap {
+  border-radius: 14px;
+  border: 1px solid #dbe7f2;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  padding: 8px;
+}
+
 .days-row {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  min-height: 52px; /* компактная высота строки дней */
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
 }
+
 .day-button {
-  flex: 1 0 auto;
+  border: 1px solid #e4edf6;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  cursor: pointer;
+  padding: 8px 6px;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
   display: flex;
   flex-direction: column;
+  gap: 4px;
   align-items: center;
   justify-content: center;
-  padding: 4px 4px;
-  border-radius: 10px;
-  border: 1px solid #eef3f8;
-  background: #fbfdff;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.08s;
+  min-width: 0;
 }
-.day-button .day-number {
-  font-weight: 600;
-  font-size: 1rem;
+
+.day-button:hover {
+  background: #f2f9ff;
+  border-color: #c8deef;
 }
-.day-button .day-name {
-  font-size: 0.8rem;
-  color: #666;
-}
-.day-button .lessons-count {
-  margin-top: 4px;
-  background: #e9eef6;
-  color: #0b6fb1;
-  padding: 3px 8px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.82rem;
-}
+
 .day-button.today {
-  box-shadow: inset 0 0 0 2px rgba(39,167,231,0.12);
-  border-color: rgba(39,167,231,0.28);
+  border-color: rgba(14, 165, 233, 0.45);
 }
+
 .day-button.selected {
-  background: #27a7e758;
-  box-shadow: inset 0 0 0 3px rgba(39, 167, 231, 0.133);
+  border-color: #52b6e8;
+  background: linear-gradient(180deg, #e9f6ff 0%, #dcf1ff 100%);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.2);
   transform: translateY(-1px);
 }
 
-.lessons-list {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 0px;
-  /* box-shadow: 0 6px 18px rgba(0,0,0,0.04); */
+.day-name {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
-.cards { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px }
-.lesson-card { padding: 0; border-radius: 0; background: transparent; border: none }
-.time { font-size: 0.85rem; color: #345; }
-.subject { font-weight: 600; margin-top: 6px }
-.meta { font-size: 0.85rem; color: #666; margin-top: 4px }
-.no-lessons { color: #888; margin: 30px 0px; font-weight: 500; text-align: center }
 
-/* skeleton for cards (single column, 3 items) */
-.skeleton-list { list-style: none; padding: 12px; margin: 0; display: flex; flex-direction: column; gap: 8px }
-.skeleton-card { padding: 12px; border-radius: 10px; background: #fff; box-shadow: 0 6px 18px rgba(20,40,80,0.04); min-height: 68px; display:flex; flex-direction:column; gap:8px }
-.sk-line { border-radius: 6px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size: 200% 100%; animation: shimmer 1.1s linear infinite }
-.sk-line.top { height: 14px; width: 85% }
-.sk-line.mid { height: 10px; width: 45% }
-.sk-line.bot { height: 12px; width: 65% }
+.day-number {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
 
-@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+.lessons-count {
+  min-width: 22px;
+  height: 20px;
+  border-radius: 999px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eaf3fb;
+  color: #075985;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
 
-.lesson-relation { margin-top: 8px }
-.relation-btn { background: transparent; border: none; color: #0b6fb1; font-weight: 600; cursor: pointer; padding: 4px 0 }
-.relation-btn:hover { text-decoration: underline }
+.lessons-list {
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #dbe7f2;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  padding: 8px;
+}
+
+.cards {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lesson-card {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+.no-lessons {
+  color: #7a889c;
+  margin: 36px 0;
+  font-weight: 600;
+  text-align: center;
+}
+
+.skeleton-list {
+  list-style: none;
+  padding: 4px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-card {
+  padding: 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e6edf5;
+  box-shadow: 0 6px 18px rgba(20, 40, 80, 0.04);
+  min-height: 68px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sk-line {
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef3f8 25%, #f6f9fc 50%, #eef3f8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.1s linear infinite;
+}
+
+.sk-line.top {
+  height: 14px;
+  width: 85%;
+}
+
+.sk-line.mid {
+  height: 10px;
+  width: 45%;
+}
+
+.sk-line.bot {
+  height: 12px;
+  width: 65%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .day-button {
+    padding: 7px 3px;
+    gap: 3px;
+  }
+
+  .day-name {
+    font-size: 0.72rem;
+  }
+
+  .day-number {
+    font-size: 0.96rem;
+  }
+
+  .lessons-count {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    font-size: 0.68rem;
+  }
+}
 </style>
