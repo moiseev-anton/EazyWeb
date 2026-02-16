@@ -207,7 +207,6 @@ function toggle(i) {
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #dbe7f2;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 }
 
 .accordion-header {
@@ -216,7 +215,7 @@ function toggle(i) {
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background: #ffffff;
   border: none;
   cursor: pointer;
   transition: background 0.16s ease;
@@ -341,7 +340,6 @@ function toggle(i) {
   border-radius: 10px;
   border: 1px solid #e6edf5;
   background: #fff;
-  box-shadow: 0 6px 18px rgba(20, 40, 80, 0.04);
   min-height: 80px;
   display: flex;
   flex-direction: column;
@@ -350,7 +348,7 @@ function toggle(i) {
 
 .skeleton-day .sk-line {
   border-radius: 6px;
-  background: linear-gradient(90deg, #eef3f8 25%, #f6f9fc 50%, #eef3f8 75%);
+  background: #e7edf4;
   background-size: 200% 100%;
   animation: shimmer 1.1s linear infinite;
 }

@@ -25,7 +25,7 @@
         </li>
       </div>
       <div v-else-if="props.loadError">
-        <LoadError :detail="'занятий'" @retry="() => emit('retry')" />
+        <LoadError :detail="' занятия'" @retry="() => emit('retry')" />
       </div>
       <div v-else>
         <div v-if="(periodsMap[selectedIso] || []).length === 0" class="no-lessons">Нет занятий</div>
@@ -166,7 +166,6 @@ watch(weekDates, (newVal) => {
   border-radius: 14px;
   border: 1px solid #dbe7f2;
   background: #ffffff;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
   padding: 8px;
 }
 
@@ -180,7 +179,7 @@ watch(weekDates, (newVal) => {
 .day-button {
   border: 1px solid #e4edf6;
   border-radius: 10px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background: #ffffff;
   cursor: pointer;
   padding: 8px 6px;
   transition: background 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
@@ -203,8 +202,7 @@ watch(weekDates, (newVal) => {
 
 .day-button.selected {
   border-color: #52b6e8;
-  background: linear-gradient(180deg, #e9f6ff 0%, #dcf1ff 100%);
-  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.2);
+  background: #eef6fb;
   transform: translateY(-1px);
 }
 
@@ -244,7 +242,6 @@ watch(weekDates, (newVal) => {
   border-radius: 14px;
   background: #ffffff;
   border: 1px solid #dbe7f2;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
   padding: 8px;
 }
 
@@ -285,7 +282,6 @@ watch(weekDates, (newVal) => {
   border-radius: 10px;
   background: #fff;
   border: 1px solid #e6edf5;
-  box-shadow: 0 6px 18px rgba(20, 40, 80, 0.04);
   min-height: 68px;
   display: flex;
   flex-direction: column;
@@ -294,7 +290,7 @@ watch(weekDates, (newVal) => {
 
 .sk-line {
   border-radius: 6px;
-  background: linear-gradient(90deg, #eef3f8 25%, #f6f9fc 50%, #eef3f8 75%);
+  background: #e7edf4;
   background-size: 200% 100%;
   animation: shimmer 1.1s linear infinite;
 }

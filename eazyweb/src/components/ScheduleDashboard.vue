@@ -394,6 +394,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
+  padding: 0 6px;
 }
 
 .dashboard-header {
@@ -405,10 +406,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   border-radius: 0 0 18px 18px;
   border: 1px solid rgba(14, 116, 144, 0.2);
   border-top: 0;
-  background:
-    radial-gradient(120% 100% at 0% 0%, rgba(14, 165, 233, 0.16) 0%, rgba(14, 165, 233, 0) 58%),
-    linear-gradient(135deg, #ffffff 0%, #f2f9ff 100%);
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+  background: var(--bg-surface);
 }
 
 .header-top {
@@ -468,7 +466,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 
 .back-button:hover,
 .mode-toggle-button:hover {
-  background: #eef7ff;
+  background: var(--bg-muted);
   border-color: #b8d9f2;
 }
 
@@ -533,7 +531,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .calendar-button:hover {
-  background: #f2f9ff;
+  background: var(--bg-muted);
   border-color: #b8d9f2;
 }
 
@@ -544,9 +542,9 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .today-button {
-  border: 1px solid #89caec;
+  border: 1px solid #8db8d6;
   border-radius: 10px;
-  background: rgba(14, 165, 233, 0.08);
+  background: var(--bg-surface);
   color: #075985;
   padding: 7px 10px;
   min-width: 36px;
@@ -556,7 +554,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .today-button:hover {
-  background: rgba(14, 165, 233, 0.16);
+  background: var(--bg-muted);
   transform: translateY(-1px);
 }
 
@@ -580,7 +578,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .nav-arrow:hover:not(:disabled) {
-  background: #f2f9ff;
+  background: var(--bg-muted);
   border-color: #b8d9f2;
 }
 
@@ -595,7 +593,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .dashboard-content {
-  padding: 0 8px 10px;
+  padding: 0 0 10px;
   min-width: 0;
 }
 
@@ -603,7 +601,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   z-index: 1001;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.16);
+  box-shadow: none;
   border: 1px solid #e6edf5;
   overflow: hidden;
 }
@@ -634,7 +632,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   padding: 16px;
   max-width: 420px;
   width: calc(100% - 48px);
-  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.22);
+  box-shadow: none;
 }
 
 .modal-dialog p {
@@ -658,9 +656,9 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .modal-btn.primary {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  background: var(--accent);
   color: white;
-  border-color: #0284c7;
+  border-color: var(--accent);
 }
 
 @media (max-width: 767px) {
@@ -676,10 +674,6 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 
   .header-bottom {
     align-items: flex-end;
-  }
-
-  .dashboard-content {
-    padding: 0 2px 10px;
   }
 
   .dashboard-datepicker {

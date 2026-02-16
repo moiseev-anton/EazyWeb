@@ -25,7 +25,7 @@
     </div>
 
     <div v-else-if="error" class="error-offset">
-      <LoadError :detail="'преподавателей'" @retry="load" />
+      <LoadError :detail="' преподавателей'" @retry="load" />
     </div>
 
     <section v-else-if="groups.length === 0" class="center-state">
@@ -96,19 +96,15 @@ onMounted(() => load())
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
-  background:
-    radial-gradient(125% 120% at 0% 0%, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 58%),
-    radial-gradient(95% 120% at 100% 0%, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0) 60%),
-    #f5f9fc;
+  padding: 6px;
+  background: transparent;
 }
 
 .teachers-hero {
   padding: 16px;
   border-radius: 18px;
   border: 1px solid rgba(14, 116, 144, 0.2);
-  background: linear-gradient(135deg, #ffffff 0%, #eff8ff 100%);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  background: #ffffff;
 }
 
 .teachers-hero h1 {
@@ -129,7 +125,7 @@ onMounted(() => load())
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   padding-right: 0;
 }
 
@@ -137,7 +133,6 @@ onMounted(() => load())
   border-radius: 16px;
   border: 1px solid #dbe7f2;
   background: #fff;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
   overflow: hidden;
 }
 
@@ -147,7 +142,7 @@ onMounted(() => load())
   font-size: 0.95rem;
   color: #0f172a;
   border-bottom: 1px solid #eaf1f8;
-  background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+  background: #f8fafc;
 }
 
 .teachers-list {
@@ -167,17 +162,16 @@ onMounted(() => load())
   align-items: center;
   justify-content: center;
   text-align: center;
-  transition: background 0.16s, transform 0.1s, box-shadow 0.16s, border-color 0.16s;
+  transition: background 0.16s, transform 0.1s, border-color 0.16s;
   color: #1e293b;
   font-size: 0.9rem;
   min-width: 130px;
 }
 
 .teacher-btn:hover {
-  background: #f3faff;
+  background: #f2f5f9;
   border-color: #b8d9f2;
   transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(14, 116, 144, 0.12);
 }
 
 .teacher-btn:active {
@@ -229,12 +223,11 @@ onMounted(() => load())
   border-radius: 16px;
   padding: 14px;
   border: 1px solid #e6edf5;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
 }
 
 .sk-letter,
 .sk-pill {
-  background: linear-gradient(90deg, #eaf0f6 25%, #f7fbff 50%, #eaf0f6 75%);
+  background: #e7edf4;
   background-size: 200% 100%;
   animation: shimmer 1.1s linear infinite;
 }

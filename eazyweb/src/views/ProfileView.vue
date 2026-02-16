@@ -311,11 +311,8 @@ async function handleLogout() {
 <style scoped>
 .profile-page {
     min-height: 100%;
-    padding: 20px;
-    background:
-        radial-gradient(130% 120% at 0% 0%, rgba(39, 167, 231, 0.14) 0%, rgba(39, 167, 231, 0) 55%),
-        radial-gradient(120% 100% at 100% 0%, rgba(8, 145, 178, 0.15) 0%, rgba(8, 145, 178, 0) 60%),
-        #f4f8fc;
+    padding: 6px;
+    background: transparent;
 }
 
 .profile-shell {
@@ -334,8 +331,7 @@ async function handleLogout() {
     padding: 18px;
     border-radius: 18px;
     border: 1px solid rgba(11, 111, 177, 0.18);
-    background: linear-gradient(135deg, #ffffff 0%, #ebf6ff 100%);
-    box-shadow: 0 12px 30px rgba(11, 111, 177, 0.08);
+    background: #ffffff;
 }
 
 .hero-user {
@@ -386,7 +382,6 @@ async function handleLogout() {
     border-radius: 18px;
     border: 1px solid rgba(148, 163, 184, 0.35);
     background: #fff;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
     display: flex;
     flex-direction: column;
 }
@@ -505,7 +500,7 @@ async function handleLogout() {
     border: 1px solid #e2e8f0;
     border-radius: 14px;
     padding: 12px;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    background: #ffffff;
 }
 
 .notify-item strong {
@@ -556,12 +551,11 @@ async function handleLogout() {
     background: #fff;
     top: 4px;
     left: 4px;
-    box-shadow: 0 1px 5px rgba(15, 23, 42, 0.25);
     transition: transform 0.2s ease;
 }
 
 .switch input:checked + .slider {
-    background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+    background: #0ea5e9;
 }
 
 .switch input:checked + .slider::before {
@@ -580,13 +574,12 @@ async function handleLogout() {
     padding: 9px 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, color 0.12s ease;
+    transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
 }
 
 .primary-btn {
     color: #fff;
-    background: linear-gradient(135deg, #0891b2 0%, #27a7e7 100%);
-    box-shadow: 0 8px 16px rgba(39, 167, 231, 0.25);
+    background: #0284c7;
 }
 
 .primary-btn:hover:not(:disabled) {
@@ -604,8 +597,7 @@ async function handleLogout() {
 
 .danger-btn {
     color: #fff;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    box-shadow: 0 10px 20px rgba(220, 38, 38, 0.24);
+    background: #dc2626;
 }
 
 .danger-btn:hover:not(:disabled) {
@@ -660,7 +652,6 @@ async function handleLogout() {
     background: #0f172a;
     padding: 10px 14px;
     border-radius: 12px;
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.24);
 }
 
 .toast.success {
@@ -687,7 +678,7 @@ async function handleLogout() {
 
 @media (max-width: 640px) {
     .profile-page {
-        padding: 14px;
+        padding: 6px;
     }
 
     .hero {

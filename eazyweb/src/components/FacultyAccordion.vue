@@ -20,7 +20,7 @@
     </div>
 
     <div v-else-if="error" class="error-offset">
-      <LoadError :detail="'группы'" @retry="retry" />
+      <LoadError :detail="' группы'" @retry="retry" />
     </div>
 
     <section v-else-if="faculties.length === 0" class="accordion-empty">
@@ -133,19 +133,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
-  background:
-    radial-gradient(120% 120% at 0% 0%, rgba(14, 165, 233, 0.16) 0%, rgba(14, 165, 233, 0) 55%),
-    radial-gradient(100% 120% at 100% 0%, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0) 60%),
-    #f5f9fc;
+  padding: 6px;
+  background: transparent;
 }
 
 .accordion-hero {
   padding: 16px;
   border-radius: 18px;
   border: 1px solid rgba(14, 116, 144, 0.2);
-  background: linear-gradient(135deg, #ffffff 0%, #eef8ff 100%);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  background: #ffffff;
 }
 
 .accordion-hero h2 {
@@ -177,13 +173,12 @@ onMounted(() => {
   border-radius: 16px;
   padding: 14px;
   border: 1px solid #e6edf5;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
 }
 
 .sk-header,
 .sk-course-line.short,
 .sk-pill {
-  background: linear-gradient(90deg, #eaf0f6 25%, #f7fbff 50%, #eaf0f6 75%);
+  background: #e7edf4;
   background-size: 200% 100%;
   animation: shimmer 1.1s linear infinite;
 }
@@ -266,7 +261,7 @@ onMounted(() => {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   padding-right: 0;
 }
 
@@ -275,7 +270,6 @@ onMounted(() => {
   border: 1px solid #dbe7f2;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
 }
 
 .accordion-header {
@@ -289,16 +283,16 @@ onMounted(() => {
   cursor: pointer;
   text-align: left;
   color: #0f172a;
-  background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+  background: #ffffff;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 .accordion-header:hover {
-  background: linear-gradient(135deg, #eff7ff 0%, #e8f3ff 100%);
+  background: #f2f5f9;
 }
 
 .accordion-header.open {
-  background: linear-gradient(135deg, #e8f4ff 0%, #def0ff 100%);
+  background: #eef6fb;
 }
 
 .faculty-title {
@@ -378,17 +372,16 @@ onMounted(() => {
   justify-content: center;
   gap: 0;
   text-align: left;
-  transition: background 0.16s, transform 0.1s, box-shadow 0.16s, border-color 0.16s;
+  transition: background 0.16s, transform 0.1s, border-color 0.16s;
   color: #1e293b;
   font-size: 0.9rem;
   min-width: 110px;
 }
 
 .group-btn:hover {
-  background: #f3faff;
+  background: #f2f5f9;
   border-color: #b8d9f2;
   transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(14, 116, 144, 0.12);
 }
 
 .group-btn:active {

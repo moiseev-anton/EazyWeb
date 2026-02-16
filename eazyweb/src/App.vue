@@ -1,63 +1,75 @@
 <template>
   <div class="app">
-    <!-- <header>
-      <h1>EazyClass</h1>
-    </header> -->
     <Navigation />
     <main class="main-content">
       <div class="content-inner">
         <router-view />
       </div>
     </main>
-    
-    <!-- <footer v-if="$route.name === 'schedule' && !isAuthenticated">
-      <p>© 2025 EazyClass. Удобное расписание с уведомлениями.</p>
-    </footer> -->
   </div>
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
 import Navigation from './components/Navigation.vue'
-import { useAuthStore } from './stores/auth'
-
-const route = useRoute()
-const authStore = useAuthStore()
-const isAuthenticated = authStore.isAuthenticated
 </script>
 
 <style>
-body { margin: 0; font-family: sans-serif; }
+:root {
+  --bg-app: #f6f8fb;
+  --bg-surface: #ffffff;
+  --bg-muted: #f2f5f9;
+  --border: #dbe3ec;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --accent: #0284c7;
+  --danger: #dc2626;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  color: var(--text-main);
+  background: var(--bg-app);
+}
+
 .app {
   min-height: 100vh;
-  display: flex; flex-direction: column;
-  transition: margin-left 0.3s ease;  /* Плавный сдвиг при resize */
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
 }
-header {
-  background: #27A7E7; color: white; padding: 1rem; text-align: center;
-  z-index: 200;  /* Над nav */
-}
+
 .main-content {
   flex: 1;
-  margin-bottom: 60px;  /* Для bottom nav */
+  margin-bottom: 60px;
   display: flex;
-  justify-content: flex-start; /* по умолчанию «прилипаем» к сайдбару */
+  justify-content: flex-start;
+  background: var(--bg-app);
 }
-footer {
-  background: #f0f0f0; padding: 1rem; text-align: center;
-}
-/* Адаптив: сдвиг всего app под sidebar */
+
 @media (min-width: 768px) {
-  .app { margin-left: 250px; margin-bottom: 0; }
-  .main-content { margin-bottom: 0; }
-  .content-inner { width: 100%; max-width: 768px; }
+  .app {
+    margin-left: 250px;
+    margin-bottom: 0;
+  }
+
+  .main-content {
+    margin-bottom: 0;
+  }
+
+  .content-inner {
+    width: 100%;
+    max-width: 768px;
+  }
 }
 
-/* Когда ширина окна больше ширины сайдбара + контента (250 + 768 = 1018),
-   центрируем контент в оставшейся области справа от сайдбара */
 @media (min-width: 1018px) {
-  .main-content { justify-content: center; }
+  .main-content {
+    justify-content: center;
+  }
 }
 
-.content-inner { width: 100%; }
+.content-inner {
+  width: 100%;
+}
 </style>
