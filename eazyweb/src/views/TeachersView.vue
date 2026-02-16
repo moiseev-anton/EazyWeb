@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <ScheduleDashboard
     v-if="selectedEntity"
     :entityId="selectedEntity.id"
@@ -10,33 +10,43 @@
   />
 
   <div v-else class="teachers-view">
-    <div v-if="isLoading" class="teachers-skeleton">
+    <header class="teachers-hero">
+      <h1>Преподаватели</h1>
+      <p>Выберите преподавателя из списка, чтобы открыть его расписание.</p>
+    </header>
+
+    <div v-if="isLoading" class="teachers-skeleton" aria-busy="true">
       <div class="letter-skel" v-for="n in 5" :key="n">
         <div class="sk-letter"></div>
         <div class="sk-teachers">
-          <span class="sk-pill" v-for="m in 3" :key="m"></span>
+          <span class="sk-pill" v-for="m in 6" :key="`${n}-${m}`"></span>
         </div>
       </div>
     </div>
+
     <div v-else-if="error" class="error-offset">
-      <LoadError :detail="' преподавателей'" @retry="load" />
+      <LoadError :detail="'преподавателей'" @retry="load" />
     </div>
-    <div v-else-if="groups.length === 0" class="center-state">На данный момент нет данных о преподавателях</div>
+
+    <section v-else-if="groups.length === 0" class="center-state">
+      <h3>Список преподавателей пуст</h3>
+      <p>Данные появятся, когда они будут доступны на сервере.</p>
+    </section>
 
     <div v-else class="teachers-container">
-      <div v-for="group in groups" :key="group.letter" class="letter-section">
+      <section v-for="group in groups" :key="group.letter" class="letter-section">
         <div class="letter-header">{{ group.letter }}</div>
-        <div class="groups-list">
+        <div class="teachers-list">
           <button
             v-for="t in group.teachers"
             :key="t.id"
-            class="group-btn"
+            class="teacher-btn"
             @click="selectTeacher({ id: t.id, name: t.shortName || t.fullName, endpoint: t.endpoint })"
           >
-            <span class="group-title">{{ t.shortName || t.fullName }}</span>
+            <span class="teacher-name">{{ t.shortName || t.fullName }}</span>
           </button>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
@@ -79,81 +89,217 @@ onMounted(() => load())
 
 <style scoped>
 .teachers-view {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 8px 12px;
+  gap: 12px;
+  padding: 16px;
+  background:
+    radial-gradient(125% 120% at 0% 0%, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 58%),
+    radial-gradient(95% 120% at 100% 0%, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0) 60%),
+    #f5f9fc;
 }
 
-.center-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  color: #666;
+.teachers-hero {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  background: linear-gradient(135deg, #ffffff 0%, #eff8ff 100%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 }
 
-.center-state.error {
-  color: #666;
+.teachers-hero h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.teachers-hero p {
+  margin: 6px 0 0;
+  color: #5b687a;
+  font-size: 0.95rem;
 }
 
 .teachers-container {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 4px 0 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 0;
 }
 
 .letter-section {
-  margin-bottom: 12px;
+  border-radius: 16px;
+  border: 1px solid #dbe7f2;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
 }
 
 .letter-header {
-  font-weight: 600;
-  color: #666;
-  padding: 6px 8px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  border-bottom: 1px solid #eaf1f8;
+  background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
 }
 
-.groups-list {
+.teachers-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 4px 8px 0 8px;
+  padding: 10px 12px 12px;
 }
 
-.group-btn {
+.teacher-btn {
   padding: 8px 12px;
   background: #fff;
-  border: 1px solid #e9e9e9;
+  border: 1px solid #d9e7f2;
   border-radius: 10px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  transition: background 0.12s, transform 0.08s, box-shadow 0.12s;
-  color: #222;
-  font-size: 14px;
-  min-width: 120px;
-  flex: 0 1 auto;
+  transition: background 0.16s, transform 0.1s, box-shadow 0.16s, border-color 0.16s;
+  color: #1e293b;
+  font-size: 0.9rem;
+  min-width: 130px;
 }
 
-.group-btn:hover { background:#f7fbff; transform:translateY(-2px); box-shadow:0 6px 18px rgba(20,40,80,0.06); }
-
-.group-title { font-weight:600 }
-
-@media (max-width:480px){
-  .letter-header{ padding:4px 6px; font-size:14px }
-  .group-btn{ min-width:100px; font-size:13px }
+.teacher-btn:hover {
+  background: #f3faff;
+  border-color: #b8d9f2;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(14, 116, 144, 0.12);
 }
 
-/* Teachers skeleton */
-.teachers-skeleton { display:flex; flex-direction:column; gap:12px; padding:12px }
-.letter-skel { background:#fff; padding:10px; border-radius:8px; box-shadow:0 6px 18px rgba(20,40,80,0.04) }
-.sk-letter { height:14px; width:120px; border-radius:6px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite; margin-bottom:8px }
-.sk-teachers { display:flex; gap:8px; flex-wrap:wrap }
-.teachers-skeleton .sk-pill { width:120px; height:36px; border-radius:10px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite }
+.teacher-btn:active {
+  transform: translateY(0);
+}
 
-@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+.teacher-name {
+  font-weight: 600;
+}
 
-/* error offset: 30% from top */
-.error-offset { margin-top: 30vh; display:flex; justify-content:center }
+.center-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px solid #dbe6f0;
+  background: #fff;
+  color: #4b5563;
+  padding: 28px 20px;
+}
+
+.center-state h3 {
+  margin: 0;
+  color: #111827;
+}
+
+.center-state p {
+  margin: 8px 0 0;
+}
+
+.error-offset {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teachers-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.letter-skel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid #e6edf5;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+.sk-letter,
+.sk-pill {
+  background: linear-gradient(90deg, #eaf0f6 25%, #f7fbff 50%, #eaf0f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.1s linear infinite;
+}
+
+.sk-letter {
+  height: 14px;
+  width: 70px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.sk-teachers {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sk-pill {
+  width: 128px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .teachers-view {
+    padding: 12px;
+  }
+
+  .teachers-hero {
+    padding: 14px;
+  }
+
+  .teachers-list {
+    padding: 9px 10px 10px;
+  }
+
+  .teacher-btn {
+    min-width: 112px;
+  }
+}
+
+@media (max-width: 360px) {
+  .teachers-view {
+    padding: 10px;
+  }
+
+  .teachers-hero p {
+    font-size: 0.9rem;
+  }
+
+  .teachers-list {
+    padding: 8px;
+  }
+
+  .teacher-btn {
+    width: 100%;
+  }
+}
 </style>
