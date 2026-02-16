@@ -1,34 +1,35 @@
-<template>
+﻿<template>
   <div class="faculty-accordion">
-    <!-- Loading state (skeleton) -->
-    <div v-if="isLoading" class="accordion-loading">
+    <header class="accordion-hero">
+      <h2>Выбор группы</h2>
+      <p>Выберите факультет и курс, чтобы открыть расписание нужной группы.</p>
+    </header>
+
+    <div v-if="isLoading" class="accordion-loading" aria-busy="true">
       <div class="faculty-skeleton">
         <div class="faculty-item" v-for="n in 4" :key="n">
           <div class="sk-header"></div>
-          <div class="sk-course">
+          <div class="sk-course" v-for="m in 2" :key="`${n}-${m}`">
             <div class="sk-course-line short"></div>
             <div class="sk-groups">
-              <span class="sk-pill" v-for="m in 4" :key="m"></span>
+              <span class="sk-pill" v-for="k in 5" :key="`${n}-${m}-${k}`"></span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Error state -->
     <div v-else-if="error" class="error-offset">
-      <LoadError :detail="' группы'" @retry="retry" />
+      <LoadError :detail="'группы'" @retry="retry" />
     </div>
 
-    <!-- Empty state -->
-    <div v-else-if="faculties.length === 0" class="accordion-empty">
-      <p>На данный момент информации о группах нет</p>
-    </div>
+    <section v-else-if="faculties.length === 0" class="accordion-empty">
+      <h3>Нет данных по группам</h3>
+      <p>Попробуйте обновить страницу чуть позже.</p>
+    </section>
 
-    <!-- Accordion items -->
     <div v-else class="accordion-container">
-      <div v-for="faculty in faculties" :key="faculty.id" class="accordion-item">
-        <!-- Faculty Header -->
+      <article v-for="faculty in faculties" :key="faculty.id" class="accordion-item">
         <button
           class="accordion-header"
           :class="{ open: expandedFacultyIds.has(faculty.id) }"
@@ -36,26 +37,22 @@
         >
           <span class="faculty-title">
             <span class="faculty-name">{{ faculty.title }}</span>
+            <span class="faculty-meta">{{ faculty.shortTitle || '' }}</span>
           </span>
-          <span class="toggle-icon">
+          <span class="toggle-icon" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M7 8L10 11L13 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
         </button>
 
-        <!-- Faculty Content -->
         <transition name="expand">
           <div v-show="expandedFacultyIds.has(faculty.id)" class="accordion-content">
-            <!-- Courses within faculty -->
-            <div v-for="course in faculty.courses" :key="`course-${course.number}`" class="course-section">
+            <section v-for="course in faculty.courses" :key="`course-${faculty.id}-${course.number}`" class="course-section">
               <div class="course-header">
-                <span class="line"></span>
-                <span class="course-number">{{ course.number }} курс</span>
-                <span class="small-line"></span>
+                <span class="course-badge">{{ course.number }} курс</span>
               </div>
 
-              <!-- Groups within course -->
               <div class="groups-list">
                 <button
                   v-for="group in course.groups"
@@ -66,10 +63,10 @@
                   <span class="group-title">{{ group.title }}</span>
                 </button>
               </div>
-            </div>
+            </section>
           </div>
         </transition>
-      </div>
+      </article>
     </div>
   </div>
 </template>
@@ -84,7 +81,6 @@ const emit = defineEmits(['group-selected'])
 const isLoading = ref(false)
 const error = ref(null)
 const faculties = ref([])
-// allow multiple open faculties
 const expandedFacultyIds = ref(new Set())
 
 async function loadFaculties() {
@@ -107,7 +103,6 @@ function toggleFaculty(facultyId) {
   const set = expandedFacultyIds.value
   if (set.has(facultyId)) set.delete(facultyId)
   else set.add(facultyId)
-  // force ref change
   expandedFacultyIds.value = new Set(set)
 }
 
@@ -124,7 +119,6 @@ function retry() {
 }
 
 onMounted(() => {
-  // start collapsed
   expandedFacultyIds.value = new Set()
   loadFaculties()
 })
@@ -132,219 +126,272 @@ onMounted(() => {
 
 <style scoped>
 .faculty-accordion {
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-}
-
-/* Loading state */
-.accordion-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  /* allow skeleton to sit at top of container */
-  height: auto;
   gap: 12px;
-  color: #666;
-  padding: 8px;
+  padding: 16px;
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(14, 165, 233, 0.16) 0%, rgba(14, 165, 233, 0) 55%),
+    radial-gradient(100% 120% at 100% 0%, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0) 60%),
+    #f5f9fc;
 }
 
-/* Skeleton inside accordion */
-.faculty-skeleton { width: 100%; padding: 8px; display:flex; flex-direction:column; gap:10px }
-.faculty-item { background: #fff; border-radius: 8px; padding: 10px; box-shadow: 0 6px 18px rgba(20,40,80,0.04) }
-.sk-header { height: 14px; width: 60%; border-radius: 6px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite; margin-bottom: 8px }
-.sk-course { display:flex; flex-direction:column; gap:8px }
-.sk-course-line.short { height: 10px; width: 35%; border-radius:6px; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite }
-.sk-groups { display:flex; gap:8px; flex-wrap:wrap }
-.sk-pill { width: 100px; height: 32px; border-radius: 16px; display:inline-block; background: linear-gradient(90deg,#eef3f8 25%, #f6f9fc 50%, #eef3f8 75%); background-size:200% 100%; animation: shimmer 1.1s linear infinite }
+.accordion-hero {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  background: linear-gradient(135deg, #ffffff 0%, #eef8ff 100%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
 
-@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+.accordion-hero h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
 
-/* error offset: 30% from top */
-.error-offset { margin-top: 30vh; display:flex; justify-content:center }
+.accordion-hero p {
+  margin: 6px 0 0;
+  color: #5b687a;
+  font-size: 0.95rem;
+}
 
+.accordion-loading {
+  flex: 1;
+  padding: 2px;
+}
 
-/* Empty state */
-.accordion-empty {
+.faculty-skeleton {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.faculty-item {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid #e6edf5;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+.sk-header,
+.sk-course-line.short,
+.sk-pill {
+  background: linear-gradient(90deg, #eaf0f6 25%, #f7fbff 50%, #eaf0f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.1s linear infinite;
+}
+
+.sk-header {
+  height: 14px;
+  width: 54%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.sk-course {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.sk-course-line.short {
+  height: 10px;
+  width: 28%;
+  border-radius: 8px;
+}
+
+.sk-groups {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sk-pill {
+  width: 96px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.error-offset {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: #999;
-  font-size: 16px;
 }
 
-/* Accordion container */
+.accordion-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px solid #dbe6f0;
+  background: #fff;
+  color: #4b5563;
+  padding: 28px 20px;
+}
+
+.accordion-empty h3 {
+  margin: 0;
+  color: #111827;
+}
+
+.accordion-empty p {
+  margin: 8px 0 0;
+}
+
 .accordion-container {
   flex: 1;
   overflow-y: auto;
-  min-width: 280px;
-  max-width: 768px;
-  
-  width: 100%;
-  padding: 8px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 0;
 }
 
-/* Accordion item */
 .accordion-item {
-  margin-bottom: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 16px;
+  border: 1px solid #dbe7f2;
   overflow: hidden;
-  background: white;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
 }
 
-/* Faculty header */
 .accordion-header {
   width: 100%;
-  padding: 10px 16px;
+  padding: 13px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+  gap: 12px;
   border: none;
-  border-bottom: 1px solid #ddd;
   cursor: pointer;
-  transition: background 0.2s;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
   text-align: left;
+  color: #0f172a;
+  background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .accordion-header:hover {
-  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  background: linear-gradient(135deg, #eff7ff 0%, #e8f3ff 100%);
 }
 
 .accordion-header.open {
-  /* keep header visual neutral; only rotate icon when open */
+  background: linear-gradient(135deg, #e8f4ff 0%, #def0ff 100%);
 }
 
 .faculty-title {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 
 .faculty-name {
-  flex: 1;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-.faculty-short {
-  font-size: 13px;
-  opacity: 0.8;
+.faculty-meta {
+  font-size: 0.82rem;
+  color: #64748b;
 }
 
 .toggle-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
+  color: #334155;
+  transition: transform 0.25s ease;
 }
 
-.accordion-header.active .toggle-icon {
+.accordion-header.open .toggle-icon {
   transform: rotate(180deg);
-  color: white;
 }
 
-.toggle-icon svg {
-  color: inherit;
-}
-
-/* Accordion content */
 .accordion-content {
-  padding: 6px 0 4px;
-  background: white;
+  padding: 6px 12px 10px;
+  background: #fff;
 }
 
-/* Course section */
 .course-section {
-  padding: 0;
-  border-top: 0px solid #f0f0f0;
+  padding: 10px 0 8px;
+  margin-top: 0;
+  background: transparent;
 }
 
-.course-section:first-child {
-  border-top: none;
+.course-section + .course-section {
+  border-top: 1px solid #e8eff6;
 }
 
 .course-header {
-  display: flex;
-  align-items: center;
-  padding: 4px 12px;
-  color: #6b6b6b;
+  display: block;
+  margin-bottom: 8px;
 }
 
-.course-header .line {
-  flex: 1 1 auto;
-  height: 1px;
-  background: #e6e6e6;
-
-}
-
-.course-header .line:first-child {
-  margin-right: 12px;
-}
-
-.course-header .line:last-child {
-  margin-left: 12px;
-}
-
-.course-header .small-line {
-  width: 20px;
-  height: 1px;
-  background: #e6e6e6;
+.course-badge {
   display: inline-block;
-  margin-left: 8px;
-  margin-right: 8px;
+  padding: 0;
+  background: transparent;
+  color: #7a889c;
+  font-weight: 500;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
 }
-
-.course-number {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 400;
-  color: #7a7a7a;
-  white-space: nowrap;
-}
-
-/* Groups list: horizontal wrapping buttons */
 
 .groups-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 4px 12px;
 }
 
 .group-btn {
   padding: 8px 12px;
-  background: #fff;
-  border: 1px solid #e9e9e9;
+  background: #ffffff;
+  border: 1px solid #d9e7f2;
   border-radius: 10px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  transition: background 0.15s, transform 0.08s, box-shadow 0.12s;
-  color: #222;
-  font-size: 14px;
-  min-width: 120px;
-  flex: 0 1 auto;
-  box-shadow: 0 0 0 rgba(0,0,0,0);
+  gap: 0;
+  text-align: left;
+  transition: background 0.16s, transform 0.1s, box-shadow 0.16s, border-color 0.16s;
+  color: #1e293b;
+  font-size: 0.9rem;
+  min-width: 110px;
 }
 
 .group-btn:hover {
-  background: #f7fbff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(20,40,80,0.06);
+  background: #f3faff;
+  border-color: #b8d9f2;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(14, 116, 144, 0.12);
 }
 
 .group-btn:active {
-  background: #eef4ff;
   transform: translateY(0);
 }
 
@@ -352,15 +399,9 @@ onMounted(() => {
   font-weight: 600;
 }
 
-
-.group-btn:hover .group-arrow {
-  transform: translateX(4px);
-}
-
-/* Expand transition */
 .expand-enter-active,
 .expand-leave-active {
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  transition: max-height 0.3s ease, opacity 0.24s ease;
   overflow: hidden;
 }
 
@@ -372,57 +413,51 @@ onMounted(() => {
 
 .expand-enter-to,
 .expand-leave-from {
-  max-height: 1000px;
+  max-height: 1200px;
   opacity: 1;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
-  .accordion-container {
-    max-width: 100%;
+  .faculty-accordion {
     padding: 12px;
   }
 
-  .accordion-header {
+  .accordion-hero {
     padding: 14px;
   }
 
+  .accordion-header {
+    padding: 12px 14px;
+  }
+
   .faculty-name {
-    font-size: 15px;
+    font-size: 0.95rem;
   }
 
-  .faculty-short {
-    font-size: 12px;
-  }
-
-  .toggle-icon {
-    width: 18px;
-    height: 18px;
+  .course-section {
+    padding: 9px;
   }
 
   .group-btn {
-    padding: 10px 14px;
-    font-size: 13px;
+    min-width: 96px;
   }
 }
 
-@media (max-width: 480px) {
-  .accordion-container {
-    padding: 8px;
+@media (max-width: 360px) {
+  .faculty-accordion {
+    padding: 10px;
   }
 
-  .accordion-header {
-    padding: 12px;
-    flex-wrap: wrap;
+  .accordion-hero p {
+    font-size: 0.9rem;
   }
 
-  .faculty-title {
-    flex-basis: 100%;
-    margin-bottom: 4px;
+  .accordion-content {
+    padding: 6px 8px 8px;
   }
 
-  .toggle-icon {
-    flex-basis: auto;
+  .group-btn {
+    width: 100%;
   }
 }
 </style>
