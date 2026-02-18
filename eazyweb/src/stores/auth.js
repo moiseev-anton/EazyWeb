@@ -4,6 +4,8 @@ import api, { setupInterceptors } from '../api/axios'
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
+  // boot status: 'booting' | 'authenticated' | 'anonymous' | 'network_error' | 'server_error'
+  const bootStatus = ref('booting')
   const user = ref(null)
   const subscription = ref(null)
   const notifications = ref({ changes: true, reminders: true })
@@ -189,6 +191,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Provide a small initializer to wire interceptors from main.js if needed
   async function init() {
+    bootStatus.value = 'booting'
+
     try {
       setupInterceptors({ accessToken, refreshToken, logout })
     } catch (e) {
@@ -197,17 +201,21 @@ export const useAuthStore = defineStore('auth', () => {
 
     // If we already have an access token in memory, try to load subscription
     if (accessToken.value) {
+      bootStatus.value = 'authenticated'
       loadSubscription().catch(() => {})
       return
     }
 
     // Try to refresh access token using httponly refresh cookie
+    let refreshSucceeded = false
     try {
       const res = await api.post('/token/refresh/', null, { withCredentials: true })
       const data = res.data || {}
       if (data.access) {
         accessToken.value = data.access
         isAuthenticated.value = true
+        refreshSucceeded = true
+        bootStatus.value = 'authenticated'
         // ensure interceptors see the new token
         try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
 
@@ -234,8 +242,52 @@ export const useAuthStore = defineStore('auth', () => {
         try { await loadSubscription() } catch (_) {}
       }
     } catch (e) {
-      // refresh failed or no refresh cookie — remain unauthenticated
+      // Distinguish network/unavailable vs server error vs auth failure
+      if (!e.response) {
+        bootStatus.value = 'network_error'
+        return
+      }
+      if (e.response && e.response.status >= 500) {
+        bootStatus.value = 'server_error'
+        return
+      }
+      // otherwise 401/403 etc -> treat as no refresh cookie and continue
     }
+
+    if (refreshSucceeded) return
+
+    // Try Telegram WebApp initData flow (TWA)
+    try {
+      const win = typeof window !== 'undefined' ? window : null
+      const initDataRaw = win && win.Telegram && win.Telegram.WebApp && (win.Telegram.WebApp.initData || win.Telegram.WebApp.initDataRaw) ? (win.Telegram.WebApp.initData || win.Telegram.WebApp.initDataRaw) : (win && win.__telegram_init_data ? win.__telegram_init_data : null)
+      if (initDataRaw) {
+        // send empty body and Authorization: tma <initDataRaw>
+        const twaRes = await api.post('/token/twa/', null, { headers: { Authorization: `tma ${initDataRaw}` }, withCredentials: true })
+        const d = twaRes.data || {}
+        if (d && d.access) {
+          accessToken.value = d.access
+          user.value = d.user || null
+          isAuthenticated.value = !!accessToken.value
+          bootStatus.value = 'authenticated'
+          try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+          try { await loadSubscription() } catch (_) {}
+          return
+        }
+      }
+    } catch (e) {
+      if (!e.response) {
+        bootStatus.value = 'network_error'
+        return
+      }
+      if (e.response && e.response.status >= 500) {
+        bootStatus.value = 'server_error'
+        return
+      }
+      // otherwise treat as anonymous
+    }
+
+    // No auth available
+    bootStatus.value = 'anonymous'
   }
 
   // Load current user's subscription (expect at most one). Uses include=teacher,group
@@ -374,6 +426,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     isAuthenticated,
+    bootStatus,
     user,
     subscription,
     notifications,

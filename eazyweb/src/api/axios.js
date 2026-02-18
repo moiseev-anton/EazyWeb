@@ -9,10 +9,23 @@ const api = axios.create({
   },
 })
 
+let requestInterceptorId = null
+let responseInterceptorId = null
+
 // Setup interceptors with a provided auth store
 export function setupInterceptors(authStore) {
+  // Avoid stacking duplicated interceptors after repeated init/login/retry calls
+  if (requestInterceptorId !== null) {
+    api.interceptors.request.eject(requestInterceptorId)
+    requestInterceptorId = null
+  }
+  if (responseInterceptorId !== null) {
+    api.interceptors.response.eject(responseInterceptorId)
+    responseInterceptorId = null
+  }
+
   // Attach access token to requests
-  api.interceptors.request.use((config) => {
+  requestInterceptorId = api.interceptors.request.use((config) => {
     try {
       let token = undefined
       if (!authStore) token = undefined
@@ -31,7 +44,7 @@ export function setupInterceptors(authStore) {
   })
 
   // Response interceptor: on 401 attempt refresh once
-  api.interceptors.response.use(
+  responseInterceptorId = api.interceptors.response.use(
     res => res,
     async (error) => {
       const originalRequest = error.config
