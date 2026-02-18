@@ -8,7 +8,7 @@
       </div>
 
       <div class="subgroup" :class="{ 'is-empty': !showSubgroup }" :aria-hidden="!showSubgroup">
-        <span v-if="showSubgroup">{{ subgroup }} subgroup</span>
+        <span v-if="showSubgroup">{{ subgroup }} подгруппа</span>
       </div>
 
       <div class="classroom" v-if="classroom" :title="classroom">
@@ -113,11 +113,17 @@ function openLeft() {
 </script>
 
 <style scoped>
-.lesson-info { display: flex; flex-direction: column; gap: 6px }
+.lesson-info {
+  --font-ui: "Inter", "Segoe UI", "Roboto", "Noto Sans", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-ui);
+}
 .subject {
-  font-weight: 600;
+  font-weight: 650;
   font-size: 0.98rem;
-  line-height: 1.15;
+  line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -131,7 +137,7 @@ function openLeft() {
   flex-wrap: wrap;
   width: 100%;
   gap: 8px;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   color: #445;
 }
 
@@ -150,7 +156,7 @@ function openLeft() {
   overflow: hidden;
   text-overflow: ellipsis;
   color: #0b6fb1;
-  text-decoration: underline;
+  text-decoration: none;
   background: none;
   border: none;
   padding: 0;
@@ -158,9 +164,13 @@ function openLeft() {
   cursor: pointer;
 }
 
+.group-or-teacher:hover {
+  text-decoration: underline;
+}
+
 .subgroup {
-  flex: 1 1 64px;
-  min-width: 64px;
+  flex: 1 1 54px;
+  min-width: 54px;
   max-width: 100%;
   flex-shrink: 2;
   order: 2;
@@ -169,6 +179,9 @@ function openLeft() {
   text-overflow: ellipsis;
   color: #6b6b6b;
   text-align: center;
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 .subgroup.is-empty {
@@ -177,8 +190,8 @@ function openLeft() {
 }
 
 .classroom {
-  flex: 0 0 90px;
-  width: 90px;
+  flex: 0 0 70px;
+  width: 70ch;
   flex-shrink: 0;
   order: 3;
   color: #6b6b6b;
@@ -194,32 +207,36 @@ function openLeft() {
   justify-content: center;
   /* gap: 6px; */
   /* background: rgba(11,111,177,0.05); */
-  padding: 6px 0px;
+  padding: 2px 0px 2px 2px;
   border-radius: 8px;
+  border: 1px solid #b9b9b9; 
 }
 
 .classroom .icon { flex: 0 0 auto }
 
 .classroom-text {
   width: 52px;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   color: #445;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 
 @media (max-width: 420px) {
   .subgroup {
-    flex-basis: 64px;
-    min-width: 64px;
+    flex-basis: 54px;
+    min-width: 54px;
     text-align: center;
   }
 
-  .classroom {
+  /* .classroom {
     flex-basis: 71px;
-  }
+  } */
 }
 </style>

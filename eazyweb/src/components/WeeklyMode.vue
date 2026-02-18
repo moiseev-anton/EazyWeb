@@ -320,6 +320,7 @@ function toggle(i) {
   border-radius: 0;
   background: transparent;
   border: none;
+  container-type: inline-size;
 }
 
 .no-lessons {
