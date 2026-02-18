@@ -159,7 +159,7 @@ watch(weekDates, (newVal) => {
 .daily-mode {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .days-wrap {

@@ -261,10 +261,6 @@ onMounted(() => load())
 }
 
 @media (max-width: 768px) {
-  .teachers-view {
-    padding: 12px;
-  }
-
   .teachers-hero {
     padding: 14px;
   }
@@ -280,7 +276,7 @@ onMounted(() => load())
 
 @media (max-width: 360px) {
   .teachers-view {
-    padding: 10px;
+    padding: 6px;
   }
 
   .teachers-hero p {

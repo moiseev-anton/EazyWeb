@@ -411,10 +411,6 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .faculty-accordion {
-    padding: 12px;
-  }
-
   .accordion-hero {
     padding: 14px;
   }

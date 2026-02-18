@@ -77,7 +77,7 @@ onMounted(() => {
 <style scoped>
 /* ===== BASE ======== */
 .schedule-view {
-  padding: 0;
+  padding: 6px;
   background: transparent;
   min-height: 100vh;
 }

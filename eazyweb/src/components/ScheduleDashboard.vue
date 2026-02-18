@@ -394,18 +394,16 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
-  padding: 0 6px;
 }
 
 .dashboard-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   padding: 12px 14px;
-  border-radius: 0 0 18px 18px;
-  border: 1px solid rgba(14, 116, 144, 0.2);
-  border-top: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(14, 116, 144, 0.2);;
   background: var(--bg-surface);
 }
 
@@ -414,7 +412,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .header-bottom {
@@ -593,7 +591,6 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .dashboard-content {
-  padding: 0 0 10px;
   min-width: 0;
 }
 
@@ -664,7 +661,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 @media (max-width: 767px) {
   .dashboard-header {
     padding: 10px 10px;
-    border-radius: 0 0 14px 14px;
+    border-radius: 14px;
   }
 
   .entity-title h2 {
