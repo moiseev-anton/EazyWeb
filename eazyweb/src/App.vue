@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app">
     <template v-if="isBooting">
       <nav class="boot-nav-mobile" aria-hidden="true">
@@ -66,6 +66,12 @@
           <div class="error-sub">Сервис временно недоступен. Попробуйте позже.</div>
           <button class="retry-btn" @click="retry">Повторить</button>
         </template>
+
+        <template v-else-if="bootStatus === 'twa_invalid'">
+          <div class="status-dot status-dot--warn" />
+          <div class="error-title">Сессия истекла</div>
+          <div class="error-sub">Перезапустите приложение (закройте и откройте заново через меню бота)</div>
+        </template>
       </div>
     </div>
   </div>
@@ -79,7 +85,7 @@ import { useAuthStore } from './stores/auth'
 const auth = useAuthStore()
 const bootStatus = computed(() => auth.bootStatus)
 const isBooting = computed(() => bootStatus.value === 'booting')
-const errorOverlayVisible = computed(() => ['network_error', 'server_error'].includes(bootStatus.value))
+const errorOverlayVisible = computed(() => ['network_error', 'server_error', 'twa_invalid'].includes(bootStatus.value))
 
 function retry() {
   auth.init()
@@ -87,26 +93,50 @@ function retry() {
 </script>
 
 <style>
+/* Глобальные переменные — теперь в нашей палитре */
 :root {
-  --bg-app: #f6f8fb;
-  --bg-surface: #ffffff;
-  --bg-muted: #f2f5f9;
-  --border: #dbe3ec;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --accent: #0284c7;
-  --danger: #dc2626;
+  --bg-app: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  --glass-bg: rgba(30, 41, 59, 0.28);
+  --glass-bg-light: rgba(30, 41, 59, 0.24);
+  --glass-bg-strong: rgba(51, 65, 85, 0.28);
+  --glass-blur: blur(14px);
+  --border: rgba(148, 163, 184, 0.18);
+  --border-light: rgba(148, 163, 184, 0.14);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #cbd5e1;
+  --accent-indigo: #818cf8;
+  --accent-mint: #87cbc1;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  --hover-bg: rgba(51, 65, 85, 0.42);
+  --danger: #f87171;
+  --success: #87cbc1;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #0f1117;
+}
+
+#app {
+  min-height: 100%;
+  background: var(--bg-app);
 }
 
 body {
   margin: 0;
-  font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
-  color: var(--text-main);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
   background: var(--bg-app);
+  min-height: 100svh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
 }
 
 .app {
-  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   transition: margin-left 0.3s ease;
@@ -114,15 +144,21 @@ body {
 
 .main-content {
   flex: 1;
-  margin-bottom: 60px;
+  margin-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); /* место под bottom-nav + safe area */
   display: flex;
   justify-content: flex-start;
-  background: var(--bg-app);
+}
+
+.content-inner {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  /* padding: 0 12px; */
 }
 
 @media (min-width: 768px) {
   .app {
-    margin-left: 250px;
+    margin-left: 260px;
     margin-bottom: 0;
   }
 
@@ -130,10 +166,9 @@ body {
     margin-bottom: 0;
   }
 
-  .content-inner {
-    width: 100%;
-    max-width: 768px;
-  }
+  /* .content-inner {
+    padding: 0 20px;
+  } */
 }
 
 @media (min-width: 1018px) {
@@ -142,26 +177,28 @@ body {
   }
 }
 
-.content-inner {
-  width: 100%;
-}
-
+/* Boot / Loading состояние */
 .boot-nav-mobile {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 62px;
-  background: #ffffff;
-  border-top: 1px solid #e5eaf1;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  height: 68px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 28px;
   display: flex;
-  align-items: center;
   justify-content: space-around;
+  align-items: center;
   z-index: 1000;
+  margin: 0 auto;
+  max-width: 420px;
+  padding: 0 8px;
 }
 
 .boot-nav-item {
-  width: 78px;
+  width: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -175,111 +212,16 @@ body {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 250px;
-  background: #f9fafb;
-  border-right: 1px solid #e8edf3;
+  width: 260px;
+  background: var(--bg-app);
+  border-right: 1px solid var(--border);
   z-index: 1000;
 }
 
-.boot-logo {
-  padding: 20px;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #27a7e7;
-  letter-spacing: -0.5px;
-  border-bottom: 1px solid #e8edf3;
-}
-
-.boot-sidebar {
-  flex: 1;
-  padding: 20px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.boot-sidebar-profile {
-  padding: 0 14px 20px;
-  border-top: 1px solid #e8edf3;
-}
-
-.boot-sidebar-item {
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 10px;
-}
-
-.boot-content {
-  padding: 16px;
-}
-
-.boot-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.boot-card {
-  background: #ffffff;
-  border: 1px solid #e0e8f1;
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.boot-sk {
-  background: linear-gradient(90deg, #e5edf6 25%, #f3f7fc 50%, #e5edf6 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s linear infinite;
-  border-radius: 8px;
-}
-
-.boot-sk-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-}
-
-.boot-sk-label {
-  width: 48px;
-  height: 8px;
-  border-radius: 6px;
-}
-
-.boot-sk-side-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-}
-
-.boot-sk-side-line {
-  width: 110px;
-  height: 12px;
-}
-
-.boot-title-line {
-  width: 210px;
-  height: 18px;
-  margin-bottom: 14px;
-}
-
-.boot-card-head {
-  width: 160px;
-  height: 14px;
-  margin-bottom: 10px;
-}
-
-.boot-card-line {
-  width: 100%;
-  height: 10px;
-  margin-bottom: 8px;
-}
-
-.boot-card-line.short {
-  width: 72%;
-  margin-bottom: 0;
+@media (max-width: 767px) {
+  .boot-nav-desktop {
+    display: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -291,23 +233,114 @@ body {
     display: flex;
     flex-direction: column;
   }
-
-  .boot-content {
-    padding: 20px;
-  }
 }
 
+.boot-logo {
+  padding: 24px 20px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent-indigo);
+  letter-spacing: -0.5px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.boot-sidebar {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.boot-sidebar-profile {
+  padding: 16px 12px 24px;
+  border-top: 1px solid var(--border-light);
+}
+
+.boot-sidebar-item {
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+}
+
+.boot-content {
+  padding: 16px;
+}
+
+.boot-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.boot-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.boot-sk {
+  background: linear-gradient(
+    90deg,
+    rgba(71, 85, 105, 0.4) 25%,
+    rgba(100, 116, 139, 0.6) 50%,
+    rgba(71, 85, 105, 0.4) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 10px;
+}
+
+.boot-sk-icon,
+.boot-sk-side-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.boot-sk-label,
+.boot-sk-side-line {
+  width: 80px;
+  height: 12px;
+  border-radius: 8px;
+}
+
+.boot-title-line {
+  width: 240px;
+  height: 20px;
+  margin-bottom: 16px;
+}
+
+.boot-card-head {
+  width: 180px;
+  height: 16px;
+  margin-bottom: 12px;
+}
+
+.boot-card-line {
+  width: 100%;
+  height: 12px;
+  margin-bottom: 10px;
+}
+
+.boot-card-line.short {
+  width: 70%;
+}
+
+/* Boot Overlay (ошибки) */
 .boot-overlay {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(1000px 600px at 10% 0%, rgba(2, 132, 199, 0.2), transparent),
-    radial-gradient(800px 500px at 90% 100%, rgba(14, 165, 233, 0.16), transparent),
-    rgba(9, 17, 32, 0.72);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
   z-index: 9999;
   padding: 20px;
 }
@@ -315,85 +348,79 @@ body {
 .boot-modal-card {
   width: 100%;
   max-width: 420px;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
-  border: 1px solid #d9e7f5;
-  padding: 26px 22px;
-  border-radius: 18px;
-  box-shadow: 0 22px 70px rgba(2, 23, 44, 0.35);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
   text-align: center;
+  color: var(--text-primary);
 }
 
 .brand-mark {
-  margin: 0 auto 18px;
+  margin: 0 auto 20px;
   width: fit-content;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 999px;
-  background: #e9f6ff;
-  color: #0c4a6e;
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  background: rgba(129, 140, 248, 0.18);
+  color: var(--accent-indigo);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 700;
 }
 
 .status-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 999px;
-  margin: 0 auto 14px;
+  margin: 0 auto 16px;
 }
 
 .status-dot--warn {
-  background: #f59e0b;
-  box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.18);
+  background: #fbbf24;
+  box-shadow: 0 0 0 10px rgba(251, 191, 36, 0.2);
 }
 
 .status-dot--danger {
-  background: #ef4444;
-  box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.16);
+  background: var(--danger);
+  box-shadow: 0 0 0 10px rgba(248, 113, 113, 0.2);
 }
 
 .error-title {
   font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 8px;
-  color: #0b2942;
+  font-size: 1.35rem;
+  margin-bottom: 12px;
 }
 
 .error-sub {
-  color: var(--text-muted);
-  margin-bottom: 16px;
-  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  font-size: 0.95rem;
 }
 
 .retry-btn {
+  background: var(--accent-indigo);
+  color: #0f1117;
   border: none;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-  color: #fff;
-  font-size: 14px;
+  border-radius: 12px;
+  padding: 12px 24px;
   font-weight: 600;
-  padding: 10px 16px;
+  font-size: 0.98rem;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(3, 105, 161, 0.28);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  transition: all 0.18s ease;
+  box-shadow: 0 6px 20px rgba(129, 140, 248, 0.3);
 }
 
 .retry-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(3, 105, 161, 0.36);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(129, 140, 248, 0.4);
 }
 
-.retry-btn:active {
-  transform: translateY(0);
-}
-
+/* Анимация шиммера */
 @keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 </style>

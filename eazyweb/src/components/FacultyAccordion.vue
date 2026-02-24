@@ -132,97 +132,99 @@ onMounted(() => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 6px;
-  background: transparent;
+  gap: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  color: #e2e8f0;
 }
 
 .accordion-hero {
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(14, 116, 144, 0.2);
-  background: #ffffff;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.28);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(100, 116, 139, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
 }
 
 .accordion-hero h2 {
   margin: 0;
-  font-size: 1.2rem;
-  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #818cf8;           /* как в teachers-hero h1 */
+  letter-spacing: -0.02em;
 }
 
 .accordion-hero p {
-  margin: 6px 0 0;
-  color: #5b687a;
-  font-size: 0.95rem;
+  margin: 8px 0 0;
+  color: #94a3b8;
+  font-size: 0.96rem;
+  line-height: 1.45;
 }
 
 .accordion-loading {
   flex: 1;
-  padding: 2px;
+  padding: 4px;
 }
 
 .faculty-skeleton {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .faculty-item {
-  background: #fff;
-  border-radius: 16px;
-  padding: 14px;
-  border: 1px solid #e6edf5;
+  background: rgba(30, 41, 59, 0.32);
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  backdrop-filter: blur(10px);
 }
 
 .sk-header,
 .sk-course-line.short,
 .sk-pill {
-  background: #e7edf4;
+  background: linear-gradient(
+    90deg,
+    rgba(71, 85, 105, 0.4) 25%,
+    rgba(100, 116, 139, 0.6) 50%,
+    rgba(71, 85, 105, 0.4) 75%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.1s linear infinite;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 10px;
 }
 
 .sk-header {
-  height: 14px;
-  width: 54%;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  height: 16px;
+  width: 60%;
+  margin-bottom: 12px;
 }
 
 .sk-course {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .sk-course-line.short {
-  height: 10px;
-  width: 28%;
-  border-radius: 8px;
+  height: 12px;
+  width: 35%;
 }
 
 .sk-groups {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .sk-pill {
-  width: 96px;
-  height: 30px;
-  border-radius: 999px;
-  display: inline-block;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  width: 108px;
+  height: 34px;
+  border-radius: 14px;
 }
 
 .error-offset {
@@ -239,20 +241,25 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  border-radius: 16px;
-  border: 1px solid #dbe6f0;
-  background: #fff;
-  color: #4b5563;
-  padding: 28px 20px;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+  padding: 32px 24px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .accordion-empty h3 {
   margin: 0;
-  color: #111827;
+  color: #f1f5f9;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .accordion-empty p {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
+  color: #94a3b8;
 }
 
 .accordion-container {
@@ -261,20 +268,23 @@ onMounted(() => {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-right: 0;
+  gap: 16px;
+  /* padding-right: 4px; */
 }
 
 .accordion-item {
-  border-radius: 16px;
-  border: 1px solid #dbe7f2;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   overflow: hidden;
-  background: #fff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .accordion-header {
   width: 100%;
-  padding: 13px 16px;
+  padding: 14px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -282,119 +292,121 @@ onMounted(() => {
   border: none;
   cursor: pointer;
   text-align: left;
-  color: #0f172a;
-  background: #ffffff;
-  transition: background 0.2s ease, color 0.2s ease;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.35);
+  transition: all 0.22s ease;
 }
 
 .accordion-header:hover {
-  background: #f2f5f9;
+  background: rgba(51, 65, 85, 0.42);
 }
 
 .accordion-header.open {
-  background: #eef6fb;
+  background: rgba(51, 65, 85, 0.38);
 }
 
 .faculty-title {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
 .faculty-name {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #87cbc1;           /* твой спокойный мятный */
 }
 
 .faculty-meta {
-  font-size: 0.82rem;
-  color: #64748b;
+  font-size: 0.88rem;
+  color: #94a3b8;
 }
 
 .toggle-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #334155;
-  transition: transform 0.25s ease;
+  color: #525252;           /* как у тебя */
+  transition: transform 0.25s ease, color 0.25s ease;
 }
 
 .accordion-header.open .toggle-icon {
   transform: rotate(180deg);
+  color: #717171;
 }
 
 .accordion-content {
-  padding: 6px 12px 10px;
-  background: #fff;
+  padding: 8px 16px 12px;
+  background: rgba(15, 23, 42, 0.2);
 }
 
 .course-section {
-  padding: 10px 0 8px;
-  margin-top: 0;
-  background: transparent;
+  padding: 12px 0 10px;
 }
 
 .course-section + .course-section {
-  border-top: 1px solid #e8eff6;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .course-header {
-  display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .course-badge {
   display: inline-block;
-  padding: 0;
-  background: transparent;
-  color: #7a889c;
-  font-weight: 500;
-  font-size: 0.82rem;
-  letter-spacing: 0.02em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  color: #5f9d94;           /* твой приглушённый teal */
+  font-weight: 600;
+  font-size: 0.8rem;
 }
 
 .groups-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .group-btn {
-  padding: 8px 12px;
-  background: #ffffff;
-  border: 1px solid #d9e7f2;
-  border-radius: 10px;
+  padding: 10px 16px;
+  background: rgba(51, 65, 85, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
   text-align: left;
-  transition: background 0.16s, transform 0.1s, border-color 0.16s;
-  color: #1e293b;
-  font-size: 0.9rem;
-  min-width: 110px;
+  transition: all 0.18s ease;
+  color: #e2e8f0;
+  font-size: 0.94rem;
+  min-width: 118px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .group-btn:hover {
-  background: #f2f5f9;
-  border-color: #b8d9f2;
-  transform: translateY(-1px);
+  background: rgba(51, 65, 85, 0.42);
+  border-color: rgba(148, 163, 184, 0.32);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .group-btn:active {
   transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .group-title {
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
+/* Transition */
 .expand-enter-active,
 .expand-leave-active {
-  transition: max-height 0.3s ease, opacity 0.24s ease;
+  transition: max-height 0.32s ease, opacity 0.26s ease;
   overflow: hidden;
 }
 
@@ -406,29 +418,26 @@ onMounted(() => {
 
 .expand-enter-to,
 .expand-leave-from {
-  max-height: 1200px;
+  max-height: 1400px;
   opacity: 1;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .accordion-hero {
-    padding: 14px;
+    padding: 18px 20px;
   }
 
   .accordion-header {
-    padding: 12px 14px;
+    padding: 13px 16px;
   }
 
   .faculty-name {
-    font-size: 0.95rem;
-  }
-
-  .course-section {
-    padding: 9px;
+    font-size: 1rem;
   }
 
   .group-btn {
-    min-width: 96px;
+    min-width: 104px;
   }
 }
 
@@ -438,15 +447,16 @@ onMounted(() => {
   }
 
   .accordion-hero p {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
   }
 
   .accordion-content {
-    padding: 6px 8px 8px;
+    padding: 8px 12px 10px;
   }
 
   .group-btn {
     width: 100%;
+    min-width: unset;
   }
 }
 </style>

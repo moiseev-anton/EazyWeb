@@ -1,16 +1,6 @@
 <template>
   <div class="home-page">
-    <!-- <section class="info">
-      <h2>Добро пожаловать в EazyClass!</h2>
-      <p>Это универсальное веб-приложение для [твоё описание]. Работает в браузере, на мобильном и как Telegram Mini App (TWA).</p>
-      <ul>
-        <li>Безопасный вход через Telegram.</li>
-        <li>Уведомления от бота.</li>
-        <li>Кросс-платформенность: десктоп, мобильный, Telegram.</li>
-      </ul>
-      <img src="/vite.svg" alt="Логотип" width="200" />
-    </section> -->
-
+    
     <section class="auth" v-if="!isAuthenticated">
       <h3>Войдите</h3>
       <TelegramAuthButton @success="onAuthSuccess" />

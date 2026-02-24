@@ -113,6 +113,59 @@
                 </section>
             </div>
 
+            <section v-if="isAuthenticated" class="panel social-panel">
+                <div class="panel-head">
+                    <h2>Связанные аккаунты</h2>
+                </div>
+
+                <div class="panel-body">
+                    <div v-if="socialLoading" class="social-state">Загрузка аккаунтов...</div>
+                    <div v-else-if="socialError" class="social-state social-state-error">{{ socialError }}</div>
+                    <div v-else-if="socialAccounts.length === 0" class="social-state">Связанные аккаунты не найдены</div>
+
+                    <div v-else class="social-list">
+                        <div v-for="acc in socialAccounts" :key="acc.id" class="social-item">
+                            <div class="social-main">
+                                <div class="platform-badge" :class="`platform-${acc.platform}`" :title="platformLabel(acc.platform)">
+                                    <svg v-if="acc.platform === 'telegram'" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M20.34 4.37a1 1 0 0 0-1.02-.14L3.64 10.3a1 1 0 0 0 .07 1.88l3.7 1.3 1.45 4.88a1 1 0 0 0 1.72.35l2.22-2.57 4.1 3.08a1 1 0 0 0 1.58-.55l3.03-13.3a1 1 0 0 0-.48-.99zM8.37 12.78l8.7-5.37-6.65 6.99-.26 1.6-.87-3.22-.92-.32z" />
+                                    </svg>
+                                    <svg v-else-if="acc.platform === 'vk'" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 7.9c.13-.42.47-.65 1.03-.65h2.29c.5 0 .73.27.9.6 1.03 2.46 2.25 4.53 3.06 4.53.33 0 .47-.24.47-.76V8.35c-.05-.75-.22-1.02-.93-1.1V7h3.6c.53 0 .72.29.72.93v4.38c0 .47.2.64.33.64.81 0 2.79-2.1 3.94-4.5.2-.42.46-.6.97-.6h2.29c.62 0 .77.33.62.78-.3 1.37-3.34 5.72-3.32 5.72-.26.43-.37.62 0 1.06.26.34 1.1 1.02 1.66 1.67.76.86 1.35 1.59 1.5 2.1.16.5-.11.76-.67.76h-2.03c-.52 0-.75-.26-1.05-.57-.56-.58-1.08-1.22-1.64-1.22-.39 0-.49.23-.49.66v1.02c0 .43-.14.68-.56.68-2.68 0-5.64-1.66-7.85-4.74-1.66-2.35-2.99-5.16-3.34-6.32z" />
+                                    </svg>
+                                    <span v-else>{{ platformLetter(acc.platform) }}</span>
+                                </div>
+
+                                <div class="social-text">
+                                    <div class="social-id">{{ acc.displayId }}</div>
+                                    <div class="social-platform">{{ platformLabel(acc.platform) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="social-status">
+                                <span class="status-chip" :class="statusClass(acc.status.kind)">{{ acc.status.title }}</span>
+                                <small>{{ acc.status.description }}</small>
+                                <button
+                                    v-if="canConnectTelegramBot(acc)"
+                                    class="ghost-btn mini-btn"
+                                    :disabled="connectLoadingId === acc.id"
+                                    @click="requestBotWriteAccess(acc)"
+                                >
+                                    {{ connectLoadingId === acc.id ? 'Подключение...' : 'Подключить бота' }}
+                                </button>
+                                <button
+                                    v-if="canOpenTelegramBot(acc)"
+                                    class="ghost-btn mini-btn"
+                                    @click="openTelegramBot"
+                                >
+                                    Открыть бота
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <footer v-if="isAuthenticated" class="page-actions">
                 <button class="danger-btn" :disabled="saving" @click="handleLogout">Выйти из профиля</button>
             </footer>
@@ -121,7 +174,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -134,6 +187,11 @@ const router = useRouter()
 const editMode = ref(false)
 const saving = ref(false)
 const toasts = ref([])
+const socialAccounts = ref([])
+const socialLoading = ref(false)
+const socialError = ref('')
+const connectLoadingId = ref(null)
+const telegramBotUrl = ref('')
 
 const displayName = computed(() => {
     if (!isAuthenticated.value) return 'Не авторизован'
@@ -149,6 +207,12 @@ const initials = computed(() => {
     const a = first ? first[0] : ''
     const b = last ? last[0] : ''
     return `${a}${b}`.toUpperCase() || 'U'
+})
+
+const isTelegramWebApp = computed(() => {
+    if (typeof window === 'undefined') return false
+    const tg = window.Telegram?.WebApp
+    return !!(tg && (tg.initData || tg.initDataRaw))
 })
 
 function showToast(message, type = 'info', timeout = 3500) {
@@ -293,6 +357,171 @@ async function toggleNotify(kind, value) {
     }
 }
 
+function normalizePlatform(value) {
+    return String(value || '').trim().toLowerCase()
+}
+
+function platformLetter(platform) {
+    const p = normalizePlatform(platform)
+    return p ? p[0].toUpperCase() : '?'
+}
+
+function platformLabel(platform) {
+    const p = normalizePlatform(platform)
+    if (p === 'telegram') return 'Telegram'
+    if (p === 'vk') return 'VK'
+    return platform || 'Неизвестная платформа'
+}
+
+function resolveDisplayId(attributes = {}) {
+    const username = attributes?.extraData?.username
+    if (username) return String(username)
+    return String(attributes?.socialId || '—')
+}
+
+function resolveAccountStatus(acc) {
+    const p = normalizePlatform(acc.platform)
+    const attrs = acc.attributes || {}
+    const chatId = attrs.chatId
+    const blocked = Boolean(attrs.isBlocked)
+
+    if (p === 'telegram' && (chatId === null || chatId === undefined || chatId === '')) {
+        return {
+            kind: 'inactive',
+            title: 'Не подключен',
+            description: 'Для получения уведомлений подключите бота.'
+        }
+    }
+
+    if (blocked) {
+        return {
+            kind: 'blocked',
+            title: 'Заблокирован',
+            description: 'Разблокируйте бота, чтобы получать уведомления.'
+        }
+    }
+
+    return {
+        kind: 'ok',
+        title: 'Подключен',
+        description: 'Уведомления доступны для этого аккаунта.'
+    }
+}
+
+function statusClass(kind) {
+    if (kind === 'blocked') return 'status-blocked'
+    if (kind === 'inactive') return 'status-inactive'
+    return 'status-ok'
+}
+
+function canConnectTelegramBot(acc) {
+    const p = normalizePlatform(acc.platform)
+    return p === 'telegram' && acc.status.kind === 'inactive' && isTelegramWebApp.value
+}
+
+function canOpenTelegramBot(acc) {
+    const p = normalizePlatform(acc.platform)
+    if (p !== 'telegram') return false
+    if (!telegramBotUrl.value) return false
+    if (acc.status.kind === 'blocked') return true
+    return acc.status.kind === 'inactive' && !isTelegramWebApp.value
+}
+
+async function ensureTelegramBotUrl() {
+    if (telegramBotUrl.value) return telegramBotUrl.value
+    try {
+        const info = await authStore.getTelegramBotInfo()
+        telegramBotUrl.value = info?.botUrl || ''
+        return telegramBotUrl.value
+    } catch (e) {
+        return ''
+    }
+}
+
+function openTelegramBot() {
+    if (!telegramBotUrl.value) return
+    try {
+        const w = window.open(telegramBotUrl.value, '_blank')
+        if (!w) window.location.href = telegramBotUrl.value
+    } catch (e) {
+        window.location.href = telegramBotUrl.value
+    }
+}
+
+async function loadSocialAccounts() {
+    if (!isAuthenticated.value) {
+        socialAccounts.value = []
+        socialError.value = ''
+        return
+    }
+
+    socialLoading.value = true
+    socialError.value = ''
+    try {
+        const res = await api.get('/social-accounts/', { withCredentials: true })
+        const data = Array.isArray(res.data?.data) ? res.data.data : []
+        socialAccounts.value = data.map(item => {
+            const attrs = item?.attributes || {}
+            const platform = normalizePlatform(attrs.platform)
+            const status = resolveAccountStatus({ platform, attributes: attrs })
+            return {
+                id: item?.id || `${platform}-${attrs.socialId || Math.random()}`,
+                platform,
+                attributes: attrs,
+                displayId: resolveDisplayId(attrs),
+                status
+            }
+        })
+        const needBotLink = socialAccounts.value.some(acc =>
+            normalizePlatform(acc.platform) === 'telegram' &&
+            (acc.status.kind === 'blocked' || acc.status.kind === 'inactive')
+        )
+        if (needBotLink) await ensureTelegramBotUrl()
+    } catch (e) {
+        socialAccounts.value = []
+        socialError.value = 'Не удалось загрузить связанные аккаунты'
+    } finally {
+        socialLoading.value = false
+    }
+}
+
+async function requestBotWriteAccess(account) {
+    const tg = window.Telegram?.WebApp
+    if (!tg || typeof tg.requestWriteAccess !== 'function') {
+        showToast('Функция доступна только в Telegram Mini App', 'error')
+        return
+    }
+
+    connectLoadingId.value = account.id
+    try {
+        const result = await new Promise((resolve, reject) => {
+            let done = false
+            const finish = (value) => {
+                if (done) return
+                done = true
+                resolve(value)
+            }
+            try {
+                const maybe = tg.requestWriteAccess(finish)
+                if (maybe && typeof maybe.then === 'function') {
+                    maybe.then(finish).catch(reject)
+                }
+            } catch (err) {
+                reject(err)
+            }
+        })
+
+        if (result === false) showToast('Доступ к сообщениям не предоставлен', 'error')
+        else showToast('Запрос отправлен. Проверьте чат с ботом в Telegram.', 'success')
+
+        await loadSocialAccounts()
+    } catch (e) {
+        showToast('Не удалось запросить доступ у Telegram', 'error')
+    } finally {
+        connectLoadingId.value = null
+    }
+}
+
 async function handleLogout() {
     try {
         const res = await authStore.logout()
@@ -306,405 +535,599 @@ async function handleLogout() {
         else showToast('Не удалось выйти', 'error')
     }
 }
+
+onMounted(() => {
+    if (isAuthenticated.value) loadSocialAccounts()
+})
+
+watch(isAuthenticated, (value) => {
+    if (value) loadSocialAccounts()
+    else {
+        socialAccounts.value = []
+        socialError.value = ''
+    }
+})
 </script>
 
 <style scoped>
 .profile-page {
-    min-height: 100%;
-    padding: 6px;
-    background: transparent;
+  min-height: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  color: #e2e8f0;
 }
 
 .profile-shell {
-    max-width: 1120px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 14px;
-    padding: 18px;
-    border-radius: 18px;
-    border: 1px solid rgba(11, 111, 177, 0.18);
-    background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.28);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
 }
 
 .hero-user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
-
-
 .hero-title {
-    margin: 0;
-    font-size: 1.3rem;
-    color: #0f172a;
-    text-align: left;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #818cf8;           /* индиго акцент */
+  letter-spacing: -0.02em;
 }
 
 .hero-subtitle {
-    margin: 4px 0 0;
-    color: #475569;
-    text-align: left;
+  margin: 6px 0 0;
+  color: #94a3b8;
+  font-size: 1rem;
 }
 
 .status-pill {
-    border-radius: 999px;
-    border: 1px solid #d1d5db;
-    padding: 7px 12px;
-    color: #334155;
-    background: #fff;
-    font-size: 0.86rem;
-    white-space: nowrap;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(30, 41, 59, 0.32);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #cbd5e1;
 }
 
 .status-pill.online {
-    border-color: rgba(16, 185, 129, 0.28);
-    background: rgba(16, 185, 129, 0.09);
-    color: #065f46;
+  background: rgba(87, 203, 193, 0.18); /* #87cbc1 с прозрачностью */
+  border-color: rgba(87, 203, 193, 0.35);
+  color: #87cbc1;
+}
+
+.toasts {
+  position: fixed;
+  right: 20px;
+  bottom: 80px; /* выше bottom-nav */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2000;
+}
+
+.toast {
+  min-width: 240px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: #e2e8f0;
+  background: rgba(30, 41, 59, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.toast.success {
+  background: rgba(87, 203, 193, 0.9);
+  border-color: rgba(87, 203, 193, 0.4);
+  color: #0f1117;
+}
+
+.toast.error {
+  background: rgba(220, 38, 38, 0.9);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #fff;
 }
 
 .content-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    gap: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 16px;
 }
 
 .panel {
-    border-radius: 18px;
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    background: #fff;
-    display: flex;
-    flex-direction: column;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .panel-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px 12px;
-    border-bottom: 1px solid #eef2f7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.35);
 }
 
 .panel-head h2 {
-    margin: 0;
-    font-size: 1.04rem;
-    color: #0f172a;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #818cf8;
 }
 
 .panel-body {
-    padding: 14px 18px 18px;
+  padding: 14px 18px 18px;
 }
 
 .info-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding-bottom: 10px;
 }
 
 .info-row:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .info-row span {
-    color: #64748b;
+  color: #94a3b8;
 }
 
 .info-row strong {
-    color: #0f172a;
-    text-align: right;
+  color: #e2e8f0;
+  text-align: right;
+  font-weight: 600;
 }
 
 .edit-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .split {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .input-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .input-row span {
-    color: #475569;
-    font-size: 0.9rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
 }
 
 .input-row input {
-    height: 42px;
-    border-radius: 12px;
-    border: 1px solid #cbd5e1;
-    padding: 0 12px;
-    font-size: 0.95rem;
-    color: #0f172a;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    background: #fff;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  padding: 0 14px;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+  background: rgba(51, 65, 85, 0.28);
+  backdrop-filter: blur(8px);
+  transition: all 0.15s;
 }
 
 .input-row input:focus {
-    outline: none;
-    border-color: #27a7e7;
-    box-shadow: 0 0 0 4px rgba(39, 167, 231, 0.16);
+  outline: none;
+  border-color: #818cf8;
+  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.16);
 }
 
 .error {
-    color: #b91c1c;
-    font-size: 0.82rem;
+  color: #f87171;
+  font-size: 0.82rem;
 }
 
 .panel-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 0 18px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 18px 16px;
 }
 
 .notify-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .notify-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 12px;
-    background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: rgba(51, 65, 85, 0.28);
+  backdrop-filter: blur(8px);
 }
 
 .notify-item strong {
-    display: block;
-    color: #0f172a;
-    margin-bottom: 4px;
+  display: block;
+  color: #e2e8f0;
+  margin-bottom: 4px;
 }
 
 .notify-item p {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.9rem;
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
 }
 
 .switch {
-    position: relative;
-    width: 48px;
-    height: 28px;
-    flex: 0 0 auto;
+  position: relative;
+  width: 50px;
+  height: 28px;
+  flex: 0 0 auto;
 }
 
 .switch input {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    margin: 0;
-    z-index: 2;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+  z-index: 2;
 }
 
 .slider {
-    width: 100%;
-    height: 100%;
-    border-radius: 999px;
-    background: #dbe4ee;
-    display: block;
-    position: relative;
-    transition: background 0.2s ease;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.35);
+  display: block;
+  position: relative;
+  transition: background 0.2s ease;
 }
 
 .slider::before {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #fff;
-    top: 4px;
-    left: 4px;
-    transition: transform 0.2s ease;
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 .switch input:checked + .slider {
-    background: #0ea5e9;
+  background: #818cf8;
 }
 
 .switch input:checked + .slider::before {
-    transform: translateX(20px);
+  transform: translateX(22px);
 }
 
-.switch input:disabled {
-    cursor: not-allowed;
+.switch input:disabled + .slider {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .primary-btn,
 .ghost-btn,
-.danger-btn {
-    border: none;
-    border-radius: 11px;
-    padding: 9px 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
+.danger-btn,
+.mini-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  backdrop-filter: blur(8px);
 }
 
 .primary-btn {
-    color: #fff;
-    background: #0284c7;
+  color: #0f1117;
+  background: #818cf8;
 }
 
 .primary-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(129, 140, 248, 0.3);
 }
 
 .ghost-btn {
-    color: #334155;
-    background: #f1f5f9;
+  color: #cbd5e1;
+  background: rgba(51, 65, 85, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.22);
 }
 
 .ghost-btn:hover:not(:disabled) {
-    background: #e2e8f0;
+  background: rgba(51, 65, 85, 0.42);
+  transform: translateY(-2px);
 }
 
 .danger-btn {
-    color: #fff;
-    background: #dc2626;
+  color: #fff;
+  background: rgba(220, 38, 38, 0.8);
 }
 
 .danger-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
+  background: rgba(220, 38, 38, 1);
+  transform: translateY(-2px);
 }
 
 .primary-btn:disabled,
 .ghost-btn:disabled,
 .danger-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .page-actions {
-    display: flex;
-    justify-content: flex-end;
-    background: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.social-panel .panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-state {
+  color: #94a3b8;
+  font-size: 0.93rem;
+  text-align: center;
+  padding: 20px;
+}
+
+.social-state-error {
+  color: #f87171;
+}
+
+.social-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-item {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: rgba(51, 65, 85, 0.28);
+  backdrop-filter: blur(8px);
+}
+
+.social-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.platform-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(30, 41, 59, 0.35);
+  color: #cbd5e1;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.platform-badge svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.platform-telegram {
+  color: #229ed9;
+}
+
+.platform-vk {
+  color: #0077ff;
+}
+
+.social-text {
+  min-width: 0;
+}
+
+.social-id {
+  color: #e2e8f0;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.social-platform {
+  color: #94a3b8;
+  font-size: 0.88rem;
+}
+
+.social-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.social-status small {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+.status-chip {
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.status-ok {
+  color: #87cbc1;
+  background: rgba(135, 203, 193, 0.18);
+  border-color: rgba(135, 203, 193, 0.35);
+}
+
+.status-blocked {
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.18);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+.status-inactive {
+  color: #a5b4fc;
+  background: rgba(129, 140, 248, 0.18);
+  border-color: rgba(129, 140, 248, 0.35);
+}
+
+.mini-btn {
+  font-size: 0.82rem;
+  padding: 6px 12px;
 }
 
 .empty-state {
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    background: #fff;
-    border-radius: 16px;
-    padding: 24px;
-    text-align: center;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .empty-state h2 {
-    margin: 0 0 8px;
-    color: #0f172a;
+  margin: 0 0 10px;
+  color: #f1f5f9;
+  font-size: 1.25rem;
 }
 
 .empty-state p {
-    margin: 0;
-    color: #64748b;
+  margin: 0;
+  color: #94a3b8;
 }
 
-.toasts {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 2000;
-}
-
-.toast {
-    min-width: 220px;
-    color: #fff;
-    background: #0f172a;
-    padding: 10px 14px;
-    border-radius: 12px;
-}
-
-.toast.success {
-    background: #059669;
-}
-
-.toast.error {
-    background: #dc2626;
-}
-
+/* Responsive */
 @media (max-width: 880px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .page-actions {
-        justify-content: stretch;
-    }
+  .page-actions {
+    justify-content: stretch;
+  }
 
-    .danger-btn {
-        width: 100%;
-    }
+  .danger-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
-    .profile-page {
-        padding: 6px;
-    }
+  .profile-page {
+    padding: 10px;
+  }
 
-    .hero {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px 20px;
+  }
 
-    .status-pill {
-        align-self: flex-start;
-    }
+  .status-pill {
+    align-self: flex-start;
+  }
 
-    .split {
-        grid-template-columns: 1fr;
-    }
+  .split {
+    grid-template-columns: 1fr;
+  }
 
-    .notify-item {
-        align-items: flex-start;
-    }
+  .notify-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
 
-    .switch {
-        margin-top: 2px;
-    }
+  .switch {
+    align-self: flex-start;
+  }
 
-    .panel-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .panel-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .social-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .social-status {
+    align-items: flex-start;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .social-status small {
+    text-align: left;
+  }
 }
 </style>

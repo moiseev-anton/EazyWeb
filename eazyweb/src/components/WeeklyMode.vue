@@ -24,7 +24,7 @@
             </div>
           </div>
           <div class="right">
-            <div class="count">{{ lessonsMap[d.iso]?.length || 0 }}</div>
+            <div class="count">{{ lessonsMap[d.iso] || 0 }}</div>
             <div class="chev" :class="{ expanded: expanded[idx], disabled: disabled[idx] }">
               <ChevronDownIcon class="chev-icon" />
             </div>
@@ -44,7 +44,7 @@
               />
             </li>
           </ul>
-          <div v-if="!(lessonsMap[d.iso] && lessonsMap[d.iso].length)" class="no-lessons">Нет занятий</div>
+          <div v-if="!(periodsMap[d.iso] && periodsMap[d.iso].length)" class="no-lessons">Нет занятий</div>
         </div>
       </div>
     </div>
@@ -139,11 +139,16 @@ const lessonsMap = computed(() => {
   for (const l of props.lessons || []) {
     const date = l.attributes?.date
     if (!date) continue
-    if (!m[date]) m[date] = []
-    m[date].push(l)
+    const number = l.attributes?.number || ''
+    const startTime = l.attributes?.startTime || ''
+    const endTime = l.attributes?.endTime || ''
+    const periodKey = `${number}|${startTime}|${endTime}`
+    if (!m[date]) m[date] = new Set()
+    m[date].add(periodKey)
   }
-  for (const k of Object.keys(m)) m[k].sort((a, b) => a.attributes.number - b.attributes.number)
-  return m
+  const counts = {}
+  for (const k of Object.keys(m)) counts[k] = m[k].size
+  return counts
 })
 
 const expanded = ref([])
@@ -159,7 +164,7 @@ function updateExpanded() {
   disabled.value = []
 
   weekDates.value.forEach(d => {
-    const lessonsCount = (lessonsMap.value[d.iso] || []).length
+    const lessonsCount = lessonsMap.value[d.iso] || 0
     const hasLessons = lessonsCount > 0
 
     if (!hasLessons) {
@@ -193,20 +198,23 @@ function toggle(i) {
 .weekly-mode {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* ===== АККОРДЕОНЫ ДНЕЙ ===== */
 .days-stack {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .day-accordion {
-  background: #fff;
-  border-radius: 12px;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   overflow: hidden;
-  border: 1px solid #dbe7f2;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .accordion-header {
@@ -214,96 +222,108 @@ function toggle(i) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  background: #ffffff;
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.35);
   border: none;
   cursor: pointer;
-  transition: background 0.16s ease;
+  transition: all 0.22s ease;
 }
 
 .accordion-header:hover:not(.disabled) {
-  background: #f2f9ff;
+  background: rgba(51, 65, 85, 0.42);
 }
 
 .accordion-header.disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: default;
+  background: rgba(15, 23, 42, 0.25);
 }
 
 .accordion-header .left {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
   min-width: 0;
 }
 
 .header-title {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
   font-weight: 600;
   min-width: 0;
   flex-wrap: wrap;
+  font-size: 0.98rem;
 }
 
 .short-date {
-  color: #0f172a;
-}
-
-.weekday-full {
-  color: #64748b;
-  font-weight: 500;
-}
-
-.marker {
-  color: #0284c7;
-  font-weight: 600;
+  color: #e2e8f0;
+  font-weight: 700;
 }
 
 .sep {
   color: #94a3b8;
+  margin: 0 4px;
+}
+
+.marker {
+  color: #87cbc1;           /* мягкий мятный для Сегодня/Завтра */
+  font-weight: 700;
+}
+
+.weekday-full {
+  color: #cbd5e1;
+  font-weight: 500;
 }
 
 .accordion-header .right {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
 .count {
-  background: #eaf3fb;
-  color: #075985;
-  padding: 4px 8px;
+  min-width: 32px;
+  height: 24px;
   border-radius: 999px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(148, 163, 184, 0.28);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  color: #cbd5e1;
   font-weight: 700;
-  min-width: 30px;
-  text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
 }
 
 .chev {
-  width: 18px;
-  height: 18px;
-  color: #64748b;
-  transition: transform 0.18s ease, opacity 0.16s ease;
+  width: 20px;
+  height: 20px;
+  color: #94a3b8;
+  transition: transform 0.22s ease, opacity 0.18s ease;
 }
 
 .chev.expanded {
   transform: rotate(180deg);
+  color: #818cf8;
 }
 
 .chev.disabled {
-  opacity: 0.15;
+  opacity: 0.3;
 }
 
 .chev-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
+/* ===== ТЕЛО АККОРДЕОНА ===== */
 .accordion-body {
-  padding: 10px;
-  border-top: 1px solid #edf3f9;
+  padding: 12px 18px 16px;
+  background: rgba(15, 23, 42, 0.2);
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .cards {
@@ -312,7 +332,7 @@ function toggle(i) {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .lesson-card {
@@ -324,57 +344,95 @@ function toggle(i) {
 }
 
 .no-lessons {
-  color: #7a889c;
-  padding: 10px 0 4px;
+  color: #94a3b8;
+  padding: 16px 0 8px;
   text-align: center;
   font-weight: 600;
+  font-size: 1rem;
 }
 
+/* ===== SKELETON ===== */
 .weekly-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-day {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(51, 65, 85, 0.32);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  backdrop-filter: blur(10px);
+  min-height: 90px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.skeleton-day {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #e6edf5;
-  background: #fff;
-  min-height: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .skeleton-day .sk-line {
-  border-radius: 6px;
-  background: #e7edf4;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(71, 85, 105, 0.4) 25%,
+    rgba(100, 116, 139, 0.6) 50%,
+    rgba(71, 85, 105, 0.4) 75%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.1s linear infinite;
+  animation: shimmer 1.4s linear infinite;
 }
 
 .skeleton-day .sk-line.top {
-  height: 14px;
+  height: 16px;
   width: 90%;
 }
 
 .skeleton-day .sk-line.mid {
-  height: 10px;
-  width: 40%;
+  height: 12px;
+  width: 45%;
 }
 
 .skeleton-day .sk-line.bot {
-  height: 12px;
-  width: 65%;
+  height: 14px;
+  width: 70%;
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: 200% 0;
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .accordion-header {
+    padding: 12px 16px;
   }
-  100% {
-    background-position: -200% 0;
+
+  .header-title {
+    font-size: 0.95rem;
+    gap: 4px;
+  }
+
+  .count {
+    min-width: 28px;
+    height: 22px;
+    font-size: 0.8rem;
+  }
+
+  .accordion-body {
+    padding: 10px 14px 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .short-date,
+  .marker,
+  .weekday-full {
+    font-size: 0.9rem;
+  }
+
+  .sep {
+    margin: 0 3px;
   }
 }
 </style>

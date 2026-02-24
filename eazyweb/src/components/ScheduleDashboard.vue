@@ -46,23 +46,24 @@
         </div>
       </div>
 
-      <div v-if="calendarVisible" class="overlay" @click="calendarVisible = false">
-        <div class="calendar-popup" :style="popupStyle" @click.stop>
-          <VueDatePicker
-            v-model="selectedWeek"
-            week-picker
-            inline
-            auto-apply
-            :min-date="minDateObj"
-            :max-date="maxDateObj"
-            :time-config="{ enableTimePicker: false }"
-            :locale="ru"
-            @update:model-value="onWeekSelected"
-            class="dashboard-datepicker"
-          />
-        </div>
-      </div>
     </header>
+
+    <div v-if="calendarVisible" class="overlay" @click="calendarVisible = false">
+      <div class="calendar-popup" :style="popupStyle" @click.stop>
+        <VueDatePicker
+          v-model="selectedWeek"
+          week-picker
+          inline
+          auto-apply
+          :min-date="minDateObj"
+          :max-date="maxDateObj"
+          :time-config="{ enableTimePicker: false }"
+          :locale="ru"
+          @update:model-value="onWeekSelected"
+          class="dashboard-datepicker"
+        />
+      </div>
+    </div>
 
     <div v-if="showReplaceConfirm" class="overlay modal-overlay" @click="cancelReplaceSubscription">
       <div class="modal-dialog" @click.stop>
@@ -285,7 +286,7 @@ function positionPopupNearButton() {
   const top = rect.bottom + 8
 
   popupStyle.value = {
-    position: 'absolute',
+    position: 'fixed',
     top: `${top}px`,
     left: `${left}px`
   }
@@ -389,22 +390,28 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 </script>
 
 <style scoped>
+/* ===== BASE ===== */
 .dashboard {
   margin: 0 auto;
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
+  background: transparent;
 }
 
+/* ===== HEADER ===== */
 .dashboard-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  margin-bottom: 6px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(14, 116, 144, 0.2);;
-  background: var(--bg-surface);
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.28);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
 }
 
 .header-top {
@@ -412,7 +419,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .header-bottom {
@@ -426,197 +433,170 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .left-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
 .entity-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
 .entity-title h2 {
   margin: 0;
-  font-size: 1.22rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #818cf8;           /* индиго акцент */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: min(68vw, 560px);
+  max-width: min(65vw, 500px);
+  letter-spacing: -0.02em;
 }
 
 .back-button,
-.mode-toggle-button {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid #d9e7f2;
-  background: #ffffff;
+.mode-toggle-button,
+.nav-arrow,
+.calendar-button,
+.today-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(51, 65, 85, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+  transition: all 0.18s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .back-button:hover,
-.mode-toggle-button:hover {
-  background: var(--bg-muted);
-  border-color: #b8d9f2;
+.mode-toggle-button:hover,
+.nav-arrow:hover:not(:disabled),
+.calendar-button:hover,
+.today-button:hover {
+  background: rgba(51, 65, 85, 0.42);
+  border-color: rgba(148, 163, 184, 0.32);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .back-icon,
-.mode-icon {
-  width: 21px;
-  height: 21px;
-  color: #334155;
+.mode-icon,
+.nav-arrow-icon,
+.dropdown-arrow {
+  width: 22px;
+  height: 22px;
+  color: #cbd5e1;
 }
 
 .star-button {
   border: none;
   background: transparent;
   cursor: pointer;
-  color: #c2ccd8;
   padding: 0;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.12s ease, color 0.2s ease;
+  transition: transform 0.18s ease, color 0.18s ease;
 }
 
 .star-button:hover {
-  transform: scale(1.05);
+  transform: scale(1.12);
 }
 
 .star-button.subscribed {
-  color: #f59e0b;
+  color: #87cbc1;           /* мягкий мятный для подписки */
 }
 
 .star-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 .week-block {
   display: flex;
+  align-items: center;
 }
 
 .calendar-wrapper {
   display: inline-flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
 .calendar-button {
-  border: 1px solid #d5e5f2;
-  border-radius: 10px;
-  padding: 7px 12px;
-  background: #ffffff;
-  color: #1f2937;
+  padding: 8px 14px;
   font-weight: 600;
-  font-size: 0.92rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
+  font-size: 0.95rem;
+  color: #e2e8f0;
   text-transform: capitalize;
-  transition: background 0.16s, border-color 0.16s;
-}
-
-.calendar-button:hover {
-  background: var(--bg-muted);
-  border-color: #b8d9f2;
+  min-width: 140px;
+  justify-content: space-between;
 }
 
 .dropdown-arrow {
-  width: 14px;
-  height: 14px;
-  color: #64748b;
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
 }
 
 .today-button {
-  border: 1px solid #8db8d6;
-  border-radius: 10px;
-  background: var(--bg-surface);
-  color: #075985;
-  padding: 7px 10px;
-  min-width: 36px;
+  width: auto;
+  min-width: 40px;
+  padding: 8px 12px;
   font-weight: 700;
-  cursor: pointer;
-  transition: background 0.16s ease, transform 0.1s ease;
-}
-
-.today-button:hover {
-  background: var(--bg-muted);
-  transform: translateY(-1px);
+  color: #87cbc1;
+  background: rgba(135, 203, 193, 0.18);
+  border-color: rgba(135, 203, 193, 0.35);
 }
 
 .week-nav {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .nav-arrow {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  border: 1px solid #d5e5f2;
-  background: #ffffff;
-  color: #1f2937;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.16s, border-color 0.16s;
-}
-
-.nav-arrow:hover:not(:disabled) {
-  background: var(--bg-muted);
-  border-color: #b8d9f2;
+  width: 36px;
+  height: 36px;
 }
 
 .nav-arrow:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none !important;
 }
 
-.nav-arrow-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.dashboard-content {
-  min-width: 0;
-}
-
-.dashboard-datepicker {
-  z-index: 1001;
-  background: white;
-  border-radius: 16px;
-  box-shadow: none;
-  border: 1px solid #e6edf5;
-  overflow: hidden;
-}
-
+/* ===== POPUP КАЛЕНДАРЬ ===== */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(0, 0, 0, 0.45);
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .calendar-popup {
   position: absolute;
   z-index: 1002;
+  background: rgba(30, 41, 59, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
 }
 
+/* ===== МОДАЛКИ ===== */
 .modal-overlay {
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -624,60 +604,95 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .modal-dialog {
-  background: #fff;
-  border-radius: 14px;
-  padding: 16px;
+  background: rgba(30, 41, 59, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  padding: 20px 24px;
   max-width: 420px;
-  width: calc(100% - 48px);
-  box-shadow: none;
+  width: calc(100% - 32px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  color: #e2e8f0;
 }
 
 .modal-dialog p {
-  margin: 0;
-  color: #1f2937;
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+}
+
+.modal-dialog strong {
+  color: #818cf8;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 12px;
 }
 
 .modal-btn {
-  background: #fff;
-  border: 1px solid #d0d7e1;
-  padding: 8px 12px;
-  border-radius: 10px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.18s ease;
+  background: rgba(51, 65, 85, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
 }
 
 .modal-btn.primary {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
+  background: #818cf8;
+  border-color: #818cf8;
+  color: #0f1117;
 }
 
+.modal-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ===== CONTENT ===== */
+.dashboard-content {
+  min-width: 0;
+}
+
+/* ===== DATEPICKER OVERRIDE (vue-datepicker) ===== */
+.dashboard-datepicker {
+  --vdp-selected-bg: #818cf8;
+  --vdp-hover-bg: rgba(129, 140, 248, 0.18);
+  --vdp-hover-color: #e2e8f0;
+  --vdp-selected-color: #0f1117;
+  --vdp-background: rgba(30, 41, 59, 0.95);
+  --vdp-border: rgba(148, 163, 184, 0.22);
+  --vdp-text: #e2e8f0;
+  --vdp-disabled: #475569;
+  --vdp-today-color: #87cbc1;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Responsive */
 @media (max-width: 767px) {
   .dashboard-header {
-    padding: 10px 10px;
-    border-radius: 14px;
+    padding: 12px 14px;
+    border-radius: 16px;
   }
 
   .entity-title h2 {
-    font-size: 1.06rem;
-    max-width: min(62vw, 360px);
+    font-size: 1.18rem;
+    max-width: min(60vw, 320px);
   }
 
-  .header-bottom {
-    align-items: flex-end;
+  .back-button,
+  .mode-toggle-button,
+  .nav-arrow {
+    width: 38px;
+    height: 38px;
   }
 
-  .dashboard-datepicker {
-    left: 0;
-    right: auto;
-    width: max-content;
-    max-width: calc(100vw - 32px);
+  .calendar-button {
+    font-size: 0.9rem;
+    padding: 7px 12px;
   }
 }
 </style>

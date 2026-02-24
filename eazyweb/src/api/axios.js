@@ -12,6 +12,14 @@ const api = axios.create({
 let requestInterceptorId = null
 let responseInterceptorId = null
 
+function isAuthEndpoint(url = '') {
+  const normalized = String(url || '')
+  return normalized.includes('/token/refresh/')
+    || normalized.includes('/token/twa/')
+    || normalized.includes('/token/logout/')
+    || normalized.includes('/token/')
+}
+
 // Setup interceptors with a provided auth store
 export function setupInterceptors(authStore) {
   // Avoid stacking duplicated interceptors after repeated init/login/retry calls
@@ -51,7 +59,12 @@ export function setupInterceptors(authStore) {
       if (!originalRequest) return Promise.reject(error)
 
       // If status 401 and we haven't retried yet
-      if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      if (
+        error.response
+        && error.response.status === 401
+        && !originalRequest._retry
+        && !isAuthEndpoint(originalRequest.url)
+      ) {
         originalRequest._retry = true
         try {
           await authStore.refreshToken()

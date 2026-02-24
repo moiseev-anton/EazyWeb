@@ -13,9 +13,9 @@
 
       <div class="classroom" v-if="classroom" :title="classroom">
         <span class="classroom-inner" aria-hidden="true">
-          <svg class="icon pin" viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 2C8.686 2 6 4.686 6 8c0 4.418 5.4 10.308 5.715 10.658a1 1 0 0 0 1.57 0C12.6 18.308 18 12.418 18 8c0-3.314-2.686-6-6-6z" stroke="#6b6b6b" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="rgba(11,111,177,0.04)"/>
-            <circle cx="12" cy="8" r="2" fill="#0b6fb1"/>
+          <svg class="icon pin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
           </svg>
           <span class="classroom-text">{{ classroom }}</span>
         </span>
@@ -80,8 +80,6 @@ function openLeft() {
   const emitEntity = (obj) => {
     emit('open-entity', obj)
 
-    // Р В РЎСљР В Р’В°Р В Р вЂ Р В РЎвЂР В РЎвЂ“Р В Р’В°Р РЋРІР‚В Р В РЎвЂР РЋР РЏ Р В Р вЂ¦Р В Р’В° /schedule Р РЋРІР‚С™Р В РЎвЂўР В Р’В»Р РЋР Р‰Р В РЎвЂќР В РЎвЂў Р В Р’ВµР РЋР С“Р В Р’В»Р В РЎвЂ Р В РЎВР РЋРІР‚в„– Р В РЎСљР В РІР‚Сћ Р В Р вЂ¦Р В Р’В° Р РЋР С“Р РЋРІР‚С™Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋРІР‚В Р В Р’В°Р РЋРІР‚В¦,
-    // Р В РЎвЂќР В РЎвЂўР РЋРІР‚С™Р В РЎвЂўР РЋР вЂљР РЋРІР‚в„–Р В Р’Вµ Р РЋРЎвЂњР В Р’В¶Р В Р’Вµ Р РЋРЎвЂњР В РЎВР В Р’ВµР РЋР вЂ№Р РЋРІР‚С™ Р В РЎвЂўР РЋРІР‚С™Р В РЎвЂќР РЋР вЂљР РЋРІР‚в„–Р В Р вЂ Р В Р’В°Р РЋРІР‚С™Р РЋР Р‰ Р РЋР С“Р РЋРЎвЂњР РЋРІР‚В°Р В Р вЂ¦Р В РЎвЂўР РЋР С“Р РЋРІР‚С™Р РЋР Р‰ inline (groups, teachers, schedule)
     if (!['schedule', 'groups', 'teachers'].includes(route.name)) {
       router.push({ name: 'schedule', query: { openId: obj.id, openType: obj.type, openName: obj.name } }).catch(() => {})
     }
@@ -114,20 +112,21 @@ function openLeft() {
 
 <style scoped>
 .lesson-info {
-  --font-ui: "Inter", "Segoe UI", "Roboto", "Noto Sans", sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-family: var(--font-ui);
+  gap: 6px;
 }
+
 .subject {
-  font-weight: 650;
-  font-size: 0.98rem;
-  line-height: 1.2;
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: #e2e8f0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: -0.01em;
 }
 
 .row2 {
@@ -136,9 +135,9 @@ function openLeft() {
   justify-content: flex-start;
   flex-wrap: wrap;
   width: 100%;
-  gap: 8px;
-  font-size: 0.84rem;
-  color: #445;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #94a3b8;
 }
 
 .left {
@@ -155,33 +154,34 @@ function openLeft() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #0b6fb1;
+  color: #818cf8;
   text-decoration: none;
   background: none;
   border: none;
   padding: 0;
   font: inherit;
   cursor: pointer;
+  font-weight: 600;
+  transition: color 0.18s ease;
 }
 
 .group-or-teacher:hover {
+  color: #a5b4fc;
   text-decoration: underline;
 }
 
 .subgroup {
-  flex: 1 1 54px;
-  min-width: 54px;
+  flex: 1 1 70px;
+  min-width: 70px;
   max-width: 100%;
   flex-shrink: 2;
   order: 2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #6b6b6b;
+  color: #94a3b8;
   text-align: center;
-  font-family: var(--font-ui);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-weight: 500;
 }
 
 .subgroup.is-empty {
@@ -190,11 +190,11 @@ function openLeft() {
 }
 
 .classroom {
-  flex: 0 0 70px;
-  width: 70ch;
+  flex: 0 0 80px;
+  width: 80px;
   flex-shrink: 0;
   order: 3;
-  color: #6b6b6b;
+  color: #87cbc1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,38 +205,43 @@ function openLeft() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* gap: 6px; */
-  /* background: rgba(11,111,177,0.05); */
-  padding: 2px 0px 2px 2px;
-  border-radius: 8px;
-  border: 1px solid #b9b9b9; 
+  gap: 6px;
+  /* background: rgba(135, 203, 193, 0.14);
+  border: 1px solid rgba(135, 203, 193, 0.35); */
+  padding: 4px 6px;
+  border-radius: 10px;
 }
 
-.classroom .icon { flex: 0 0 auto }
+.icon.pin {
+  width: 14px;
+  height: 14px;
+  color: #87cbc1;
+  flex: 0 0 auto;
+}
 
 .classroom-text {
-  width: 52px;
-  font-size: 0.84rem;
-  color: #445;
+  font-size: 0.9rem;
+  color: #87cbc1;
+  font-weight: 600;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: var(--font-ui);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
 }
 
-
+/* Responsive */
 @media (max-width: 420px) {
   .subgroup {
-    flex-basis: 54px;
-    min-width: 54px;
-    text-align: center;
+    flex-basis: 60px;
+    min-width: 60px;
   }
 
-  /* .classroom {
-    flex-basis: 71px;
-  } */
+  .classroom {
+    flex-basis: 70px;
+  }
+
+  .classroom-text {
+    font-size: 0.85rem;
+  }
 }
 </style>

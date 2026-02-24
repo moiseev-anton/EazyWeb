@@ -77,33 +77,84 @@ onMounted(() => {
 <style scoped>
 /* ===== BASE ======== */
 .schedule-view {
-  padding: 6px;
-  background: transparent;
-  min-height: 100vh;
+  padding: 12px;
+  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  min-height: 100dvh;
+  color: #e2e8f0;
 }
 
-
 /* ================================
-   PRE-AUTH / NO SUB
+   PRE-AUTH / NO SUBSCRIPTION
 ================================ */
 .pre-auth,
 .no-subscription {
-  max-width: 600px;
-  margin: 60px auto;
+  max-width: 620px;
+  margin: 80px auto 40px;
   text-align: center;
-  padding: 0 16px;
+  padding: 32px 24px;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.28);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
 }
 
 .app-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 12px;
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: #818cf8;           /* индиго акцент */
+  letter-spacing: -0.03em;
 }
 
 .app-description {
-  color: #666;
-  margin-bottom: 24px;
+  color: #94a3b8;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin-bottom: 32px;
 }
 
+/* Ссылки в no-subscription */
+.no-subscription a {
+  color: #818cf8;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.18s ease;
+}
+
+.no-subscription a:hover {
+  color: #a5b4fc;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pre-auth,
+  .no-subscription {
+    margin: 60px auto 32px;
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+
+  .app-title {
+    font-size: 1.9rem;
+  }
+
+  .app-description {
+    font-size: 0.98rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .schedule-view {
+    padding: 10px;
+  }
+
+  .pre-auth,
+  .no-subscription {
+    padding: 20px 16px;
+  }
+}
 </style>
 

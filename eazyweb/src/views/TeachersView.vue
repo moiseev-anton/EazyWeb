@@ -95,28 +95,48 @@ onMounted(() => load())
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 6px;
-  background: transparent;
+  gap: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  color: #e2e8f0;
+}
+
+.teachers-view {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  color: #e2e8f0;
 }
 
 .teachers-hero {
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(14, 116, 144, 0.2);
-  background: #ffffff;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.28);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(100, 116, 139, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
 }
 
 .teachers-hero h1 {
   margin: 0;
-  font-size: 1.2rem;
-  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #818cf8;
+  letter-spacing: -0.02em;
 }
 
 .teachers-hero p {
-  margin: 6px 0 0;
-  color: #5b687a;
-  font-size: 0.95rem;
+  margin: 8px 0 0;
+  color: #94a3b8;
+  font-size: 0.96rem;
+  line-height: 1.45;
 }
 
 .teachers-container {
@@ -125,61 +145,69 @@ onMounted(() => load())
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-right: 0;
+  gap: 16px;
+  padding-right: 4px; /* для скроллбара */
 }
 
 .letter-section {
-  border-radius: 16px;
-  border: 1px solid #dbe7f2;
-  background: #fff;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .letter-header {
-  padding: 10px 14px;
+  padding: 12px 18px;
   font-weight: 700;
-  font-size: 0.95rem;
-  color: #0f172a;
-  border-bottom: 1px solid #eaf1f8;
-  background: #f8fafc;
+  font-size: 1.05rem;
+  color: #87cbc1;
+  background: rgba(15, 23, 42, 0.35);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .teachers-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px 12px 12px;
+  gap: 10px;
+  padding: 14px 16px 16px;
 }
 
 .teacher-btn {
-  padding: 8px 12px;
-  background: #fff;
-  border: 1px solid #d9e7f2;
-  border-radius: 10px;
+  padding: 10px 16px;
+  background: rgba(51, 65, 85, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  transition: background 0.16s, transform 0.1s, border-color 0.16s;
-  color: #1e293b;
-  font-size: 0.9rem;
-  min-width: 130px;
+  transition: all 0.18s ease;
+  color: #e2e8f0;
+  font-size: 0.94rem;
+  min-width: 138px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .teacher-btn:hover {
-  background: #f2f5f9;
-  border-color: #b8d9f2;
-  transform: translateY(-1px);
+  background: rgba(51, 65, 85, 0.42);
+  border-color: rgba(148, 163, 184, 0.32);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .teacher-btn:active {
   transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .teacher-name {
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .center-state {
@@ -189,20 +217,25 @@ onMounted(() => load())
   align-items: center;
   justify-content: center;
   text-align: center;
-  border-radius: 16px;
-  border: 1px solid #dbe6f0;
-  background: #fff;
-  color: #4b5563;
-  padding: 28px 20px;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+  padding: 32px 24px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .center-state h3 {
   margin: 0;
-  color: #111827;
+  color: #f1f5f9;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .center-state p {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
+  color: #94a3b8;
 }
 
 .error-offset {
@@ -212,83 +245,88 @@ onMounted(() => load())
   justify-content: center;
 }
 
+/* Skeleton ── сохраняем анимацию, но адаптируем под тёмную тему */
 .teachers-skeleton {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .letter-skel {
-  background: #fff;
-  border-radius: 16px;
-  padding: 14px;
-  border: 1px solid #e6edf5;
+  background: rgba(30, 41, 59, 0.32);
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  backdrop-filter: blur(10px);
 }
 
 .sk-letter,
 .sk-pill {
-  background: #e7edf4;
+  background: linear-gradient(
+    90deg,
+    rgba(71, 85, 105, 0.4) 25%,
+    rgba(100, 116, 139, 0.6) 50%,
+    rgba(71, 85, 105, 0.4) 75%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.1s linear infinite;
+  animation: shimmer 1.4s linear infinite;
 }
 
 .sk-letter {
-  height: 14px;
-  width: 70px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  height: 16px;
+  width: 80px;
+  border-radius: 10px;
+  margin-bottom: 12px;
 }
 
 .sk-teachers {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .sk-pill {
-  width: 128px;
-  height: 34px;
-  border-radius: 10px;
+  width: 136px;
+  height: 38px;
+  border-radius: 14px;
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
+/* Responsive ── слегка увеличены отступы для комфорта */
 @media (max-width: 768px) {
   .teachers-hero {
-    padding: 14px;
+    padding: 18px 20px;
   }
 
   .teachers-list {
-    padding: 9px 10px 10px;
+    padding: 12px 14px 14px;
   }
 
   .teacher-btn {
-    min-width: 112px;
+    min-width: 120px;
   }
 }
 
 @media (max-width: 360px) {
   .teachers-view {
-    padding: 6px;
+    padding: 10px;
   }
 
   .teachers-hero p {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
   }
 
   .teachers-list {
-    padding: 8px;
+    padding: 10px;
   }
 
   .teacher-btn {
     width: 100%;
+    min-width: unset;
   }
 }
 </style>

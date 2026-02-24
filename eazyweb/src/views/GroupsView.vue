@@ -21,7 +21,6 @@ import { ref } from 'vue'
 import ScheduleDashboard from '../components/ScheduleDashboard.vue'
 import FacultyAccordion from '../components/FacultyAccordion.vue'
 
-
 const selectedEntity = ref(null)
 
 function selectGroup(group) {
@@ -29,7 +28,6 @@ function selectGroup(group) {
 }
 
 function handleOpenEntity(entity) {
-  // open other entity (teacher or group) in the same view
   selectedEntity.value = { ...entity }
 }
 </script>
@@ -40,14 +38,18 @@ function handleOpenEntity(entity) {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: transparent;
+  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  color: #e2e8f0;
+  box-sizing: border-box;
 }
 
 .groups-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto; 
+  overflow-x: hidden;
   padding: 0;
 }
+
 </style>

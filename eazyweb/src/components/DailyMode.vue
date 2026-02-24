@@ -11,7 +11,7 @@
         >
           <span class="day-name">{{ d.name }}</span>
           <div class="day-number">{{ d.day }}</div>
-          <span class="lessons-count">{{ lessonsMap[d.iso]?.length || 0 }}</span>
+          <span class="lessons-count">{{ lessonsMap[d.iso] || 0 }}</span>
         </button>
       </div>
     </div>
@@ -129,11 +129,16 @@ const lessonsMap = computed(() => {
   for (const l of props.lessons || []) {
     const date = l.attributes?.date
     if (!date) continue
-    if (!m[date]) m[date] = []
-    m[date].push(l)
+    const number = l.attributes?.number || ''
+    const startTime = l.attributes?.startTime || ''
+    const endTime = l.attributes?.endTime || ''
+    const periodKey = `${number}|${startTime}|${endTime}`
+    if (!m[date]) m[date] = new Set()
+    m[date].add(periodKey)
   }
-  for (const k of Object.keys(m)) m[k].sort((a, b) => a.attributes.number - b.attributes.number)
-  return m
+  const counts = {}
+  for (const k of Object.keys(m)) counts[k] = m[k].size
+  return counts
 })
 
 const isCurrentWeek = computed(() => {
@@ -159,56 +164,64 @@ watch(weekDates, (newVal) => {
 .daily-mode {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 
+/* ===== ДНИ НЕДЕЛИ ===== */
 .days-wrap {
-  border-radius: 14px;
-  border: 1px solid #dbe7f2;
-  background: #ffffff;
-  padding: 8px;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  padding: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .days-row {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
   width: 100%;
 }
 
 .day-button {
-  border: 1px solid #e4edf6;
-  border-radius: 10px;
-  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: rgba(51, 65, 85, 0.28);
+  backdrop-filter: blur(8px);
   cursor: pointer;
-  padding: 8px 6px;
-  transition: background 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+  padding: 10px 6px;
+  transition: all 0.18s ease;
   display: flex;
   flex-direction: column;
   gap: 4px;
   align-items: center;
   justify-content: center;
   min-width: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .day-button:hover {
-  background: #f2f9ff;
-  border-color: #c8deef;
+  background: rgba(51, 65, 85, 0.42);
+  border-color: rgba(148, 163, 184, 0.32);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .day-button.today {
-  border-color: rgba(14, 165, 233, 0.45);
+  border-color: rgba(135, 203, 193, 0.45); /* #87cbc1 */
+  background: rgba(135, 203, 193, 0.18);
 }
 
 .day-button.selected {
-  border-color: #52b6e8;
-  background: #eef6fb;
+  border-color: rgba(129, 140, 248, 0.55); /* #818cf8 */
+  background: rgba(129, 140, 248, 0.22);
   transform: translateY(-1px);
 }
 
 .day-name {
-  font-size: 0.78rem;
-  color: #64748b;
+  font-size: 0.82rem;
+  color: #94a3b8;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -218,31 +231,36 @@ watch(weekDates, (newVal) => {
 }
 
 .day-number {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #e2e8f0;
   line-height: 1;
 }
 
 .lessons-count {
-  min-width: 22px;
+  min-width: 24px;
   height: 20px;
   border-radius: 999px;
   padding: 0 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #eaf3fb;
-  color: #075985;
+  background: rgba(148, 163, 184, 0.28);
+  backdrop-filter: blur(6px);
+  color: #cbd5e1;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
 }
 
+/* ===== СПИСОК ЗАНЯТИЙ ===== */
 .lessons-list {
-  border-radius: 14px;
-  background: #ffffff;
-  border: 1px solid #dbe7f2;
-  padding: 8px;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.24);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  padding: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .cards {
@@ -251,7 +269,7 @@ watch(weekDates, (newVal) => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .lesson-card {
@@ -263,82 +281,96 @@ watch(weekDates, (newVal) => {
 }
 
 .no-lessons {
-  color: #7a889c;
-  margin: 36px 0;
+  color: #94a3b8;
+  margin: 48px 0;
   font-weight: 600;
   text-align: center;
+  font-size: 1.05rem;
 }
 
-.skeleton-list {
-  list-style: none;
-  padding: 4px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ===== SKELETON ===== */
+.cards.skeleton-list {
+  gap: 10px;
 }
 
 .skeleton-card {
-  padding: 12px;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #e6edf5;
-  min-height: 68px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(51, 65, 85, 0.32);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  backdrop-filter: blur(10px);
+  min-height: 80px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .sk-line {
-  border-radius: 6px;
-  background: #e7edf4;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(71, 85, 105, 0.4) 25%,
+    rgba(100, 116, 139, 0.6) 50%,
+    rgba(71, 85, 105, 0.4) 75%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.1s linear infinite;
+  animation: shimmer 1.4s linear infinite;
 }
 
 .sk-line.top {
-  height: 14px;
+  height: 16px;
   width: 85%;
 }
 
 .sk-line.mid {
-  height: 10px;
-  width: 45%;
+  height: 12px;
+  width: 50%;
 }
 
 .sk-line.bot {
-  height: 12px;
-  width: 65%;
+  height: 14px;
+  width: 70%;
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
+/* Responsive */
 @media (max-width: 560px) {
   .day-button {
-    padding: 7px 3px;
+    padding: 8px 4px;
     gap: 3px;
   }
 
   .day-name {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
   }
 
   .day-number {
-    font-size: 0.96rem;
+    font-size: 1rem;
   }
 
   .lessons-count {
-    min-width: 18px;
+    min-width: 20px;
     height: 18px;
-    padding: 0 4px;
-    font-size: 0.68rem;
+    padding: 0 5px;
+    font-size: 0.72rem;
+  }
+
+  .lessons-list {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .days-row {
+    gap: 6px;
+  }
+
+  .day-button {
+    padding: 7px 2px;
   }
 }
 </style>
