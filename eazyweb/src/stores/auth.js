@@ -4,17 +4,193 @@ import api, { setupInterceptors } from '../api/axios'
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
-  // boot status: 'booting' | 'authenticated' | 'anonymous' | 'network_error' | 'server_error'
+  // boot status: 'booting' | 'authenticated' | 'anonymous' | 'network_error' | 'server_error' | 'twa_invalid'
   const bootStatus = ref('booting')
   const user = ref(null)
   const subscription = ref(null)
   const notifications = ref({ changes: true, reminders: true })
+  const telegramBotInfo = ref(null)
 
   // access token is kept in memory (not localStorage) for security
   const accessToken = ref('')
 
   // refresh control to avoid parallel refreshes
   let refreshPromise = null
+  let telegramBotInfoPromise = null
+  const TELEGRAM_INITDATA_CACHE_KEY = 'telegram_init_data_raw'
+  const TELEGRAM_INITDATA_CACHE_TTL_MS = 30 * 1000
+  const TELEGRAM_RUNTIME_SEEN_KEY = 'telegram_runtime_seen'
+
+  function hasInitDataHash(raw) {
+    if (!raw) return false
+    try {
+      const params = new URLSearchParams(String(raw))
+      return !!params.get('hash')
+    } catch (e) {
+      return false
+    }
+  }
+
+  function readCachedTelegramInitDataRaw({ maxAgeMs = TELEGRAM_INITDATA_CACHE_TTL_MS } = {}) {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        const raw = window.sessionStorage.getItem(TELEGRAM_INITDATA_CACHE_KEY) || ''
+        if (!raw) return ''
+        try {
+          const parsed = JSON.parse(raw)
+          const cachedRaw = String(parsed?.raw || '')
+          const ts = Number(parsed?.ts || 0)
+          if (!hasInitDataHash(cachedRaw)) return ''
+          if (!ts || (Date.now() - ts > maxAgeMs)) return ''
+          return cachedRaw
+        } catch (e) {
+          // Backward compatibility: old cache format was a plain string
+          if (hasInitDataHash(raw)) return raw
+        }
+      }
+    } catch (e) {
+      // ignore sessionStorage access errors
+    }
+    return ''
+  }
+
+  function cacheTelegramInitDataRaw(raw) {
+    if (!hasInitDataHash(raw)) return
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.setItem(TELEGRAM_RUNTIME_SEEN_KEY, '1')
+        window.sessionStorage.setItem(
+          TELEGRAM_INITDATA_CACHE_KEY,
+          JSON.stringify({ raw: String(raw), ts: Date.now() })
+        )
+      }
+    } catch (e) {
+      // ignore sessionStorage write errors
+    }
+  }
+
+  function isTelegramRuntime() {
+    if (typeof window === 'undefined') return false
+    if (window.Telegram?.WebApp) {
+      try {
+        if (window.sessionStorage) window.sessionStorage.setItem(TELEGRAM_RUNTIME_SEEN_KEY, '1')
+      } catch (e) {}
+      return true
+    }
+    const hash = String(window.location?.hash || '')
+    const search = String(window.location?.search || '')
+    if (hash.includes('tgWebApp') || search.includes('tgWebApp')) {
+      try {
+        if (window.sessionStorage) window.sessionStorage.setItem(TELEGRAM_RUNTIME_SEEN_KEY, '1')
+      } catch (e) {}
+      return true
+    }
+
+    // Telegram WebView UA often includes Telegram/TelegramWebView markers.
+    const ua = String(window.navigator?.userAgent || '')
+    if (/Telegram|TelegramWebView|TgWebView/i.test(ua)) {
+      try {
+        if (window.sessionStorage) window.sessionStorage.setItem(TELEGRAM_RUNTIME_SEEN_KEY, '1')
+      } catch (e) {}
+      return true
+    }
+
+    // Last known runtime hint for current session.
+    try {
+      if (window.sessionStorage && window.sessionStorage.getItem(TELEGRAM_RUNTIME_SEEN_KEY) === '1') return true
+    } catch (e) {}
+
+    return false
+  }
+
+  function tryReadTelegramInitDataRaw({ allowCachedFallback = false, cacheMaxAgeMs = TELEGRAM_INITDATA_CACHE_TTL_MS } = {}) {
+    if (typeof window === 'undefined') return ''
+    const tg = window.Telegram?.WebApp
+    const fromWebApp = tg?.initData || tg?.initDataRaw || ''
+    if (fromWebApp) {
+      const raw = String(fromWebApp)
+      if (hasInitDataHash(raw)) {
+        cacheTelegramInitDataRaw(raw)
+        return raw
+      }
+      if (allowCachedFallback) {
+        const cached = readCachedTelegramInitDataRaw({ maxAgeMs: cacheMaxAgeMs })
+        if (cached) return cached
+      }
+      return ''
+    }
+
+    // Fallback for cases where Telegram data is present in URL hash/query
+    try {
+      const hash = String(window.location?.hash || '')
+      if (hash.includes('tgWebAppData=')) {
+        const raw = hash.startsWith('#') ? hash.slice(1) : hash
+        const params = new URLSearchParams(raw)
+        const v = params.get('tgWebAppData')
+        if (v) {
+          if (hasInitDataHash(v)) {
+            cacheTelegramInitDataRaw(v)
+            return v
+          }
+          return ''
+        }
+      }
+    } catch (e) {
+      // ignore URL parsing errors
+    }
+    if (allowCachedFallback) {
+      const cached = readCachedTelegramInitDataRaw({ maxAgeMs: cacheMaxAgeMs })
+      if (cached) return cached
+    }
+    return ''
+  }
+
+  async function getTelegramInitDataRaw({
+    waitMs = 3200,
+    intervalMs = 120,
+    allowCachedFallback = false,
+    cacheMaxAgeMs = TELEGRAM_INITDATA_CACHE_TTL_MS
+  } = {}) {
+    const direct = tryReadTelegramInitDataRaw({ allowCachedFallback: false, cacheMaxAgeMs })
+    if (hasInitDataHash(direct)) return direct
+
+    const deadline = Date.now() + waitMs
+    while (Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, intervalMs))
+      const next = tryReadTelegramInitDataRaw({ allowCachedFallback: false, cacheMaxAgeMs })
+      if (hasInitDataHash(next)) return next
+    }
+    if (allowCachedFallback) {
+      return readCachedTelegramInitDataRaw({ maxAgeMs: cacheMaxAgeMs }) || ''
+    }
+    return ''
+  }
+
+  function normalizeUserPayload(rawUser, fallback = null) {
+    const fallbackSafe = fallback || {}
+    if (!rawUser) return fallback || null
+
+    if (rawUser.attributes) {
+      const a = rawUser.attributes || {}
+      return {
+        id: rawUser.id || fallbackSafe.id || null,
+        username: a.username || a.user_name || a.login || fallbackSafe.username || null,
+        firstName: a.firstName || a.first_name || fallbackSafe.firstName || null,
+        lastName: a.lastName || a.last_name || fallbackSafe.lastName || null,
+        notifyScheduleUpdates: a.notifyScheduleUpdates ?? a.notify_schedule_updates ?? fallbackSafe.notifyScheduleUpdates ?? null,
+        notifyUpcomingLessons: a.notifyUpcomingLessons ?? a.notify_upcoming_lessons ?? fallbackSafe.notifyUpcomingLessons ?? null
+      }
+    }
+
+    return {
+      id: rawUser.id || fallbackSafe.id || null,
+      username: rawUser.username || rawUser.user_name || rawUser.login || fallbackSafe.username || null,
+      firstName: rawUser.firstName || rawUser.first_name || fallbackSafe.firstName || null,
+      lastName: rawUser.lastName || rawUser.last_name || fallbackSafe.lastName || null,
+      notifyScheduleUpdates: rawUser.notifyScheduleUpdates ?? rawUser.notify_schedule_updates ?? fallbackSafe.notifyScheduleUpdates ?? null,
+      notifyUpcomingLessons: rawUser.notifyUpcomingLessons ?? rawUser.notify_upcoming_lessons ?? fallbackSafe.notifyUpcomingLessons ?? null
+    }
+  }
 
   // Actions
   async function login(credentials) {
@@ -23,27 +199,7 @@ export const useAuthStore = defineStore('auth', () => {
     const res = await api.post('/token/', credentials, { withCredentials: true })
     const data = res.data || {}
     accessToken.value = data.access || ''
-    const uraw = data.user || null
-    if (uraw && uraw.attributes) {
-      const a = uraw.attributes
-      user.value = {
-        id: uraw.id || null,
-        username: a.username || a.user_name || a.login || null,
-        firstName: a.firstName || a.first_name || null,
-        lastName: a.lastName || a.last_name || null,
-        notifyScheduleUpdates: a.notifyScheduleUpdates ?? a.notify_schedule_updates ?? null,
-        notifyUpcomingLessons: a.notifyUpcomingLessons ?? a.notify_upcoming_lessons ?? null
-      }
-    } else if (uraw) {
-      user.value = {
-        id: uraw.id || null,
-        username: uraw.username || uraw.user_name || uraw.login || null,
-        firstName: uraw.firstName || uraw.first_name || null,
-        lastName: uraw.lastName || uraw.last_name || null
-      }
-    } else {
-      user.value = null
-    }
+    user.value = normalizeUserPayload(data.user)
     isAuthenticated.value = !!accessToken.value
     // setup interceptors once store is available
     try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
@@ -189,6 +345,68 @@ export const useAuthStore = defineStore('auth', () => {
   // expose accessToken (string) for interceptors
   const accessTokenStr = computed(() => accessToken.value)
 
+  async function hydrateCurrentUser() {
+    try {
+      const me = await api.get('/users/me/', { withCredentials: true })
+      user.value = normalizeUserPayload(me.data?.data, user.value)
+    } catch (e) {
+      // ignore failures to fetch user profile
+    }
+  }
+
+  async function authViaRefresh() {
+    try {
+      const res = await api.post('/token/refresh/', null, { withCredentials: true })
+      const data = res.data || {}
+      if (!data.access) return 'auth_failed'
+
+      accessToken.value = data.access
+      isAuthenticated.value = true
+      bootStatus.value = 'authenticated'
+      try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+      await hydrateCurrentUser()
+      try { await loadSubscription() } catch (_) {}
+      return 'ok'
+    } catch (e) {
+      if (!e.response) return 'network_error'
+      if (e.response && e.response.status >= 500) return 'server_error'
+      return 'auth_failed'
+    }
+  }
+
+  async function authViaTelegram() {
+    try {
+      const initDataRaw = await getTelegramInitDataRaw({
+        waitMs: 3200,
+        intervalMs: 120,
+        allowCachedFallback: true,
+        cacheMaxAgeMs: TELEGRAM_INITDATA_CACHE_TTL_MS
+      })
+
+      if (!hasInitDataHash(initDataRaw)) return 'auth_failed'
+
+      const twaRes = await api.post('/token/twa/', null, {
+        headers: { Authorization: `tma ${initDataRaw}` },
+        withCredentials: true
+      })
+      const d = twaRes.data || {}
+      if (!d || !d.access) return 'auth_failed'
+
+      accessToken.value = d.access
+      user.value = normalizeUserPayload(d.user, user.value)
+      isAuthenticated.value = !!accessToken.value
+      bootStatus.value = 'authenticated'
+      try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+      await hydrateCurrentUser()
+      try { await loadSubscription() } catch (_) {}
+      return 'ok'
+    } catch (e) {
+      if (!e.response) return 'network_error'
+      if (e.response && e.response.status >= 500) return 'server_error'
+      return 'auth_failed'
+    }
+  }
+
   // Provide a small initializer to wire interceptors from main.js if needed
   async function init() {
     bootStatus.value = 'booting'
@@ -206,84 +424,47 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    // Try to refresh access token using httponly refresh cookie
-    let refreshSucceeded = false
-    try {
-      const res = await api.post('/token/refresh/', null, { withCredentials: true })
-      const data = res.data || {}
-      if (data.access) {
-        accessToken.value = data.access
-        isAuthenticated.value = true
-        refreshSucceeded = true
-        bootStatus.value = 'authenticated'
-        // ensure interceptors see the new token
-        try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+    const inTelegram = isTelegramRuntime()
 
-        // Fetch current user if possible
-        try {
-          const me = await api.get('/users/me/', { withCredentials: true })
-          const meData = me.data?.data || null
-          const a = meData?.attributes || null
-          if (a) {
-            user.value = {
-              id: meData.id || null,
-              username: a.username || a.user_name || a.login || null,
-              firstName: a.firstName || a.first_name || null,
-              lastName: a.lastName || a.last_name || null,
-              notifyScheduleUpdates: a.notifyScheduleUpdates ?? a.notify_schedule_updates ?? null,
-              notifyUpcomingLessons: a.notifyUpcomingLessons ?? a.notify_upcoming_lessons ?? null
-            }
-          }
-        } catch (e) {
-          // ignore failures to fetch user
-        }
-
-        // load subscription after successful refresh
-        try { await loadSubscription() } catch (_) {}
-      }
-    } catch (e) {
-      // Distinguish network/unavailable vs server error vs auth failure
-      if (!e.response) {
+    // In Telegram runtime prioritize fresh initData login.
+    if (inTelegram) {
+      const twaResult = await authViaTelegram()
+      if (twaResult === 'ok') return
+      if (twaResult === 'network_error') {
         bootStatus.value = 'network_error'
         return
       }
-      if (e.response && e.response.status >= 500) {
+      if (twaResult === 'server_error') {
         bootStatus.value = 'server_error'
         return
       }
-      // otherwise 401/403 etc -> treat as no refresh cookie and continue
+
+      // Fallback to refresh cookie if TWA auth failed.
+      const refreshResult = await authViaRefresh()
+      if (refreshResult === 'ok') return
+      if (refreshResult === 'network_error') {
+        bootStatus.value = 'network_error'
+        return
+      }
+      if (refreshResult === 'server_error') {
+        bootStatus.value = 'server_error'
+        return
+      }
+
+      bootStatus.value = 'twa_invalid'
+      return
     }
 
-    if (refreshSucceeded) return
-
-    // Try Telegram WebApp initData flow (TWA)
-    try {
-      const win = typeof window !== 'undefined' ? window : null
-      const initDataRaw = win && win.Telegram && win.Telegram.WebApp && (win.Telegram.WebApp.initData || win.Telegram.WebApp.initDataRaw) ? (win.Telegram.WebApp.initData || win.Telegram.WebApp.initDataRaw) : (win && win.__telegram_init_data ? win.__telegram_init_data : null)
-      if (initDataRaw) {
-        // send empty body and Authorization: tma <initDataRaw>
-        const twaRes = await api.post('/token/twa/', null, { headers: { Authorization: `tma ${initDataRaw}` }, withCredentials: true })
-        const d = twaRes.data || {}
-        if (d && d.access) {
-          accessToken.value = d.access
-          user.value = d.user || null
-          isAuthenticated.value = !!accessToken.value
-          bootStatus.value = 'authenticated'
-          try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
-          try { await loadSubscription() } catch (_) {}
-          return
-        }
-      }
-    } catch (e) {
-      if (!e.response) {
-        bootStatus.value = 'network_error'
-        return
-      }
-      if (e.response && e.response.status >= 500) {
-        bootStatus.value = 'server_error'
-        return
-      }
-      // otherwise treat as anonymous
+    // Browser runtime: refresh cookie remains primary flow.
+    const refreshResult = await authViaRefresh()
+    if (refreshResult === 'ok') return
+    if (refreshResult === 'network_error') {
+      bootStatus.value = 'network_error'
+      return
+    }
+    if (refreshResult === 'server_error') {
+      bootStatus.value = 'server_error'
+      return
     }
 
     // No auth available
@@ -346,14 +527,15 @@ export const useAuthStore = defineStore('auth', () => {
   // 1) GET /deeplink/{platform}/ -> { deeplink, nonce }
   // 2) open deeplink (try window.open, fallback to location.href)
   // 3) poll POST /token/ { nonce } until 200 with access or timeout
-  async function pollToken(nonce, { interval = 2000, timeout = 120000 } = {}) {
+  async function pollToken(nonce, { interval = 2000, timeout = 180000, requestTimeout = 25000 } = {}) {
     const start = Date.now()
+    let lastTransientError = null
     while (Date.now() - start < timeout) {
       try {
-        const res = await api.post('/token/', { nonce }, { withCredentials: true })
+        const res = await api.post('/token/', { nonce }, { withCredentials: true, timeout: requestTimeout })
         if (res.status === 200 && res.data && res.data.access) {
           accessToken.value = res.data.access
-          user.value = res.data.user || null
+          user.value = normalizeUserPayload(res.data.user, user.value)
           isAuthenticated.value = !!accessToken.value
           // Ensure interceptors use the new access token
           try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
@@ -393,14 +575,32 @@ export const useAuthStore = defineStore('auth', () => {
           await new Promise(r => setTimeout(r, interval))
           continue
         }
+        // Timeout of a single polling request (not whole polling process)
+        if (e.code === 'ECONNABORTED') {
+          lastTransientError = 'request_timeout'
+          await new Promise(r => setTimeout(r, interval))
+          continue
+        }
+        // Temporary network issues during polling
+        if (!e.response) {
+          lastTransientError = 'network_error'
+          await new Promise(r => setTimeout(r, interval))
+          continue
+        }
         throw e
       }
     }
 
-    throw new Error('Polling for token timed out')
+    if (lastTransientError === 'request_timeout') {
+      throw new Error('Истекло общее время ожидания подтверждения в Telegram (последняя ошибка: таймаут запроса к серверу).')
+    }
+    if (lastTransientError === 'network_error') {
+      throw new Error('Истекло общее время ожидания подтверждения в Telegram (последняя ошибка: сетевая недоступность).')
+    }
+    throw new Error('Истекло общее время ожидания подтверждения в Telegram.')
   }
 
-  async function startDeeplink(platform, { pollInterval = 2000, pollTimeout = 120000 } = {}) {
+  async function startDeeplink(platform, { pollInterval = 2000, pollTimeout = 180000, pollRequestTimeout = 25000 } = {}) {
     const res = await api.get(`/deeplink/${platform}/`)
     const data = res.data || {}
     const deeplink = data.deeplink
@@ -420,8 +620,54 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     // Start polling
-    const result = await pollToken(nonce, { interval: pollInterval, timeout: pollTimeout })
+    const result = await pollToken(nonce, { interval: pollInterval, timeout: pollTimeout, requestTimeout: pollRequestTimeout })
     return result
+  }
+
+  async function getTelegramBotInfo({ force = false } = {}) {
+    if (!force) {
+      if (telegramBotInfo.value && telegramBotInfo.value.botUrl) return telegramBotInfo.value
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          const raw = window.sessionStorage.getItem('telegram_bot_info')
+          if (raw) {
+            const parsed = JSON.parse(raw)
+            if (parsed && parsed.botUrl) {
+              telegramBotInfo.value = parsed
+              return parsed
+            }
+          }
+        }
+      } catch (e) {
+        // ignore sessionStorage parse/access errors
+      }
+    }
+
+    if (telegramBotInfoPromise && !force) return telegramBotInfoPromise
+
+    telegramBotInfoPromise = (async () => {
+      const res = await api.get('/deeplink/telegram/', { withCredentials: true })
+      const data = res.data || {}
+      const info = {
+        botUrl: data.bot_url || null,
+        botUsername: data.bot_username || null
+      }
+      telegramBotInfo.value = info
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          window.sessionStorage.setItem('telegram_bot_info', JSON.stringify(info))
+        }
+      } catch (e) {
+        // ignore sessionStorage write errors
+      }
+      return info
+    })()
+
+    try {
+      return await telegramBotInfoPromise
+    } finally {
+      telegramBotInfoPromise = null
+    }
   }
 
   return {
@@ -436,6 +682,7 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     startDeeplink,
     pollToken,
+    getTelegramBotInfo,
     subscribe,
     unsubscribe,
     updateNotifications,

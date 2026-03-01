@@ -169,6 +169,8 @@
             <footer v-if="isAuthenticated" class="page-actions">
                 <button class="danger-btn" :disabled="saving" @click="handleLogout">Выйти из профиля</button>
             </footer>
+
+            <AppBottom />
         </div>
     </div>
 </template>
@@ -179,6 +181,7 @@ import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
+import AppBottom from '../components/AppBottom.vue'
 
 const authStore = useAuthStore()
 const { isAuthenticated, user, notifications } = storeToRefs(authStore)
@@ -551,8 +554,9 @@ watch(isAuthenticated, (value) => {
 
 <style scoped>
 .profile-page {
-  min-height: 100%;
-  padding: 12px;
+  min-height: 100dvh;
+  display: flex;
+  /* padding: 12px; */
   background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
   color: #e2e8f0;
 }
@@ -560,6 +564,9 @@ watch(isAuthenticated, (value) => {
 .profile-shell {
   max-width: 1120px;
   margin: 0 auto;
+  width: 100%;
+  min-height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -1081,10 +1088,6 @@ watch(isAuthenticated, (value) => {
 }
 
 @media (max-width: 640px) {
-  .profile-page {
-    padding: 10px;
-  }
-
   .hero {
     flex-direction: column;
     align-items: flex-start;
@@ -1129,5 +1132,6 @@ watch(isAuthenticated, (value) => {
   .social-status small {
     text-align: left;
   }
+
 }
 </style>

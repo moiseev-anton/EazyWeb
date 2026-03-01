@@ -100,12 +100,17 @@ const authStore = useAuthStore()
 const { isAuthenticated, subscription, user } = storeToRefs(authStore)
 
 /** Twemoji как в Telegram */
+const twemojiOptions = {
+  base: `${import.meta.env.BASE_URL}twemoji/`,
+  folder: 'svg',
+  ext: '.svg'
+}
+
 const icons = {
-  schedule: twemoji.parse("🗓️", { folder: "svg", ext: ".svg" }),
-  groups: twemoji.parse("🎓", { folder: "svg", ext: ".svg" }),
-  teachers: twemoji.parse("👨‍🏫", { folder: "svg", ext: ".svg" }),
-//   profile: '👤',
-  profile: twemoji.parse("👤", { folder: "svg", ext: ".svg" }),
+  schedule: twemoji.parse('🗓️', twemojiOptions),
+  groups: twemoji.parse('🎓', twemojiOptions),
+  teachers: twemoji.parse('🧑‍🏫', twemojiOptions),
+  profile: twemoji.parse('👤', twemojiOptions),
 }
 
 let windowWidth = ref(window.innerWidth)

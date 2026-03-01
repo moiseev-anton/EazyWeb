@@ -50,30 +50,29 @@
     </template>
 
     <div v-if="errorOverlayVisible" class="boot-overlay">
-      <div class="boot-modal-card">
-        <div class="brand-mark">EazyClass</div>
+  <div class="boot-modal-card animate-fade-in">
+    <div class="brand-mark">EazyClass</div>
 
-        <template v-if="bootStatus === 'network_error'">
-          <div class="status-dot status-dot--warn" />
-          <div class="error-title">Нет соединения с сервером</div>
-          <div class="error-sub">Проверьте интернет и попробуйте еще раз.</div>
-          <button class="retry-btn" @click="retry">Повторить</button>
-        </template>
+    <template v-if="bootStatus === 'network_error'">
+      <div class="error-title">Нет соединения с сервером</div>
+      <div class="error-sub">Проверьте интернет-соединение и попробуйте ещё раз.</div>
+      <button class="retry-btn" @click="retry">Повторить попытку</button>
+    </template>
 
-        <template v-else-if="bootStatus === 'server_error'">
-          <div class="status-dot status-dot--danger" />
-          <div class="error-title">Ошибка на сервере</div>
-          <div class="error-sub">Сервис временно недоступен. Попробуйте позже.</div>
-          <button class="retry-btn" @click="retry">Повторить</button>
-        </template>
+    <template v-else-if="bootStatus === 'server_error'">
+      <div class="error-title">Ошибка сервера</div>
+      <div class="error-sub">Что-то пошло не так. Сервис временно недоступен — вернитесь позже.</div>
+      <button class="retry-btn" @click="retry">Повторить</button>
+    </template>
 
-        <template v-else-if="bootStatus === 'twa_invalid'">
-          <div class="status-dot status-dot--warn" />
-          <div class="error-title">Сессия истекла</div>
-          <div class="error-sub">Перезапустите приложение (закройте и откройте заново через меню бота)</div>
-        </template>
+    <template v-else-if="bootStatus === 'twa_invalid'">
+      <div class="error-title">Сессия истекла</div>
+      <div class="error-sub">
+        Закройте приложение полностью<br>и откройте заново через меню бота.
       </div>
-    </div>
+    </template>
+  </div>
+</div>
   </div>
 </template>
 
@@ -153,7 +152,15 @@ body {
   width: 100%;
   max-width: 820px;
   margin: 0 auto;
-  /* padding: 0 12px; */
+  padding: 12px;
+}
+
+
+
+@media (max-width: 480px) {
+  .content-inner {
+    padding: 6px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -165,10 +172,6 @@ body {
   .main-content {
     margin-bottom: 0;
   }
-
-  /* .content-inner {
-    padding: 0 20px;
-  } */
 }
 
 @media (min-width: 1018px) {
@@ -343,6 +346,7 @@ body {
   backdrop-filter: blur(8px);
   z-index: 9999;
   padding: 20px;
+  animation: fadeInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .boot-modal-card {
@@ -371,22 +375,6 @@ body {
   font-weight: 700;
 }
 
-.status-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  margin: 0 auto 16px;
-}
-
-.status-dot--warn {
-  background: #fbbf24;
-  box-shadow: 0 0 0 10px rgba(251, 191, 36, 0.2);
-}
-
-.status-dot--danger {
-  background: var(--danger);
-  box-shadow: 0 0 0 10px rgba(248, 113, 113, 0.2);
-}
 
 .error-title {
   font-weight: 700;
@@ -411,6 +399,8 @@ body {
   cursor: pointer;
   transition: all 0.18s ease;
   box-shadow: 0 6px 20px rgba(129, 140, 248, 0.3);
+  min-width: 160px;
+  margin-top: 1.5rem;
 }
 
 .retry-btn:hover {
@@ -422,5 +412,10 @@ body {
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
 </style>

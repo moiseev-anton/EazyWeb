@@ -2,11 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <!-- Основной favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <!-- PNG fallback -->
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+
+    <!-- PWA / Android -->
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0f1117" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>eazyweb</title>
+    <title>EazyClass</title>
   </head>
   <body>
     <div id="app"></div>

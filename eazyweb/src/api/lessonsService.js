@@ -24,6 +24,11 @@ function buildIncludedMap(included) {
   return map
 }
 
+function resolveRelationId(relationshipData) {
+  if (!relationshipData || Array.isArray(relationshipData)) return null
+  return relationshipData.id || null
+}
+
 export async function fetchLessons({ date_from, date_to, group = null, teacher = null, include = 'group,teacher' } = {}) {
   const params = {
     'filter[date_from]': date_from,
@@ -39,8 +44,8 @@ export async function fetchLessons({ date_from, date_to, group = null, teacher =
 
   // attach resolved relations into each lesson for easier consumption
   const lessons = Array.isArray(payload.data) ? payload.data.map(item => {
-    const groupRelId = item.relationships?.group?.data?.id
-    const teacherRelId = item.relationships?.teacher?.data?.id
+    const groupRelId = resolveRelationId(item.relationships?.group?.data)
+    const teacherRelId = resolveRelationId(item.relationships?.teacher?.data)
     return {
       ...item,
       _resolved: {

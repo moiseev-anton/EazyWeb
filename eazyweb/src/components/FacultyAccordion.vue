@@ -133,7 +133,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 12px;
+  /* padding: 12px; */
   background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
   color: #e2e8f0;
 }
@@ -442,9 +442,9 @@ onMounted(() => {
 }
 
 @media (max-width: 360px) {
-  .faculty-accordion {
+  /* .faculty-accordion {
     padding: 10px;
-  }
+  } */
 
   .accordion-hero p {
     font-size: 0.92rem;

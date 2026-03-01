@@ -7,6 +7,7 @@ const routes = [
   { path: '/groups', name: 'groups', component: () => import('../views/GroupsView.vue'), meta: { requiresAuth: false } },
   { path: '/teachers', name: 'teachers', component: () => import('../views/TeachersView.vue'), meta: { requiresAuth: false } },
   { path: '/profile', name: 'profile', component: () => import('../views/ProfileView.vue'), meta: { requiresAuth: true } },
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../views/NotFoundView.vue'), meta: { requiresAuth: false } },
 ]
 const router = createRouter({
   history: createWebHistory(),

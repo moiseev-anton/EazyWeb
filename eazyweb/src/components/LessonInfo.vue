@@ -4,7 +4,8 @@
 
     <div class="row2">
       <div class="left" v-if="leftText">
-        <a class="group-or-teacher" href="#" :title="leftText" @click.prevent="openLeft">{{ leftText }}</a>
+        <a v-if="leftEntity" class="group-or-teacher" href="#" :title="leftText" @click.prevent="openLeft">{{ leftText }}</a>
+        <span v-else class="group-or-teacher is-static" :title="leftText">{{ leftText }}</span>
       </div>
 
       <div class="subgroup" :class="{ 'is-empty': !showSubgroup }" :aria-hidden="!showSubgroup">
@@ -41,24 +42,55 @@ const subject = computed(() => props.lesson.attributes?.subject || '')
 const classroom = computed(() => props.lesson.attributes?.classroom || '')
 const subgroup = computed(() => props.lesson.attributes?.subgroup || '0')
 
-const leftText = computed(() => {
-  // If prefer is 'group' or 'teacher' or auto
+const relationData = computed(() => {
   const groupRel = props.lesson.relationships?.group?.data
   const teacherRel = props.lesson.relationships?.teacher?.data
-  let groupTitle = ''
-  let teacherShort = ''
+  const group = groupRel && props.groupsMap && props.groupsMap[groupRel.id]
+    ? props.groupsMap[groupRel.id]
+    : null
+  const teacher = teacherRel && props.teachersMap && props.teachersMap[teacherRel.id]
+    ? props.teachersMap[teacherRel.id]
+    : null
 
-  if (groupRel && props.groupsMap && props.groupsMap[groupRel.id]) {
-    groupTitle = props.groupsMap[groupRel.id].title || ''
+  return {
+    groupRel,
+    teacherRel,
+    groupTitle: group?.title || '',
+    teacherShort: teacher?.shortName || teacher?.fullName || '',
+    group,
+    teacher
   }
-  if (teacherRel && props.teachersMap && props.teachersMap[teacherRel.id]) {
-    teacherShort = props.teachersMap[teacherRel.id].shortName || ''
+})
+
+const leftEntity = computed(() => {
+  const { groupRel, teacherRel, groupTitle, teacherShort, group, teacher } = relationData.value
+
+  if (props.prefer === 'group') {
+    if (groupRel && groupTitle) return { id: groupRel.id, type: 'group', name: groupTitle, endpoint: group?.endpoint || null }
+    if (teacherRel && teacherShort) return { id: teacherRel.id, type: 'teacher', name: teacherShort, endpoint: teacher?.endpoint || null }
+    return null
   }
 
-  if (props.prefer === 'group') return groupTitle || teacherShort
-  if (props.prefer === 'teacher') return teacherShort || groupTitle
-  // auto: prefer group title if present, else teacher
-  return groupTitle || teacherShort || ''
+  if (props.prefer === 'teacher') {
+    if (teacherRel && teacherShort) return { id: teacherRel.id, type: 'teacher', name: teacherShort, endpoint: teacher?.endpoint || null }
+    return null
+  }
+
+  // auto: prefer group then teacher
+  if (groupRel && groupTitle) return { id: groupRel.id, type: 'group', name: groupTitle, endpoint: group?.endpoint || null }
+  if (teacherRel && teacherShort) return { id: teacherRel.id, type: 'teacher', name: teacherShort, endpoint: teacher?.endpoint || null }
+  return null
+})
+
+const leftText = computed(() => {
+  if (leftEntity.value) return leftEntity.value.name
+
+  // For group schedule (prefer teacher), teacher relation may be explicitly null.
+  if (props.prefer === 'teacher' && props.lesson.relationships?.teacher?.data === null) {
+    return 'не указано'
+  }
+
+  return ''
 })
 
 const showSubgroup = computed(() => {
@@ -72,10 +104,7 @@ const router = useRouter()
 const route = useRoute()
 
 function openLeft() {
-  // determine which relation to open based on prefer and availability
-  // openLeft called
-  const groupRel = props.lesson.relationships?.group?.data
-  const teacherRel = props.lesson.relationships?.teacher?.data
+  if (!leftEntity.value) return
 
   const emitEntity = (obj) => {
     emit('open-entity', obj)
@@ -85,28 +114,7 @@ function openLeft() {
     }
   }
 
-  if (props.prefer === 'group' && groupRel) {
-    const g = props.groupsMap && props.groupsMap[groupRel.id]
-    emitEntity({ id: groupRel.id, type: 'group', name: g?.title || g?.name || '', endpoint: g?.endpoint || null })
-    return
-  }
-  if (props.prefer === 'teacher' && teacherRel) {
-    const t = props.teachersMap && props.teachersMap[teacherRel.id]
-    emitEntity({ id: teacherRel.id, type: 'teacher', name: t?.shortName || t?.fullName || '', endpoint: t?.endpoint || null })
-    return
-  }
-
-  // auto: prefer group then teacher
-  if (groupRel) {
-    const g = props.groupsMap && props.groupsMap[groupRel.id]
-    emitEntity({ id: groupRel.id, type: 'group', name: g?.title || g?.name || '', endpoint: g?.endpoint || null })
-    return
-  }
-  if (teacherRel) {
-    const t = props.teachersMap && props.teachersMap[teacherRel.id]
-    emitEntity({ id: teacherRel.id, type: 'teacher', name: t?.shortName || t?.fullName || '', endpoint: t?.endpoint || null })
-    return
-  }
+  emitEntity(leftEntity.value)
 }
 </script>
 
@@ -135,7 +143,7 @@ function openLeft() {
   justify-content: flex-start;
   flex-wrap: wrap;
   width: 100%;
-  gap: 10px;
+  gap: 6px;
   font-size: 0.9rem;
   color: #94a3b8;
 }
@@ -168,6 +176,13 @@ function openLeft() {
 .group-or-teacher:hover {
   color: #a5b4fc;
   text-decoration: underline;
+}
+
+.group-or-teacher.is-static {
+  color: #94a3b8;
+  cursor: default;
+  pointer-events: none;
+  text-decoration: none;
 }
 
 .subgroup {
@@ -206,9 +221,9 @@ function openLeft() {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  /* background: rgba(135, 203, 193, 0.14);
-  border: 1px solid rgba(135, 203, 193, 0.35); */
-  padding: 4px 6px;
+  /* background: rgba(135, 203, 193, 0.14); */
+  /* border: 1px solid rgba(135, 203, 193, 0.35); */
+  padding: 4px 0px;
   border-radius: 10px;
 }
 

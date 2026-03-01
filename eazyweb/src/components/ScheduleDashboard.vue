@@ -13,6 +13,9 @@
               <StarSolidIcon v-if="isSubscribed" class="star-icon" />
               <StarOutlineIcon v-else class="star-icon" />
             </button>
+            <p v-if="guestSubscribeHintVisible" class="guest-subscribe-hint" role="status" aria-live="polite">
+              Подписка и уведомления доступны после входа
+            </p>
           </div>
         </div>
 
@@ -307,8 +310,15 @@ function toggleCalendar() {
 const showReplaceConfirm = ref(false)
 const pendingNewEntity = ref(null)
 const showUnsubscribeConfirm = ref(false)
+const guestSubscribeHintVisible = ref(false)
+let guestSubscribeHintTimer = null
 
 async function toggleSubscription() {
+  if (!authStore.isAuthenticated) {
+    showGuestSubscribeHint()
+    return
+  }
+
   if (isSubscribed.value) {
     showUnsubscribeConfirm.value = true
     return
@@ -364,6 +374,15 @@ function cancelUnsubscribe() {
   showUnsubscribeConfirm.value = false
 }
 
+function showGuestSubscribeHint() {
+  guestSubscribeHintVisible.value = true
+  if (guestSubscribeHintTimer) clearTimeout(guestSubscribeHintTimer)
+  guestSubscribeHintTimer = setTimeout(() => {
+    guestSubscribeHintVisible.value = false
+    guestSubscribeHintTimer = null
+  }, 2200)
+}
+
 function toggleMode() {
   currentMode.value = currentMode.value === 'daily' ? 'weekly' : 'daily'
 }
@@ -382,6 +401,10 @@ function goToCurrentWeek() {
 
 onBeforeUnmount(() => {
   removeRepositionListeners()
+  if (guestSubscribeHintTimer) {
+    clearTimeout(guestSubscribeHintTimer)
+    guestSubscribeHintTimer = null
+  }
 })
 
 watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
@@ -415,6 +438,8 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .header-top {
+  position: relative;
+  z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -423,6 +448,8 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .header-bottom {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -442,6 +469,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  position: relative;
 }
 
 .entity-title h2 {
@@ -519,6 +547,25 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .star-icon {
   width: 24px;
   height: 24px;
+}
+
+.guest-subscribe-hint {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  z-index: 5;
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  max-width: min(72vw, 280px);
+  white-space: normal;
+  color: #fbbf24;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 10px;
+  padding: 6px 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 
 .week-block {

@@ -78,41 +78,40 @@ const hasSecondRow = computed(() => single.value || (sameSubject.value && props.
 <style scoped>
 .lesson-card-root {
   --card-pad: 10px;
+
   box-sizing: border-box;
-  display: grid;
-  grid-template-columns: auto 1fr;           /* слева period-line, справа content */
-  column-gap: 12px;
-  align-items: start;                        /* выравнивание по верху */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   width: 100%;
   min-width: 0;
   padding: var(--card-pad);
   border-radius: 16px;
-background: linear-gradient(135deg, 
-    rgba(129, 140, 248, 0.10) 0%, 
-    rgba(135, 203, 193, 0.06) 100%
-  ), rgba(30, 41, 59, 0.36);
+
+  background: linear-gradient(135deg, 
+      rgba(129, 140, 248, 0.10) 0%, 
+      rgba(135, 203, 193, 0.06) 100%
+    ), rgba(30, 41, 59, 0.36);
   backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid rgba(129, 140, 248, 0.28);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.35),
     0 0 0 1px rgba(129, 140, 248, 0.18),
     inset 0 0 16px rgba(129, 140, 248, 0.08);
-  transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);       /* hover без translateY */
-}
 
-/* .lesson-card-root:hover {
-  transform: translateY(-5px) scale(1.015);
-  box-shadow: 
-    0 20px 48px rgba(0, 0, 0, 0.45),
-    0 0 20px 6px rgba(129, 140, 248, 0.28);
-} */
+  transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
 .period-line {
   display: flex;
-  flex-direction: column;                    /* по умолчанию вертикально */
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: center;
-  gap: 6px;
-  justify-content: flex-start;               /* прижимаем к верху */
+  gap: 12px;
+}
+
+.second-row{
+  padding: 0 2px 0 8px;
 }
 
 .number {
@@ -133,27 +132,18 @@ background: linear-gradient(135deg,
 }
 
 .time {
-  color: #87cbc1;
-  font-size: 0.92rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  white-space: nowrap;
-  min-width: 40px;
-}
-
-.time-start,
-.time-end {
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #87cbc1;
+  white-space: nowrap;
 }
 
-.time-sep {
-  opacity: 0.5;
-  font-weight: 400;
-}
+
+.time-sep { opacity: 0.5; }
 
 .content-col {
   display: flex;
@@ -172,19 +162,28 @@ background: linear-gradient(135deg,
 .multiple-blocks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .inner-block {
   background: rgba(51, 65, 85, 0.28);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 6px 2px 6px 8px;
 }
+
+
 
 /* ── ≥ 420px ── number и time вертикально слева, content справа ── */
 @container (min-width: 420px) {
+  .lesson-card-root {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    align-items: start;
+  }
+
   .period-line {
     flex-direction: column;
     align-items: center;
@@ -203,30 +202,34 @@ background: linear-gradient(135deg,
   .time-sep {
     display: none;
   }
+
+  .second-row{
+  padding: 0 2px 0 6px;
+}
+
 }
 
 /* ── ≥ 480px ── number слева, time справа от него (горизонтально), на одной высоте с центром number ── */
 @container (min-width: 480px) {
   .lesson-card-root {
-    grid-template-columns: 44px auto 1fr;    /* number | time | content */
+    grid-template-columns: 44px auto 1fr;
     column-gap: 12px;
-    align-items: start;                      /* всё по верху */
   }
 
   .period-line {
-    grid-column: 1 / 3;                      /* занимает два первых столбца */
+    grid-column: 1 / 3;
     flex-direction: row;
-    align-items: center;                     /* центрируем по вертикали относительно number */
+    align-items: center;
     justify-content: flex-start;
     gap: 12px;
-    height: 44px;                            /* фиксированная высота = высоте number */
+    height: 44px;                    /* точно по высоте number */
   }
 
-  .number {
+  /* .number {
     width: 44px;
     height: 44px;
     flex-shrink: 0;
-  }
+  } */
 
   .time {
     flex: 0 0 auto;
@@ -246,29 +249,5 @@ background: linear-gradient(135deg,
   }
 }
 
-/* ── < 420px ── всё вертикально ── */
-@container (max-width: 419px) {
-  .lesson-card-root {
-    display: flex;
-    flex-direction: column;
-  }
 
-  .period-line {
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 12px;
-    min-height: auto;
-  }
-
-  .time {
-    flex-direction: row;
-    gap: 6px;
-    font-size: 0.92rem;
-  }
-
-  .time-sep {
-    display: inline;
-  }
-}
 </style>

@@ -96,7 +96,7 @@ onMounted(() => load())
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 12px;
+  /* padding: 12px; */
   background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
   color: #e2e8f0;
 }
@@ -109,7 +109,7 @@ onMounted(() => load())
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 12px;
+  /* padding: 12px; */
   background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
   color: #e2e8f0;
 }
@@ -312,9 +312,9 @@ onMounted(() => load())
 }
 
 @media (max-width: 360px) {
-  .teachers-view {
+  /* .teachers-view {
     padding: 10px;
-  }
+  } */
 
   .teachers-hero p {
     font-size: 0.92rem;
