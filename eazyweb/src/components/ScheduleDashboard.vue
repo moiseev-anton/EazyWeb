@@ -534,6 +534,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   align-items: center;
   justify-content: center;
   transition: transform 0.18s ease, color 0.18s ease;
+  color: #6a7584;
 }
 
 .star-button:hover {

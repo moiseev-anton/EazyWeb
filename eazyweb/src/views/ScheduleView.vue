@@ -26,7 +26,7 @@
       <div class="feature-card">
         <div class="feature-icon" v-html="featureIcons.devices"></div>
         <h3>Работает везде</h3>
-        <p>В браузере на телефоне или компьютере, а также прямо внутри Telegram (как мини-приложение или бот).</p>
+        <p>В браузере, iOS, Android и прямо внутри Telegram</p>
       </div>
 
       <div class="feature-card">
@@ -85,14 +85,6 @@
       </div>
     </div>
 
-    <ul class="benefits-list">
-      
-      <li>придут уведомления в Telegram об изменениях</li>
-      <li>получите напоминания перед началом каждой пары</li>
-      <li class="benefit-note">
-        Уведомления можно включать/выключать в профиле.
-      </li>
-    </ul>
   </div>
 
   <AppBottom />
