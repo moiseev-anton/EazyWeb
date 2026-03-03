@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="daily-mode">
     <div class="days-wrap">
       <div class="days-row">
@@ -16,7 +16,14 @@
       </div>
     </div>
 
-    <div class="lessons-list">
+    <div
+      class="lessons-wrap"
+      @touchstart="onTouchStart"
+      @touchmove="onTouchMove"
+      @touchend="onTouchEnd"
+      @touchcancel="onTouchCancel"
+    >
+      <div class="lessons-list">
       <div v-if="props.loading" class="cards skeleton-list">
         <li class="skeleton-card" v-for="n in 3" :key="n">
           <div class="sk-line top"></div>
@@ -28,19 +35,24 @@
         <LoadError :detail="' занятия'" @retry="() => emit('retry')" />
       </div>
       <div v-else>
-        <div v-if="(periodsMap[selectedIso] || []).length === 0" class="no-lessons">Нет занятий</div>
-        <ul class="cards">
-          <li v-for="group in periodsMap[selectedIso] || []" :key="group.key" class="lesson-card">
-            <LessonCard
-              :lessons="group.items"
-              :groupsMap="groupsMap"
-              :teachersMap="teachersMap"
-              :showSubject="true"
-              :prefer="entityType === 'group' ? 'teacher' : 'group'"
-              @open-entity="(e) => emit('open-entity', e)"
-            />
-          </li>
-        </ul>
+        <Transition :name="dayTransitionName" mode="out-in" @after-enter="onDayTransitionEnd">
+          <div :key="selectedIso" class="day-lessons-panel">
+            <div v-if="(periodsMap[selectedIso] || []).length === 0" class="no-lessons">Нет занятий</div>
+            <ul v-else class="cards">
+              <li v-for="group in periodsMap[selectedIso] || []" :key="group.key" class="lesson-card">
+                <LessonCard
+                  :lessons="group.items"
+                  :groupsMap="groupsMap"
+                  :teachersMap="teachersMap"
+                  :showSubject="true"
+                  :prefer="entityType === 'group' ? 'teacher' : 'group'"
+                  @open-entity="(e) => emit('open-entity', e)"
+                />
+              </li>
+            </ul>
+          </div>
+        </Transition>
+      </div>
       </div>
     </div>
   </div>
@@ -147,9 +159,77 @@ const isCurrentWeek = computed(() => {
 })
 
 const selectedIso = ref(isCurrentWeek.value ? format(new Date(), 'yyyy-MM-dd') : weekDates.value[0].iso)
+const isSwipeTransition = ref(false)
+const swipeDirection = ref('next')
+
+const dayTransitionName = computed(() => {
+  if (!isSwipeTransition.value) return 'day-swap-none'
+  return swipeDirection.value === 'prev' ? 'day-swipe-prev' : 'day-swipe-next'
+})
 
 function selectDay(iso) {
+  isSwipeTransition.value = false
   selectedIso.value = iso
+}
+
+const touchStartX = ref(0)
+const touchStartY = ref(0)
+const touchDeltaX = ref(0)
+const touchDeltaY = ref(0)
+const isTouchTracking = ref(false)
+
+const SWIPE_THRESHOLD_PX = 48
+const SWIPE_MAX_VERTICAL_PX = 40
+
+function moveDayBy(offset, options = {}) {
+  const { fromSwipe = false } = options
+  const currentIndex = weekDates.value.findIndex(d => d.iso === selectedIso.value)
+  if (currentIndex < 0) return
+  const nextIndex = currentIndex + offset
+  if (nextIndex < 0 || nextIndex >= weekDates.value.length) return
+  isSwipeTransition.value = fromSwipe
+  if (fromSwipe) swipeDirection.value = offset > 0 ? 'next' : 'prev'
+  selectedIso.value = weekDates.value[nextIndex].iso
+}
+
+function onTouchStart(e) {
+  if (!e.touches || e.touches.length !== 1) return
+  const t = e.touches[0]
+  touchStartX.value = t.clientX
+  touchStartY.value = t.clientY
+  touchDeltaX.value = 0
+  touchDeltaY.value = 0
+  isTouchTracking.value = true
+}
+
+function onTouchMove(e) {
+  if (!isTouchTracking.value || !e.touches || e.touches.length !== 1) return
+  const t = e.touches[0]
+  touchDeltaX.value = t.clientX - touchStartX.value
+  touchDeltaY.value = t.clientY - touchStartY.value
+}
+
+function onTouchEnd() {
+  if (!isTouchTracking.value) return
+
+  const absX = Math.abs(touchDeltaX.value)
+  const absY = Math.abs(touchDeltaY.value)
+  const isHorizontalSwipe = absX >= SWIPE_THRESHOLD_PX && absY <= SWIPE_MAX_VERTICAL_PX && absX > absY
+
+  if (isHorizontalSwipe) {
+    if (touchDeltaX.value < 0) moveDayBy(1, { fromSwipe: true }) // swipe left -> next day
+    else moveDayBy(-1, { fromSwipe: true }) // swipe right -> previous day
+  }
+
+  isTouchTracking.value = false
+}
+
+function onTouchCancel() {
+  isTouchTracking.value = false
+}
+
+function onDayTransitionEnd() {
+  isSwipeTransition.value = false
 }
 
 watch(weekDates, (newVal) => {
@@ -167,7 +247,13 @@ watch(weekDates, (newVal) => {
   gap: 12px;
 }
 
-/* ===== ДНИ НЕДЕЛИ ===== */
+.lessons-wrap {
+  flex: 1 1 auto;
+  min-height: 36vh;
+  touch-action: pan-y;
+}
+
+/* ===== Р”РќР РќР•Р”Р•Р›Р ===== */
 .days-wrap {
   border-radius: 18px;
   background: rgba(30, 41, 59, 0.24);
@@ -253,7 +339,7 @@ watch(weekDates, (newVal) => {
   border: 1px solid rgba(148, 163, 184, 0.22);
 }
 
-/* ===== СПИСОК ЗАНЯТИЙ ===== */
+/* ===== РЎРџРРЎРћРљ Р—РђРќРЇРўРР™ ===== */
 .lessons-list {
   border-radius: 18px;
   background: rgba(30, 41, 59, 0.24);
@@ -261,6 +347,11 @@ watch(weekDates, (newVal) => {
   border: 1px solid rgba(148, 163, 184, 0.14);
   padding: 12px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.day-lessons-panel {
+  min-height: 1px;
 }
 
 .cards {
@@ -332,6 +423,38 @@ watch(weekDates, (newVal) => {
   width: 70%;
 }
 
+.day-swipe-next-enter-active,
+.day-swipe-next-leave-active,
+.day-swipe-prev-enter-active,
+.day-swipe-prev-leave-active {
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+.day-swipe-next-enter-from {
+  transform: translateX(30px);
+  opacity: 0;
+}
+
+.day-swipe-next-leave-to {
+  transform: translateX(-30px);
+  opacity: 0;
+}
+
+.day-swipe-prev-enter-from {
+  transform: translateX(-30px);
+  opacity: 0;
+}
+
+.day-swipe-prev-leave-to {
+  transform: translateX(30px);
+  opacity: 0;
+}
+
+.day-swap-none-enter-active,
+.day-swap-none-leave-active {
+  transition: none;
+}
+
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -364,6 +487,13 @@ watch(weekDates, (newVal) => {
   }
 }
 
+@media (max-width: 767px) {
+  .lessons-wrap {
+    min-height: calc(100dvh - 260px);
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (max-width: 400px) {
   .days-row {
     gap: 6px;
@@ -374,3 +504,4 @@ watch(weekDates, (newVal) => {
   }
 }
 </style>
+
