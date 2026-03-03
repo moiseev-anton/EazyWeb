@@ -202,7 +202,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = normalizeUserPayload(data.user)
     isAuthenticated.value = !!accessToken.value
     // setup interceptors once store is available
-    try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+    try { setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired }) } catch (e) {}
     // try to load subscription after login
     try { await loadSubscription() } catch (_) {}
     return data
@@ -294,10 +294,8 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated.value = !!accessToken.value
         return data.access
       } catch (e) {
-        // failed to refresh — clear auth
-        accessToken.value = ''
-        isAuthenticated.value = false
-        user.value = null
+        // failed to refresh: clear local auth state
+        clearAuthState()
         throw e
       } finally {
         refreshPromise = null
@@ -310,19 +308,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     try {
       const res = await api.post('/token/logout/', null, { withCredentials: true })
-      accessToken.value = ''
-      isAuthenticated.value = false
-      user.value = null
-      subscription.value = null
-      notifications.value = { changes: true, reminders: true }
+      clearAuthState()
       return res.data || { success: true }
     } catch (e) {
       // ensure local cleanup even if server fails
-      accessToken.value = ''
-      isAuthenticated.value = false
-      user.value = null
-      subscription.value = null
-      notifications.value = { changes: true, reminders: true }
+      clearAuthState()
       throw e
     }
   }
@@ -354,6 +344,19 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function clearAuthState() {
+    accessToken.value = ''
+    isAuthenticated.value = false
+    user.value = null
+    subscription.value = null
+    notifications.value = { changes: true, reminders: true }
+  }
+
+  function markSessionExpired() {
+    clearAuthState()
+    bootStatus.value = isTelegramRuntime() ? 'twa_invalid' : 'anonymous'
+  }
+
   async function authViaRefresh() {
     try {
       const res = await api.post('/token/refresh/', null, { withCredentials: true })
@@ -363,7 +366,7 @@ export const useAuthStore = defineStore('auth', () => {
       accessToken.value = data.access
       isAuthenticated.value = true
       bootStatus.value = 'authenticated'
-      try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+      try { setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired }) } catch (e) {}
       await hydrateCurrentUser()
       try { await loadSubscription() } catch (_) {}
       return 'ok'
@@ -396,7 +399,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = normalizeUserPayload(d.user, user.value)
       isAuthenticated.value = !!accessToken.value
       bootStatus.value = 'authenticated'
-      try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+      try { setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired }) } catch (e) {}
       await hydrateCurrentUser()
       try { await loadSubscription() } catch (_) {}
       return 'ok'
@@ -412,7 +415,7 @@ export const useAuthStore = defineStore('auth', () => {
     bootStatus.value = 'booting'
 
     try {
-      setupInterceptors({ accessToken, refreshToken, logout })
+      setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired })
     } catch (e) {
       // ignore, will setup later when login runs
     }
@@ -538,7 +541,7 @@ export const useAuthStore = defineStore('auth', () => {
           user.value = normalizeUserPayload(res.data.user, user.value)
           isAuthenticated.value = !!accessToken.value
           // Ensure interceptors use the new access token
-          try { setupInterceptors({ accessToken, refreshToken, logout }) } catch (e) {}
+          try { setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired }) } catch (e) {}
 
           // Try to fetch full user profile if not provided in response
           try {
@@ -679,6 +682,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken: accessTokenStr,
     login,
     logout,
+    markSessionExpired,
     refreshToken,
     startDeeplink,
     pollToken,

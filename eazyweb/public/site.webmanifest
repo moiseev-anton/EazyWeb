@@ -1,6 +1,7 @@
 {
   "name": "EazyClass - Расписание",
   "short_name": "EazyClass",
+  "version": "1.2",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

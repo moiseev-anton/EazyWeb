@@ -76,8 +76,11 @@ export function setupInterceptors(authStore) {
           }
           return api(originalRequest)
         } catch (refreshErr) {
-          // refresh failed — force logout
-          try { authStore.logout() } catch (e) {}
+          // refresh failed: set expired session state
+          try {
+            if (typeof authStore.markSessionExpired === 'function') authStore.markSessionExpired()
+            else if (typeof authStore.logout === 'function') authStore.logout()
+          } catch (e) {}
           return Promise.reject(refreshErr)
         }
       }
