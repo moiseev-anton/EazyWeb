@@ -59,7 +59,16 @@ const props = defineProps({
 const single = computed(() => (props.lessons || []).length === 1)
 const lessons = computed(() => props.lessons || [])
 
-const periodNumber = computed(() => lessons.value[0]?.attributes?.number || '')
+const periodNumber = computed(() => {
+  const attrs = lessons.value[0]?.attributes
+  const number = attrs?.number
+  const part = attrs?.part
+
+  if (number === undefined || number === null || number === '') return ''
+  if (part === undefined || part === null || Number(part) === 0) return String(number)
+
+  return `${number}.${part}`
+})
 const startTime = computed(() => {
   const a = lessons.value[0]?.attributes
   return a?.startTime?.slice(0, 5) || ''

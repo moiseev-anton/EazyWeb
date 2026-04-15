@@ -93,12 +93,31 @@ function buildWeekDates(monday) {
 
 const weekDates = computed(() => buildWeekDates(startOfWeek(weekStartDate.value, { weekStartsOn: 1 })))
 
+function getSortValue(value) {
+  if (value === null || value === undefined || value === '') return 0
+  const numericValue = Number(value)
+  return Number.isFinite(numericValue) ? numericValue : 0
+}
+
+function compareLessons(a, b) {
+  const numberDiff = getSortValue(a.attributes?.number) - getSortValue(b.attributes?.number)
+  if (numberDiff !== 0) return numberDiff
+
+  const partDiff = getSortValue(a.attributes?.part) - getSortValue(b.attributes?.part)
+  if (partDiff !== 0) return partDiff
+
+  const subgroupDiff = getSortValue(a.attributes?.subgroup) - getSortValue(b.attributes?.subgroup)
+  if (subgroupDiff !== 0) return subgroupDiff
+
+  return (a.attributes?.startTime || '').localeCompare(b.attributes?.startTime || '')
+}
+
 const periodsMap = computed(() => {
   const m = {}
   for (const l of props.lessons || []) {
     const date = l.attributes?.date
     if (!date) continue
-    const key = `${date}|${l.attributes?.number || ''}|${l.attributes?.startTime || ''}|${l.attributes?.endTime || ''}`
+    const key = `${date}|${l.attributes?.number || ''}|${l.attributes?.part ?? ''}|${l.attributes?.startTime || ''}|${l.attributes?.endTime || ''}`
     if (!m[date]) m[date] = []
     let grp = m[date].find(g => g.key === key)
     if (!grp) {
@@ -108,12 +127,10 @@ const periodsMap = computed(() => {
     grp.items.push(l)
   }
   for (const k of Object.keys(m)) {
-    m[k].sort((a, b) => {
-      const na = a.items[0].attributes.number || 0
-      const nb = b.items[0].attributes.number || 0
-      if (na !== nb) return na - nb
-      return (a.items[0].attributes.startTime || '').localeCompare(b.items[0].attributes.startTime || '')
+    m[k].forEach(group => {
+      group.items.sort(compareLessons)
     })
+    m[k].sort((a, b) => compareLessons(a.items[0], b.items[0]))
   }
   return m
 })
@@ -142,9 +159,10 @@ const lessonsMap = computed(() => {
     const date = l.attributes?.date
     if (!date) continue
     const number = l.attributes?.number || ''
+    const part = l.attributes?.part ?? ''
     const startTime = l.attributes?.startTime || ''
     const endTime = l.attributes?.endTime || ''
-    const periodKey = `${number}|${startTime}|${endTime}`
+    const periodKey = `${number}|${part}|${startTime}|${endTime}`
     if (!m[date]) m[date] = new Set()
     m[date].add(periodKey)
   }
@@ -504,4 +522,3 @@ watch(weekDates, (newVal) => {
   }
 }
 </style>
-

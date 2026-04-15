@@ -29,6 +29,12 @@ function resolveRelationId(relationshipData) {
   return relationshipData.id || null
 }
 
+function normalizeLessonPart(part) {
+  if (part === null || part === undefined || part === '') return null
+  const numericPart = Number(part)
+  return Number.isFinite(numericPart) ? numericPart : null
+}
+
 export async function fetchLessons({ date_from, date_to, group = null, teacher = null, include = 'group,teacher' } = {}) {
   const params = {
     'filter[date_from]': date_from,
@@ -48,6 +54,10 @@ export async function fetchLessons({ date_from, date_to, group = null, teacher =
     const teacherRelId = resolveRelationId(item.relationships?.teacher?.data)
     return {
       ...item,
+      attributes: {
+        ...item.attributes,
+        part: normalizeLessonPart(item.attributes?.part)
+      },
       _resolved: {
         group: groupRelId ? includedMap.groups[groupRelId] : null,
         teacher: teacherRelId ? includedMap.teachers[teacherRelId] : null
