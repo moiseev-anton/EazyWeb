@@ -39,7 +39,7 @@
                 :groupsMap="groupsMap"
                 :teachersMap="teachersMap"
                 :showSubject="true"
-                :prefer="entityType === 'group' ? 'teacher' : 'group'"
+                :prefer="entityType === 'group' ? 'teacher' : entityType === 'teacher' ? 'group' : 'both'"
                 @open-entity="(e) => emit('open-entity', e)"
               />
             </li>

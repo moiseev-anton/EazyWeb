@@ -1,11 +1,34 @@
-﻿<template>
+<template>
   <div class="lesson-info">
     <div v-if="showSubject" class="subject" :title="subject">{{ subject }}</div>
 
     <div class="row2">
-      <div class="left" v-if="leftText">
-        <a v-if="leftEntity" class="group-or-teacher" href="#" :title="leftText" @click.prevent="openLeft">{{ leftText }}</a>
-        <span v-else class="group-or-teacher is-static" :title="leftText">{{ leftText }}</span>
+      <div class="left-stack" v-if="showEntityStack">
+        <div class="entity-line" v-if="showGroupLine">
+          <a
+            v-if="groupEntity"
+            class="group-or-teacher"
+            href="#"
+            :title="groupEntity.name"
+            @click.prevent="openEntity(groupEntity)"
+          >
+            {{ groupEntity.name }}
+          </a>
+          <span v-else class="group-or-teacher is-static" :title="groupFallbackText">{{ groupFallbackText }}</span>
+        </div>
+
+        <div class="entity-line" v-if="showTeacherLine">
+          <a
+            v-if="teacherEntity"
+            class="group-or-teacher"
+            href="#"
+            :title="teacherEntity.name"
+            @click.prevent="openEntity(teacherEntity)"
+          >
+            {{ teacherEntity.name }}
+          </a>
+          <span v-else class="group-or-teacher is-static" :title="teacherFallbackText">{{ teacherFallbackText }}</span>
+        </div>
       </div>
 
       <div class="subgroup" :class="{ 'is-empty': !showSubgroup }" :aria-hidden="!showSubgroup">
@@ -27,16 +50,19 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 const props = defineProps({
   lesson: { type: Object, required: true },
-  // maps for resolving relationships (optional)
   groupsMap: { type: Object, default: () => ({}) },
   teachersMap: { type: Object, default: () => ({}) },
-  // show/hide subject and which to prefer: 'group'|'teacher'|'auto'
   prefer: { type: String, default: 'auto' },
   showSubject: { type: Boolean, default: true }
 })
+
+const emit = defineEmits(['open-entity'])
+const router = useRouter()
+const route = useRoute()
 
 const subject = computed(() => props.lesson.attributes?.subject || '')
 const classroom = computed(() => props.lesson.attributes?.classroom || '')
@@ -62,35 +88,28 @@ const relationData = computed(() => {
   }
 })
 
-const leftEntity = computed(() => {
-  const { groupRel, teacherRel, groupTitle, teacherShort, group, teacher } = relationData.value
-
-  if (props.prefer === 'group') {
-    if (groupRel && groupTitle) return { id: groupRel.id, type: 'group', name: groupTitle, endpoint: group?.endpoint || null }
-    if (teacherRel && teacherShort) return { id: teacherRel.id, type: 'teacher', name: teacherShort, endpoint: teacher?.endpoint || null }
-    return null
-  }
-
-  if (props.prefer === 'teacher') {
-    if (teacherRel && teacherShort) return { id: teacherRel.id, type: 'teacher', name: teacherShort, endpoint: teacher?.endpoint || null }
-    return null
-  }
-
-  // auto: prefer group then teacher
-  if (groupRel && groupTitle) return { id: groupRel.id, type: 'group', name: groupTitle, endpoint: group?.endpoint || null }
-  if (teacherRel && teacherShort) return { id: teacherRel.id, type: 'teacher', name: teacherShort, endpoint: teacher?.endpoint || null }
-  return null
+const groupEntity = computed(() => {
+  const { groupRel, groupTitle, group } = relationData.value
+  if (!groupRel || !groupTitle) return null
+  return { id: groupRel.id, type: 'group', name: groupTitle, endpoint: group?.endpoint || null }
 })
 
-const leftText = computed(() => {
-  if (leftEntity.value) return leftEntity.value.name
+const teacherEntity = computed(() => {
+  const { teacherRel, teacherShort, teacher } = relationData.value
+  if (!teacherRel || !teacherShort) return null
+  return { id: teacherRel.id, type: 'teacher', name: teacherShort, endpoint: teacher?.endpoint || null }
+})
 
-  // For group schedule (prefer teacher), teacher relation may be explicitly null.
-  if (props.prefer === 'teacher' && props.lesson.relationships?.teacher?.data === null) {
-    return 'не указано'
-  }
+const showGroupLine = computed(() => ['group', 'both', 'auto'].includes(props.prefer))
+const showTeacherLine = computed(() => ['teacher', 'both'].includes(props.prefer))
 
-  return ''
+const groupFallbackText = computed(() => 'не указано')
+const teacherFallbackText = computed(() => 'не указано')
+
+const showEntityStack = computed(() => {
+  if (showGroupLine.value && (groupEntity.value || props.prefer === 'group' || props.prefer === 'both')) return true
+  if (showTeacherLine.value && (teacherEntity.value || props.prefer === 'teacher' || props.prefer === 'both')) return true
+  return false
 })
 
 const showSubgroup = computed(() => {
@@ -98,23 +117,14 @@ const showSubgroup = computed(() => {
   return sg !== undefined && sg !== null && String(sg) !== '0' && String(sg) !== ''
 })
 
-const emit = defineEmits(['open-entity'])
-import { useRouter, useRoute } from 'vue-router'
-const router = useRouter()
-const route = useRoute()
+function openEntity(obj) {
+  if (!obj) return
 
-function openLeft() {
-  if (!leftEntity.value) return
+  emit('open-entity', obj)
 
-  const emitEntity = (obj) => {
-    emit('open-entity', obj)
-
-    if (!['schedule', 'groups', 'teachers'].includes(route.name)) {
-      router.push({ name: 'schedule', query: { openId: obj.id, openType: obj.type, openName: obj.name } }).catch(() => {})
-    }
+  if (!['schedule', 'groups', 'teachers', 'classrooms'].includes(route.name)) {
+    router.push({ name: 'schedule', query: { openId: obj.id, openType: obj.type, openName: obj.name } }).catch(() => {})
   }
-
-  emitEntity(leftEntity.value)
 }
 </script>
 
@@ -148,12 +158,21 @@ function openLeft() {
   color: #94a3b8;
 }
 
-.left {
+.left-stack {
   flex: 1 1 140px;
   min-width: 140px;
   max-width: 100%;
   flex-shrink: 1;
   order: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 24px;
+}
+
+.entity-line {
+  min-width: 0;
 }
 
 .group-or-teacher {
@@ -221,9 +240,7 @@ function openLeft() {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  /* background: rgba(135, 203, 193, 0.14); */
-  /* border: 1px solid rgba(135, 203, 193, 0.35); */
-  padding: 4px 0px;
+  padding: 4px 0;
   border-radius: 10px;
 }
 
@@ -244,7 +261,6 @@ function openLeft() {
   text-overflow: ellipsis;
 }
 
-/* Responsive */
 @media (max-width: 420px) {
   .subgroup {
     flex-basis: 60px;
