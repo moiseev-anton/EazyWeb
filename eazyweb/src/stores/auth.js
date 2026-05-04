@@ -368,10 +368,10 @@ export const useAuthStore = defineStore('auth', () => {
 
       accessToken.value = data.access
       isAuthenticated.value = true
-      bootStatus.value = 'authenticated'
       try { setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired }) } catch (e) {}
       await hydrateCurrentUser()
       try { await loadSubscription() } catch (_) {}
+      bootStatus.value = 'authenticated'
       return 'ok'
     } catch (e) {
       if (!e.response) return 'network_error'
@@ -401,10 +401,10 @@ export const useAuthStore = defineStore('auth', () => {
       accessToken.value = d.access
       user.value = normalizeUserPayload(d.user, user.value)
       isAuthenticated.value = !!accessToken.value
-      bootStatus.value = 'authenticated'
       try { setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired }) } catch (e) {}
       await hydrateCurrentUser()
       try { await loadSubscription() } catch (_) {}
+      bootStatus.value = 'authenticated'
       return 'ok'
     } catch (e) {
       if (!e.response) return 'network_error'
@@ -429,8 +429,8 @@ export const useAuthStore = defineStore('auth', () => {
 
       // If we already have an access token in memory, try to load subscription
       if (accessToken.value) {
+        try { await loadSubscription() } catch (_) {}
         bootStatus.value = 'authenticated'
-        loadSubscription().catch(() => {})
         return
       }
 
