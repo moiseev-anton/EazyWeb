@@ -36,15 +36,23 @@
     <div v-else class="classrooms-container">
       <section v-for="group in groups" :key="group.symbol" class="letter-section">
         <div class="letter-header">{{ group.symbol }}</div>
-        <div class="classrooms-list">
-          <button
-            v-for="classroom in group.classrooms"
-            :key="classroom.id"
-            class="classroom-btn"
-            @click="selectClassroom(classroom)"
+        <div class="letter-content">
+          <section
+            v-for="subgroup in group.subgroups"
+            :key="`${group.symbol}-${subgroup.subsymbol}`"
+            class="subgroup-section"
           >
-            <span class="classroom-name">{{ classroom.title }}</span>
-          </button>
+            <div class="classrooms-list">
+              <button
+                v-for="classroom in subgroup.classrooms"
+                :key="classroom.id"
+                class="classroom-btn"
+                @click="selectClassroom(classroom)"
+              >
+                <span class="classroom-name">{{ classroom.title }}</span>
+              </button>
+            </div>
+          </section>
         </div>
       </section>
     </div>
@@ -56,8 +64,9 @@ import { ref, onMounted } from 'vue'
 import ScheduleDashboard from '../components/ScheduleDashboard.vue'
 import { fetchClassrooms, groupClassroomsByFirstSymbol } from '../api/classroomsService'
 import LoadError from '../components/LoadError.vue'
+import { useEntitySelection } from '../composables/entitySelection'
 
-const selectedEntity = ref(null)
+const { selectedEntity } = useEntitySelection('classrooms')
 const isLoading = ref(false)
 const error = ref(null)
 const groups = ref([])
@@ -152,6 +161,15 @@ onMounted(() => load())
   color: #87cbc1;
   background: rgba(15, 23, 42, 0.35);
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.letter-content {
+  padding: 12px 0 10px;
+}
+
+
+.subgroup-section + .subgroup-section {
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .classrooms-list {

@@ -17,11 +17,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import ScheduleDashboard from '../components/ScheduleDashboard.vue'
 import FacultyAccordion from '../components/FacultyAccordion.vue'
+import { useEntitySelection } from '../composables/entitySelection'
 
-const selectedEntity = ref(null)
+const { selectedEntity } = useEntitySelection('groups')
 
 function selectGroup(group) {
   selectedEntity.value = { ...group, type: 'group' }

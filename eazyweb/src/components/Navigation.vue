@@ -6,6 +6,7 @@
         to="/schedule"
         class="nav-item"
         :class="{ active: isActive('schedule') }"
+        @click.prevent="handleNavClick('schedule', '/schedule')"
       >
         <span class="icon" v-html="icons.schedule"></span>
         <span class="label">Расписание</span>
@@ -15,6 +16,7 @@
         to="/groups"
         class="nav-item"
         :class="{ active: isActive('groups') }"
+        @click.prevent="handleNavClick('groups', '/groups')"
       >
         <span class="icon" v-html="icons.groups"></span>
         <span class="label">Группы</span>
@@ -24,6 +26,7 @@
         to="/teachers"
         class="nav-item"
         :class="{ active: isActive('teachers') }"
+        @click.prevent="handleNavClick('teachers', '/teachers')"
       >
         <span class="icon" v-html="icons.teachers"></span>
         <span class="label">Преподаватели</span>
@@ -48,6 +51,7 @@
           to="/schedule"
           class="nav-item"
           :class="{ active: isActive('schedule') }"
+          @click.prevent="handleNavClick('schedule', '/schedule')"
         >
           <span class="icon" v-html="icons.schedule"></span>
           <span class="label">Расписание</span>
@@ -57,6 +61,7 @@
           to="/groups"
           class="nav-item"
           :class="{ active: isActive('groups') }"
+          @click.prevent="handleNavClick('groups', '/groups')"
         >
           <span class="icon" v-html="icons.groups"></span>
           <span class="label">Группы</span>
@@ -66,6 +71,7 @@
           to="/teachers"
           class="nav-item"
           :class="{ active: isActive('teachers') }"
+          @click.prevent="handleNavClick('teachers', '/teachers')"
         >
           <span class="icon" v-html="icons.teachers"></span>
           <span class="label">Преподаватели</span>
@@ -75,6 +81,7 @@
           to="/classrooms"
           class="nav-item"
           :class="{ active: isActive('classrooms') }"
+          @click.prevent="handleNavClick('classrooms', '/classrooms')"
         >
           <span class="icon" v-html="icons.classrooms"></span>
           <span class="label">Кабинеты</span>
@@ -101,6 +108,7 @@ import { useRouter, useRoute } from 'vue-router'
 import twemoji from 'twemoji'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
+import { hasEntitySelection, clearEntitySelection } from '../composables/entitySelection'
 
 const router = useRouter()
 const route = useRoute()
@@ -133,6 +141,7 @@ const profileLabel = computed(() => {
 
 // const isActive = computed(() => (name) => route.name === name)
 const isActive = (name) => route.name === name
+const entityRoutes = ['groups', 'teachers', 'classrooms']
 
 onMounted(() => window.addEventListener('resize', handleResize))
 onUnmounted(() => window.removeEventListener('resize', handleResize))
@@ -141,7 +150,26 @@ function handleResize() {
   windowWidth.value = window.innerWidth
 }
 
+function clearPreviousEntitySelection(targetName) {
+  if (entityRoutes.includes(route.name) && route.name !== targetName) {
+    clearEntitySelection(route.name)
+  }
+}
+
+function handleNavClick(name, to) {
+  if (route.name === name) {
+    if (entityRoutes.includes(name) && hasEntitySelection(name)) {
+      clearEntitySelection(name)
+    }
+    return
+  }
+
+  clearPreviousEntitySelection(name)
+  router.push(to).catch(() => {})
+}
+
 function handleProfileClick() {
+  clearPreviousEntitySelection('profile')
   if (!isAuthenticated.value) {
     router.push('/schedule')
   } else {

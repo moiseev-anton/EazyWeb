@@ -35,13 +35,13 @@
         <span v-if="showSubgroup">{{ subgroup }} подгруппа</span>
       </div>
 
-      <div class="classroom" v-if="classroom" :title="classroom">
+      <div class="classroom" :title="classroomTitle">
         <span class="classroom-inner" aria-hidden="true">
           <svg class="icon pin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
             <circle cx="12" cy="10" r="3"/>
           </svg>
-          <span class="classroom-text">{{ classroom }}</span>
+          <span class="classroom-text">{{ classroomDisplay }}</span>
         </span>
       </div>
     </div>
@@ -65,7 +65,13 @@ const router = useRouter()
 const route = useRoute()
 
 const subject = computed(() => props.lesson.attributes?.subject || '')
-const classroom = computed(() => props.lesson.attributes?.classroom || '')
+const classroom = computed(() => {
+  const value = props.lesson.attributes?.classroom
+  if (value === null || value === undefined) return ''
+  return String(value).trim()
+})
+const classroomDisplay = computed(() => classroom.value || '---')
+const classroomTitle = computed(() => classroom.value || 'Кабинет не указан')
 const subgroup = computed(() => props.lesson.attributes?.subgroup || '0')
 
 const relationData = computed(() => {

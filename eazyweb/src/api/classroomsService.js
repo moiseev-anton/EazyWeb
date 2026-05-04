@@ -31,20 +31,29 @@ export async function fetchClassrooms(useCache = true) {
 }
 
 export function groupClassroomsByFirstSymbol(classrooms) {
-  const map = new Map()
+  const firstSymbolMap = new Map()
 
   classrooms.forEach(classroom => {
     const title = String(classroom.title || '').trim()
-    const symbol = (title[0] || '?').toUpperCase()
+    const firstSymbol = (title[0] || '?').toUpperCase()
+    const secondSymbol = (title[1] || '?').toUpperCase()
 
-    if (!map.has(symbol)) map.set(symbol, [])
-    map.get(symbol).push(classroom)
+    if (!firstSymbolMap.has(firstSymbol)) firstSymbolMap.set(firstSymbol, new Map())
+
+    const secondSymbolMap = firstSymbolMap.get(firstSymbol)
+    if (!secondSymbolMap.has(secondSymbol)) secondSymbolMap.set(secondSymbol, [])
+    secondSymbolMap.get(secondSymbol).push(classroom)
   })
 
-  return Array.from(map.entries())
-    .map(([symbol, list]) => ({
+  return Array.from(firstSymbolMap.entries())
+    .map(([symbol, secondSymbolMap]) => ({
       symbol,
-      classrooms: list.sort((a, b) => a.title.localeCompare(b.title, 'ru', { numeric: true }))
+      subgroups: Array.from(secondSymbolMap.entries())
+        .map(([subsymbol, list]) => ({
+          subsymbol,
+          classrooms: list.sort((a, b) => a.title.localeCompare(b.title, 'ru', { numeric: true }))
+        }))
+        .sort((a, b) => a.subsymbol.localeCompare(b.subsymbol, 'ru', { numeric: true }))
     }))
     .sort((a, b) => a.symbol.localeCompare(b.symbol, 'ru', { numeric: true }))
 }

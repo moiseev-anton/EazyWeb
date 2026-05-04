@@ -56,8 +56,9 @@ import { ref, onMounted } from 'vue'
 import ScheduleDashboard from '../components/ScheduleDashboard.vue'
 import { fetchTeachers, groupTeachersByLetter } from '../api/teachersService'
 import LoadError from '../components/LoadError.vue'
+import { useEntitySelection } from '../composables/entitySelection'
 
-const selectedEntity = ref(null)
+const { selectedEntity } = useEntitySelection('teachers')
 const isLoading = ref(false)
 const error = ref(null)
 const groups = ref([])
