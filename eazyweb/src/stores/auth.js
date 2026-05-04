@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   // boot status: 'booting' | 'authenticated' | 'anonymous' | 'network_error' | 'server_error' | 'twa_invalid'
   const bootStatus = ref('booting')
+  const silentAuthMode = ref('none')
   const user = ref(null)
   const subscription = ref(null)
   const notifications = ref({ changes: true, reminders: true })
@@ -17,6 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
   // refresh control to avoid parallel refreshes
   let refreshPromise = null
   let telegramBotInfoPromise = null
+  let bootPromise = null
   const TELEGRAM_INITDATA_CACHE_KEY = 'telegram_init_data_raw'
   const TELEGRAM_INITDATA_CACHE_TTL_MS = 30 * 1000
   const TELEGRAM_RUNTIME_SEEN_KEY = 'telegram_runtime_seen'
@@ -331,6 +333,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const fullName = computed(() => user.value ? `${user.value.name || ''} ${user.value.surname || ''}`.trim() : '')
+  const isSilentAuthInProgress = computed(() => bootStatus.value === 'booting' && silentAuthMode.value !== 'none')
 
   // expose accessToken (string) for interceptors
   const accessTokenStr = computed(() => accessToken.value)
@@ -412,37 +415,58 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Provide a small initializer to wire interceptors from main.js if needed
   async function init() {
-    bootStatus.value = 'booting'
+    if (bootPromise) return bootPromise
 
-    try {
-      setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired })
-    } catch (e) {
-      // ignore, will setup later when login runs
-    }
+    bootPromise = (async () => {
+      bootStatus.value = 'booting'
+      silentAuthMode.value = 'none'
 
-    // If we already have an access token in memory, try to load subscription
-    if (accessToken.value) {
-      bootStatus.value = 'authenticated'
-      loadSubscription().catch(() => {})
-      return
-    }
-
-    const inTelegram = isTelegramRuntime()
-
-    // In Telegram runtime prioritize fresh initData login.
-    if (inTelegram) {
-      const twaResult = await authViaTelegram()
-      if (twaResult === 'ok') return
-      if (twaResult === 'network_error') {
-        bootStatus.value = 'network_error'
-        return
+      try {
+        setupInterceptors({ accessToken, refreshToken, logout, markSessionExpired })
+      } catch (e) {
+        // ignore, will setup later when login runs
       }
-      if (twaResult === 'server_error') {
-        bootStatus.value = 'server_error'
+
+      // If we already have an access token in memory, try to load subscription
+      if (accessToken.value) {
+        bootStatus.value = 'authenticated'
+        loadSubscription().catch(() => {})
         return
       }
 
-      // Fallback to refresh cookie if TWA auth failed.
+      const inTelegram = isTelegramRuntime()
+      silentAuthMode.value = inTelegram ? 'telegram' : 'refresh'
+
+      // In Telegram runtime prioritize fresh initData login.
+      if (inTelegram) {
+        const twaResult = await authViaTelegram()
+        if (twaResult === 'ok') return
+        if (twaResult === 'network_error') {
+          bootStatus.value = 'network_error'
+          return
+        }
+        if (twaResult === 'server_error') {
+          bootStatus.value = 'server_error'
+          return
+        }
+
+        // Fallback to refresh cookie if TWA auth failed.
+        const refreshResult = await authViaRefresh()
+        if (refreshResult === 'ok') return
+        if (refreshResult === 'network_error') {
+          bootStatus.value = 'network_error'
+          return
+        }
+        if (refreshResult === 'server_error') {
+          bootStatus.value = 'server_error'
+          return
+        }
+
+        bootStatus.value = 'twa_invalid'
+        return
+      }
+
+      // Browser runtime: refresh cookie remains primary flow.
       const refreshResult = await authViaRefresh()
       if (refreshResult === 'ok') return
       if (refreshResult === 'network_error') {
@@ -454,24 +478,18 @@ export const useAuthStore = defineStore('auth', () => {
         return
       }
 
-      bootStatus.value = 'twa_invalid'
-      return
-    }
+      // No auth available
+      bootStatus.value = 'anonymous'
+    })()
 
-    // Browser runtime: refresh cookie remains primary flow.
-    const refreshResult = await authViaRefresh()
-    if (refreshResult === 'ok') return
-    if (refreshResult === 'network_error') {
-      bootStatus.value = 'network_error'
-      return
+    try {
+      return await bootPromise
+    } finally {
+      bootPromise = null
+      if (bootStatus.value !== 'booting') {
+        silentAuthMode.value = 'none'
+      }
     }
-    if (refreshResult === 'server_error') {
-      bootStatus.value = 'server_error'
-      return
-    }
-
-    // No auth available
-    bootStatus.value = 'anonymous'
   }
 
   // Load current user's subscription (expect at most one). Uses include=teacher,group
@@ -676,6 +694,8 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     isAuthenticated,
     bootStatus,
+    silentAuthMode,
+    isSilentAuthInProgress,
     user,
     subscription,
     notifications,
