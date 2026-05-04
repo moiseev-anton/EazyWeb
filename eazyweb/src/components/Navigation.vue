@@ -1,6 +1,5 @@
 <template>
   <div class="nav-wrapper">
-    <!-- Мобильная нижняя навигация -->
     <nav v-if="isMobile" class="bottom-nav">
       <router-link
         to="/schedule"
@@ -32,17 +31,62 @@
         <span class="label">Преподаватели</span>
       </router-link>
 
-      <div
-        class="nav-item"
-        :class="{ active: isActive('profile') }"
-        @click="handleProfileClick"
-      >
-        <span class="icon" v-html="icons.profile"></span>
-        <span class="label">{{ profileLabel }}</span>
-      </div>
+      <template v-if="showCompactMobileNav">
+        <div
+          class="nav-item nav-item-more"
+          :class="{ active: isMoreActive }"
+          @click="toggleMoreMenu"
+          aria-label="Еще"
+          title="Еще"
+        >
+          <span class="icon more-glyph" aria-hidden="true">⋯</span>
+        </div>
+      </template>
+
+      <template v-else>
+        <router-link
+          to="/classrooms"
+          class="nav-item"
+          :class="{ active: isActive('classrooms') }"
+          @click.prevent="handleNavClick('classrooms', '/classrooms')"
+        >
+          <span class="icon" v-html="icons.classrooms"></span>
+          <span class="label">Кабинеты</span>
+        </router-link>
+
+        <div
+          class="nav-item"
+          :class="{ active: isActive('profile') }"
+          @click="handleProfileClick"
+        >
+          <span class="icon" v-html="icons.profile"></span>
+          <span class="label">{{ profileLabel }}</span>
+        </div>
+      </template>
     </nav>
 
-    <!-- Десктопная боковая панель -->
+    <div v-if="isMobile && showCompactMobileNav && moreMenuOpen" class="more-overlay" @click="closeMoreMenu">
+      <div class="more-sheet" @click.stop>
+        <button
+          class="more-item"
+          :class="{ active: isActive('classrooms') }"
+          @click="handleMoreNavClick('classrooms', '/classrooms')"
+        >
+          <span class="icon" v-html="icons.classrooms"></span>
+          <span class="label">Кабинеты</span>
+        </button>
+
+        <button
+          class="more-item"
+          :class="{ active: isActive('profile') }"
+          @click="handleProfileClick"
+        >
+          <span class="icon" v-html="icons.profile"></span>
+          <span class="label">{{ profileLabel }}</span>
+        </button>
+      </div>
+    </div>
+
     <aside v-else class="sidebar">
       <div class="logo">EazyClass</div>
 
@@ -103,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import twemoji from 'twemoji'
 import { useAuthStore } from '../stores/auth'
@@ -114,9 +158,8 @@ const router = useRouter()
 const route = useRoute()
 
 const authStore = useAuthStore()
-const { isAuthenticated, subscription, user } = storeToRefs(authStore)
+const { isAuthenticated } = storeToRefs(authStore)
 
-/** Twemoji как в Telegram */
 const twemojiOptions = {
   base: `${import.meta.env.BASE_URL}twemoji/`,
   folder: 'svg',
@@ -128,26 +171,44 @@ const icons = {
   groups: twemoji.parse('🎓', twemojiOptions),
   teachers: twemoji.parse('🧑‍🏫', twemojiOptions),
   classrooms: twemoji.parse('🚪', twemojiOptions),
+  more: twemoji.parse('➕', twemojiOptions),
   profile: twemoji.parse('👤', twemojiOptions),
 }
 
-let windowWidth = ref(window.innerWidth)
-const isMobile = computed(() => windowWidth.value < 768)
-
-const profileLabel = computed(() => {
-  if (!isAuthenticated.value) return 'Войти'
-  return 'Профиль'
-})
-
-// const isActive = computed(() => (name) => route.name === name)
-const isActive = (name) => route.name === name
+const windowWidth = ref(window.innerWidth)
+const moreMenuOpen = ref(false)
 const entityRoutes = ['groups', 'teachers', 'classrooms']
+const MOBILE_SIDE_GUTTERS = 32
+const MOBILE_NAV_MAX_WIDTH = 420
+const MOBILE_ITEM_WIDTH = 74
+const MOBILE_NAV_HORIZONTAL_PADDING = 16
+
+const isMobile = computed(() => windowWidth.value < 768)
+const mobileNavInnerWidth = computed(() => {
+  const viewportLimitedWidth = Math.max(0, windowWidth.value - MOBILE_SIDE_GUTTERS)
+  return Math.min(viewportLimitedWidth, MOBILE_NAV_MAX_WIDTH)
+})
+const mobileNavCanFitAll = computed(() => mobileNavInnerWidth.value >= MOBILE_ITEM_WIDTH * 5 + MOBILE_NAV_HORIZONTAL_PADDING)
+const showCompactMobileNav = computed(() => isMobile.value && !mobileNavCanFitAll.value)
+const profileLabel = computed(() => (isAuthenticated.value ? 'Профиль' : 'Войти'))
+const isMoreActive = computed(() => showCompactMobileNav.value && ['classrooms', 'profile'].includes(route.name))
+
+const isActive = (name) => route.name === name
 
 onMounted(() => window.addEventListener('resize', handleResize))
 onUnmounted(() => window.removeEventListener('resize', handleResize))
 
+watch(() => route.fullPath, () => {
+  closeMoreMenu()
+})
+
+watch(showCompactMobileNav, (isCompact) => {
+  if (!isCompact) closeMoreMenu()
+})
+
 function handleResize() {
   windowWidth.value = window.innerWidth
+  if (windowWidth.value >= 768) closeMoreMenu()
 }
 
 function clearPreviousEntitySelection(targetName) {
@@ -157,6 +218,8 @@ function clearPreviousEntitySelection(targetName) {
 }
 
 function handleNavClick(name, to) {
+  closeMoreMenu()
+
   if (route.name === name) {
     if (entityRoutes.includes(name) && hasEntitySelection(name)) {
       clearEntitySelection(name)
@@ -168,25 +231,35 @@ function handleNavClick(name, to) {
   router.push(to).catch(() => {})
 }
 
+function handleMoreNavClick(name, to) {
+  handleNavClick(name, to)
+}
+
+function toggleMoreMenu() {
+  moreMenuOpen.value = !moreMenuOpen.value
+}
+
+function closeMoreMenu() {
+  moreMenuOpen.value = false
+}
+
 function handleProfileClick() {
+  closeMoreMenu()
   clearPreviousEntitySelection('profile')
   if (!isAuthenticated.value) {
-    router.push('/schedule')
+    router.push('/schedule').catch(() => {})
   } else {
-    router.push('/profile')
+    router.push('/profile').catch(() => {})
   }
 }
 </script>
 
 <style scoped>
-/* ── Dark glassmorphism + единый стиль с teachers/groups ── */
-
 .nav-wrapper {
   position: relative;
   font-family: Inter, system-ui, sans-serif;
 }
 
-/* Базовый nav-item (общий для mobile и desktop) */
 .nav-item {
   display: flex;
   cursor: pointer;
@@ -204,7 +277,7 @@ function handleProfileClick() {
 }
 
 .nav-item.active {
-  background: rgba(129, 140, 248, 0.18); /* #818cf8 с прозрачностью */
+  background: rgba(129, 140, 248, 0.18);
   border: 1px solid rgba(129, 140, 248, 0.28);
   color: #818cf8;
   font-weight: 600;
@@ -212,7 +285,7 @@ function handleProfileClick() {
 
 .icon {
   display: inline-block;
-  color: currentColor; /* twemoji будет окрашиваться в currentColor */
+  color: currentColor;
 }
 
 .icon img {
@@ -221,7 +294,6 @@ function handleProfileClick() {
   display: block;
 }
 
-/* ── МОБИЛЬНАЯ нижняя навигация ── */
 .bottom-nav {
   position: fixed;
   bottom: calc(16px + env(safe-area-inset-bottom, 0px));
@@ -263,7 +335,88 @@ function handleProfileClick() {
   font-weight: 500;
 }
 
-/* ── ДЕСКТОПНАЯ боковая панель ── */
+.bottom-nav .nav-item-more {
+  width: 56px;
+}
+
+.bottom-nav .nav-item-more .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.more-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.more-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.more-sheet {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 10px;
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.more-item {
+  width: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+}
+
+.more-item:hover {
+  background: rgba(51, 65, 85, 0.42);
+  color: #e2e8f0;
+}
+
+.more-item.active {
+  background: rgba(129, 140, 248, 0.18);
+  border: 1px solid rgba(129, 140, 248, 0.28);
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.more-item .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.more-item .label {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
 .sidebar {
   position: fixed;
   left: 0;
@@ -271,19 +424,18 @@ function handleProfileClick() {
   bottom: 0;
   width: 260px;
   background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
-  border-right: 1px solid rgba(148, 163, 184, 0.18); /* как бордеры в карточках */
+  border-right: 1px solid rgba(148, 163, 184, 0.18);
   display: flex;
   flex-direction: column;
   z-index: 1000;
   color: #e2e8f0;
-  /* убираем лишний box-shadow, чтобы не "выпирала" */
 }
 
 .logo {
   padding: 24px 20px;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #818cf8;           /* индиго акцент как в заголовках */
+  color: #818cf8;
   letter-spacing: -0.5px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 }
@@ -308,7 +460,7 @@ function handleProfileClick() {
   padding: 14px 18px;
   margin: 2px 0;
   border-radius: 14px;
-  backdrop-filter: blur(8px); /* лёгкий blur для согласованности */
+  backdrop-filter: blur(8px);
 }
 
 .sidebar .icon {
@@ -321,11 +473,10 @@ function handleProfileClick() {
   font-weight: 500;
 }
 
-/* Hover и active — одинаковые с остальным приложением */
 .sidebar .nav-item:hover {
   background: rgba(51, 65, 85, 0.42);
   color: #e2e8f0;
-  transform: translateX(4px); /* лёгкий сдвиг вправо для боковой панели */
+  transform: translateX(4px);
 }
 
 .sidebar .nav-item.active {
@@ -336,7 +487,6 @@ function handleProfileClick() {
   transform: translateX(0);
 }
 
-/* ── Адаптивность (без изменений) ── */
 @media (max-width: 767px) {
   .sidebar {
     display: none;
@@ -344,7 +494,8 @@ function handleProfileClick() {
 }
 
 @media (min-width: 768px) {
-  .bottom-nav {
+  .bottom-nav,
+  .more-overlay {
     display: none;
   }
 }
