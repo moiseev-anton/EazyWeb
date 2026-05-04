@@ -9,11 +9,11 @@
 
           <div class="entity-title">
             <h2>{{ entityName }}</h2>
-            <button class="star-button" :class="{ subscribed: isSubscribed }" @click="toggleSubscription" :aria-label="isSubscribed ? 'Отписаться' : 'Подписаться'">
+            <button v-if="showSubscriptionButton" class="star-button" :class="{ subscribed: isSubscribed }" @click="toggleSubscription" :aria-label="isSubscribed ? 'Отписаться' : 'Подписаться'">
               <StarSolidIcon v-if="isSubscribed" class="star-icon" />
               <StarOutlineIcon v-else class="star-icon" />
             </button>
-            <p v-if="guestSubscribeHintVisible" class="guest-subscribe-hint" role="status" aria-live="polite">
+            <p v-if="showSubscriptionButton && guestSubscribeHintVisible" class="guest-subscribe-hint" role="status" aria-live="polite">
               Подписка и уведомления доступны после входа
             </p>
           </div>
@@ -142,6 +142,7 @@ const router = useRouter()
 const { subscription } = storeToRefs(authStore)
 
 const isSubscribed = computed(() => subscription.value !== null && subscription.value.id === props.entityId)
+const showSubscriptionButton = computed(() => props.entityType !== 'classroom')
 
 const currentMode = ref('daily')
 const currentWeekOffset = ref(0)
@@ -209,6 +210,7 @@ async function loadLessons() {
     const opts = { date_from: dateFrom, date_to: dateTo }
     if (props.entityType === 'group') opts.group = props.entityId
     else if (props.entityType === 'teacher') opts.teacher = props.entityId
+    else if (props.entityType === 'classroom') opts.classroom = props.entityId
 
     const res = await fetchLessons(opts)
     lessons.value = res.lessons

@@ -2,7 +2,7 @@ import api from './axios'
 
 // Helper to parse json:api response and resolve included entities
 function buildIncludedMap(included) {
-  const map = { groups: {}, teachers: {} }
+  const map = { groups: {}, teachers: {}, classrooms: {} }
   if (!included || !Array.isArray(included)) return map
   included.forEach(item => {
     if (item.type === 'groups') {
@@ -18,6 +18,11 @@ function buildIncludedMap(included) {
         fullName: item.attributes.fullName,
         shortName: item.attributes.shortName,
         endpoint: item.attributes.endpoint
+      }
+    } else if (item.type === 'classrooms') {
+      map.classrooms[item.id] = {
+        id: item.id,
+        title: item.attributes.title
       }
     }
   })
@@ -35,13 +40,14 @@ function normalizeLessonPart(part) {
   return Number.isFinite(numericPart) ? numericPart : null
 }
 
-export async function fetchLessons({ date_from, date_to, group = null, teacher = null, include = 'group,teacher' } = {}) {
+export async function fetchLessons({ date_from, date_to, group = null, teacher = null, classroom = null, include = 'group,teacher' } = {}) {
   const params = {
     'filter[date_from]': date_from,
     'filter[date_to]': date_to
   }
   if (group) params['filter[group]'] = group
   if (teacher) params['filter[teacher]'] = teacher
+  if (classroom) params['filter[classroom]'] = classroom
   if (include) params.include = include
 
   const res = await api.get('/lessons/', { params })

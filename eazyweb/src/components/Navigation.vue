@@ -70,6 +70,15 @@
           <span class="icon" v-html="icons.teachers"></span>
           <span class="label">Преподаватели</span>
         </router-link>
+
+        <router-link
+          to="/classrooms"
+          class="nav-item"
+          :class="{ active: isActive('classrooms') }"
+        >
+          <span class="icon" v-html="icons.classrooms"></span>
+          <span class="label">Кабинеты</span>
+        </router-link>
       </nav>
 
       <div class="profile-section">
@@ -110,6 +119,7 @@ const icons = {
   schedule: twemoji.parse('🗓️', twemojiOptions),
   groups: twemoji.parse('🎓', twemojiOptions),
   teachers: twemoji.parse('🧑‍🏫', twemojiOptions),
+  classrooms: twemoji.parse('🚪', twemojiOptions),
   profile: twemoji.parse('👤', twemojiOptions),
 }
 
