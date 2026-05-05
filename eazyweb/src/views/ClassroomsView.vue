@@ -71,7 +71,7 @@
           v-model="selectedDate"
           inline
           auto-apply
-          :enable-time-picker="false"
+          :time-config="{ enableTimePicker: false }"
           :locale="ru"
           @update:model-value="onDateSelected"
           class="classrooms-datepicker"
