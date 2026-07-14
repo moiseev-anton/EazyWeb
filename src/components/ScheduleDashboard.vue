@@ -144,7 +144,20 @@ const { subscription } = storeToRefs(authStore)
 const isSubscribed = computed(() => subscription.value !== null && subscription.value.id === props.entityId)
 const showSubscriptionButton = computed(() => props.entityType !== 'classroom')
 
-const currentMode = ref('daily')
+const STORAGE_KEY = 'eazyweb.schedule.mode'
+
+function loadStoredMode() {
+  if (typeof window === 'undefined') return 'daily'
+
+  try {
+    const savedMode = window.localStorage.getItem(STORAGE_KEY)
+    return savedMode === 'weekly' ? 'weekly' : 'daily'
+  } catch {
+    return 'daily'
+  }
+}
+
+const currentMode = ref(loadStoredMode())
 const currentWeekOffset = ref(0)
 
 const MIN_OFFSET = -52
@@ -407,6 +420,18 @@ onBeforeUnmount(() => {
     clearTimeout(guestSubscribeHintTimer)
     guestSubscribeHintTimer = null
   }
+})
+
+watch(currentMode, (mode) => {
+  if (typeof window === 'undefined') return
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, mode)
+  } catch {}
+})
+
+watch([() => props.entityId, () => props.entityType], () => {
+  currentMode.value = loadStoredMode()
 })
 
 watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
