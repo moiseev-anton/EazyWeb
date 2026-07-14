@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <ScheduleDashboard
     v-if="selectedEntity"
     :entityId="selectedEntity.id"
@@ -38,8 +38,8 @@ function handleOpenEntity(entity) {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
-  color: #e2e8f0;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
   box-sizing: border-box;
 }
 
@@ -47,9 +47,8 @@ function handleOpenEntity(entity) {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; 
+  overflow-y: auto;
   overflow-x: hidden;
   padding: 0;
 }
-
 </style>

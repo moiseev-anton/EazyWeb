@@ -92,28 +92,28 @@ async function handleAuth() {
   gap: 12px;
   padding: 16px 20px;
   border-radius: 16px;
-  background: rgba(30, 41, 59, 0.24);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  background: var(--color-bg-surface-subtle);
+  backdrop-filter: var(--surface-backdrop);
+  border: 1px solid var(--color-border-soft);
+  box-shadow: var(--shadow-card);
   width: 100%;
   text-align: center;
 }
 
 .user-line {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
 }
 
 .user-line strong {
-  color: #87cbc1;           /* мятный акцент для имени */
+  color: var(--color-success);
   font-weight: 700;
 }
 
 .tg-logout {
-  background: rgba(51, 65, 85, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  color: #cbd5e1;
+  background: var(--color-bg-surface-strong);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-muted);
   padding: 10px 20px;
   border-radius: 12px;
   cursor: pointer;
@@ -124,9 +124,9 @@ async function handleAuth() {
 }
 
 .tg-logout:hover {
-  background: rgba(51, 65, 85, 0.42);
+  background: var(--color-bg-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px var(--color-shadow);
 }
 
 /* Login button */
@@ -135,8 +135,8 @@ async function handleAuth() {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: linear-gradient(90deg, #6498ff, #5c96fb);
-  color: #0f1117;
+  background: var(--color-brand-telegram);
+  color: var(--color-text-inverse);
   padding: 12px 24px;
   border: none;
   border-radius: 14px;
@@ -146,12 +146,13 @@ async function handleAuth() {
   width: 100%;
   max-width: 320px;
   transition: all 0.22s ease;
-  box-shadow: 0 6px 20px rgba(129, 140, 248, 0.25);
+  box-shadow: var(--shadow-telegram);
 }
 
 .tg-btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(129, 140, 248, 0.35);
+  background: var(--color-brand-telegram-strong);
+  box-shadow: var(--shadow-telegram-hover);
 }
 
 .tg-btn:disabled {
@@ -168,7 +169,7 @@ async function handleAuth() {
 }
 
 .tg-message {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.88rem;
   text-align: center;
   max-width: 320px;

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="daily-mode">
     <div class="days-wrap">
       <div class="days-row">
@@ -271,14 +271,14 @@ watch(weekDates, (newVal) => {
   touch-action: pan-y;
 }
 
-/* ===== Р”РќР РќР•Р”Р•Р›Р ===== */
+/* ===== ДНИ НЕДЕЛИ ===== */
 .days-wrap {
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--color-border-soft);
   padding: 10px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .days-row {
@@ -289,9 +289,9 @@ watch(weekDates, (newVal) => {
 }
 
 .day-button {
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: rgba(51, 65, 85, 0.28);
+  background: var(--color-bg-surface-elevated);
   backdrop-filter: blur(8px);
   cursor: pointer;
   padding: 10px 6px;
@@ -302,30 +302,30 @@ watch(weekDates, (newVal) => {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-raised);
 }
 
 .day-button:hover {
-  background: rgba(51, 65, 85, 0.42);
-  border-color: rgba(148, 163, 184, 0.32);
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-hover);
 }
 
 .day-button.today {
-  border-color: rgba(135, 203, 193, 0.45); /* #87cbc1 */
-  background: rgba(135, 203, 193, 0.18);
+  border-color: var(--color-accent-soft-border);
+  background: var(--color-accent-soft-bg);
 }
 
 .day-button.selected {
-  border-color: rgba(129, 140, 248, 0.55); /* #818cf8 */
-  background: rgba(129, 140, 248, 0.22);
+  border-color: var(--color-accent-border);
+  background: var(--color-accent-bg-strong);
   transform: translateY(-1px);
 }
 
 .day-name {
   font-size: 0.82rem;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -337,7 +337,7 @@ watch(weekDates, (newVal) => {
 .day-number {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   line-height: 1;
 }
 
@@ -349,22 +349,21 @@ watch(weekDates, (newVal) => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(148, 163, 184, 0.28);
+  background: var(--color-pill-bg);
   backdrop-filter: blur(6px);
-  color: #cbd5e1;
+  color: var(--color-text-muted);
   font-weight: 700;
   font-size: 0.78rem;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--color-pill-border);
 }
 
-/* ===== РЎРџРРЎРћРљ Р—РђРќРЇРўРР™ ===== */
 .lessons-list {
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--color-border-soft);
   padding: 12px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -390,7 +389,7 @@ watch(weekDates, (newVal) => {
 }
 
 .no-lessons {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   margin: 48px 0;
   font-weight: 600;
   text-align: center;
@@ -405,8 +404,8 @@ watch(weekDates, (newVal) => {
 .skeleton-card {
   padding: 14px;
   border-radius: 14px;
-  background: rgba(51, 65, 85, 0.32);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--color-bg-hover-strong);
+  border: 1px solid var(--color-border-soft);
   backdrop-filter: blur(10px);
   min-height: 80px;
   display: flex;
@@ -418,9 +417,9 @@ watch(weekDates, (newVal) => {
   border-radius: 8px;
   background: linear-gradient(
     90deg,
-    rgba(71, 85, 105, 0.4) 25%,
-    rgba(100, 116, 139, 0.6) 50%,
-    rgba(71, 85, 105, 0.4) 75%
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;

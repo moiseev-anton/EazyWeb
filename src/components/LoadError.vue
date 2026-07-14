@@ -28,12 +28,12 @@ const emit = defineEmits(['retry'])
   gap: 14px;
   padding: 24px 20px;
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
-  color: #cbd5e1;
+  background: var(--color-bg-surface-subtle);
+  backdrop-filter: var(--surface-backdrop);
+  -webkit-backdrop-filter: var(--surface-backdrop);
+  border: 1px solid var(--color-border-soft);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text-muted);
   text-align: center;
   min-height: 140px;
   justify-content: center;
@@ -42,12 +42,12 @@ const emit = defineEmits(['retry'])
 .load-error-title {
   font-weight: 700;
   font-size: 1.15rem;
-  color: #f1f5f9;
+  color: var(--color-text-primary);
   line-height: 1.35;
 }
 
 .load-error-title span {
-  color: #f1f5f9;
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -59,9 +59,9 @@ const emit = defineEmits(['retry'])
 }
 
 .btn-ghost {
-  background: rgba(129, 140, 248, 0.18); /* #818cf8 прозрачный */
-  border: 1px solid rgba(129, 140, 248, 0.35);
-  color: #818cf8;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-accent);
   padding: 10px 18px;
   border-radius: 12px;
   cursor: pointer;
@@ -72,9 +72,9 @@ const emit = defineEmits(['retry'])
 }
 
 .btn-ghost:hover {
-  background: rgba(129, 140, 248, 0.32);
+  background: var(--color-accent-bg-strong);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(129, 140, 248, 0.2);
+  box-shadow: 0 8px 24px var(--color-shadow);
 }
 
 .btn-ghost:active {

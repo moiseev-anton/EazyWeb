@@ -145,7 +145,7 @@ function openEntity(obj) {
   font-weight: 700;
   font-size: 1.05rem;
   line-height: 1.3;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -161,7 +161,7 @@ function openEntity(obj) {
   width: 100%;
   gap: 6px;
   font-size: 0.9rem;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .left-stack {
@@ -187,7 +187,7 @@ function openEntity(obj) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #818cf8;
+  color: var(--color-accent);
   text-decoration: none;
   background: none;
   border: none;
@@ -199,12 +199,12 @@ function openEntity(obj) {
 }
 
 .group-or-teacher:hover {
-  color: #a5b4fc;
+  color: var(--color-accent-strong);
   text-decoration: underline;
 }
 
 .group-or-teacher.is-static {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   cursor: default;
   pointer-events: none;
   text-decoration: none;
@@ -219,7 +219,7 @@ function openEntity(obj) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   text-align: center;
   font-weight: 500;
 }
@@ -234,7 +234,7 @@ function openEntity(obj) {
   width: 80px;
   flex-shrink: 0;
   order: 3;
-  color: #87cbc1;
+  color: var(--color-accent-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -253,13 +253,13 @@ function openEntity(obj) {
 .icon.pin {
   width: 14px;
   height: 14px;
-  color: #87cbc1;
+  color: var(--color-accent-soft);
   flex: 0 0 auto;
 }
 
 .classroom-text {
   font-size: 0.9rem;
-  color: #87cbc1;
+  color: var(--color-accent-soft);
   font-weight: 600;
   text-align: center;
   white-space: nowrap;

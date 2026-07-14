@@ -134,31 +134,31 @@ onMounted(() => {
   flex-direction: column;
   gap: 16px;
   /* padding: 12px; */
-  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
-  color: #e2e8f0;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 .accordion-hero {
   padding: 20px 24px;
   border-radius: 20px;
-  background: rgba(30, 41, 59, 0.28);
+  background: var(--color-bg-surface);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(100, 116, 139, 0.22);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-surface);
 }
 
 .accordion-hero h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #818cf8;           /* как в teachers-hero h1 */
+  color: var(--color-accent);
   letter-spacing: -0.02em;
 }
 
 .accordion-hero p {
   margin: 8px 0 0;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.96rem;
   line-height: 1.45;
 }
@@ -176,10 +176,10 @@ onMounted(() => {
 }
 
 .faculty-item {
-  background: rgba(30, 41, 59, 0.32);
+  background: var(--color-bg-surface-strong);
   border-radius: 18px;
   padding: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--color-border-soft);
   backdrop-filter: blur(10px);
 }
 
@@ -188,9 +188,9 @@ onMounted(() => {
 .sk-pill {
   background: linear-gradient(
     90deg,
-    rgba(71, 85, 105, 0.4) 25%,
-    rgba(100, 116, 139, 0.6) 50%,
-    rgba(71, 85, 105, 0.4) 75%
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -242,24 +242,24 @@ onMounted(() => {
   justify-content: center;
   text-align: center;
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  color: #cbd5e1;
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-muted);
   padding: 32px 24px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .accordion-empty h3 {
   margin: 0;
-  color: #f1f5f9;
+  color: var(--color-text-primary);
   font-size: 1.25rem;
   font-weight: 600;
 }
 
 .accordion-empty p {
   margin: 10px 0 0;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .accordion-container {
@@ -274,12 +274,12 @@ onMounted(() => {
 
 .accordion-item {
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--color-border-soft);
   overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .accordion-header {
@@ -292,17 +292,17 @@ onMounted(() => {
   border: none;
   cursor: pointer;
   text-align: left;
-  color: #e2e8f0;
-  background: rgba(15, 23, 42, 0.35);
+  color: var(--color-text-primary);
+  background: var(--color-overlay-soft);
   transition: all 0.22s ease;
 }
 
 .accordion-header:hover {
-  background: rgba(51, 65, 85, 0.42);
+  background: var(--color-bg-hover);
 }
 
 .accordion-header.open {
-  background: rgba(51, 65, 85, 0.38);
+  background: var(--color-bg-hover-strong);
 }
 
 .faculty-title {
@@ -315,30 +315,30 @@ onMounted(() => {
 .faculty-name {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #87cbc1;           /* твой спокойный мятный */
+  color: var(--color-accent-soft);
 }
 
 .faculty-meta {
   font-size: 0.88rem;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .toggle-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #525252;           /* как у тебя */
+  color: var(--color-text-secondary);
   transition: transform 0.25s ease, color 0.25s ease;
 }
 
 .accordion-header.open .toggle-icon {
   transform: rotate(180deg);
-  color: #717171;
+  color: var(--color-text-secondary);
 }
 
 .accordion-content {
   padding: 8px 16px 12px;
-  background: rgba(15, 23, 42, 0.2);
+  background: var(--color-overlay-soft);
 }
 
 .course-section {
@@ -346,7 +346,7 @@ onMounted(() => {
 }
 
 .course-section + .course-section {
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .course-header {
@@ -357,7 +357,7 @@ onMounted(() => {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 12px;
-  color: #5f9d94;           /* твой приглушённый teal */
+  color: var(--color-accent-soft);
   font-weight: 600;
   font-size: 0.8rem;
 }
@@ -370,8 +370,8 @@ onMounted(() => {
 
 .group-btn {
   padding: 10px 16px;
-  background: rgba(51, 65, 85, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: var(--color-bg-surface-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   cursor: pointer;
   display: inline-flex;
@@ -379,23 +379,23 @@ onMounted(() => {
   justify-content: center;
   text-align: left;
   transition: all 0.18s ease;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   font-size: 0.94rem;
   min-width: 118px;
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-raised);
 }
 
 .group-btn:hover {
-  background: rgba(51, 65, 85, 0.42);
-  border-color: rgba(148, 163, 184, 0.32);
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-hover);
 }
 
 .group-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-raised);
 }
 
 .group-title {

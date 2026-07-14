@@ -108,7 +108,7 @@ onBeforeUnmount(() => {
                   stroke-width="1.8"
                 />
               </svg>
-              
+
             </li>
           </ul>
         </div>
@@ -176,10 +176,10 @@ onBeforeUnmount(() => {
   width: min(100%, 780px);
   margin: 0 auto 4px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  border-bottom: 1px solid var(--color-border-soft);
   box-sizing: border-box;
   container-type: inline-size;
-  color: #cbd5e1;
+  color: var(--color-text-muted);
   text-align: left;
 }
 
@@ -187,7 +187,7 @@ onBeforeUnmount(() => {
   margin: 0 0 10px;
   font-size: 1rem;
   font-weight: 600;
-  color: #87cbc1;
+  color: var(--color-accent-soft);
   text-align: center;
 }
 
@@ -224,14 +224,14 @@ onBeforeUnmount(() => {
   gap: 8px;
   font-size: 0.92rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--color-text-muted);
 }
 
 .platform-icon {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .android-icon {
@@ -243,7 +243,7 @@ onBeforeUnmount(() => {
   margin: 0;
   padding-left: 0;
   list-style: none;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.86rem;
   line-height: 1.5;
 }
@@ -258,7 +258,7 @@ onBeforeUnmount(() => {
   height: 14px;
   vertical-align: -2px;
   margin-left: 3px;
-  color: #cbd5e1;
+  color: var(--color-text-muted);
 }
 
 .install-button {
@@ -266,8 +266,8 @@ onBeforeUnmount(() => {
   border: 0;
   border-radius: 8px;
   padding: 8px 14px;
-  background: #818cf8;
-  color: #f8fafc;
+  background: var(--color-accent);
+  color: var(--color-text-primary);
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
@@ -275,13 +275,13 @@ onBeforeUnmount(() => {
 }
 
 .install-button:hover {
-  background: #a5b4fc;
+  background: var(--color-accent-strong);
   transform: translateY(-1px);
 }
 
 .install-note {
   margin: 6px 0 0;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 0.74rem;
   line-height: 1.4;
 }
@@ -290,7 +290,7 @@ onBeforeUnmount(() => {
   width: min(100%, 780px);
   margin: 0 auto 6px;
   box-sizing: border-box;
-  color: #a5b4fc;
+  color: var(--color-accent-strong);
   font-size: 0.86rem;
   line-height: 1.5;
   text-align: left;
@@ -308,7 +308,7 @@ onBeforeUnmount(() => {
   width: min(100%, 780px);
   margin: 0 auto;
   box-sizing: border-box;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 0.92rem;
   container-type: inline-size;
 }
@@ -318,7 +318,7 @@ onBeforeUnmount(() => {
   grid-template-columns: 1fr;
   gap: 12px;
   padding-top: 10px;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .footer-left {
@@ -330,7 +330,7 @@ onBeforeUnmount(() => {
 .copyright {
   margin: 0;
   font-weight: 500;
-  color: #cbd5e1;
+  color: var(--color-text-muted);
 }
 
 .contact {
@@ -338,13 +338,13 @@ onBeforeUnmount(() => {
 }
 
 .contact a {
-  color: #818cf8;
+  color: var(--color-accent);
   text-decoration: none;
   transition: color 0.18s ease;
 }
 
 .contact a:hover {
-  color: #a5b4fc;
+  color: var(--color-accent-strong);
   text-decoration: underline;
 }
 
@@ -359,13 +359,13 @@ onBeforeUnmount(() => {
 }
 
 .footer-links a {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   text-decoration: none;
   transition: color 0.18s ease;
 }
 
 .footer-links a:hover {
-  color: #cbd5e1;
+  color: var(--color-text-muted);
   text-decoration: underline;
 }
 

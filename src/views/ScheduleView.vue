@@ -5,11 +5,11 @@
   <div class="hero-section">
     <h1 class="app-title">EazyClass</h1>
     <p class="app-tagline">Удобный помощник с расписанием занятий</p>
-    
+
     <div class="auth-cta">
       <p class="auth-hint">Вход в один клик — без паролей</p>
       <TelegramAuthButton @success="onAuthSuccess" />
-      
+
       <p class="auth-legal">
         Авторизуясь, вы принимаете
         <a href="https://eazyclass.ru/terms" target="_blank" rel="noopener noreferrer">правила</a>
@@ -34,7 +34,7 @@
         <h3>Уведомления в Telegram</h3>
         <p>Подпишитесь на своё расписание — получайте оповещения об изменениях и напоминания перед каждой парой.</p>
       </div>
-      
+
     </div>
 
   </div>
@@ -162,11 +162,11 @@ onMounted(() => {
 /* ===== BASE ======== */
 .schedule-view {
   /* padding: 12px; */
-  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
+  background: var(--color-bg-app);
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
 }
 
 /* ================================
@@ -179,23 +179,23 @@ onMounted(() => {
   text-align: center;
   padding: 32px 24px;
   border-radius: 20px;
-  background: rgba(30, 41, 59, 0.28);
+  background: var(--color-bg-surface);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-modal);
 }
 
 .app-title {
   font-size: 2.25rem;
   font-weight: 800;
   margin-bottom: 16px;
-  color: #818cf8;           /* индиго акцент */
+  color: var(--color-accent);           /* индиго акцент */
   letter-spacing: -0.03em;
 }
 
 .app-description {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 1.05rem;
   line-height: 1.5;
   margin-bottom: 32px;
@@ -207,7 +207,7 @@ onMounted(() => {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px 20px 8px;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   min-height: calc(100dvh - 28px);
   display: flex;
   flex-direction: column;
@@ -217,18 +217,18 @@ onMounted(() => {
 .hero-section {
   text-align: center;
   padding: 30px 20px;
-  background: rgba(30, 41, 59, 0.28);
+  background: var(--color-bg-surface);
   backdrop-filter: blur(16px);
   border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-modal);
 }
 
 .app-title {
   font-size: 3.5rem;
   font-weight: 800;
   margin: 0 0 12px;
-  background: linear-gradient(90deg, #818cf8, #a5b4fc);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-strong));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.04em;
@@ -237,7 +237,7 @@ onMounted(() => {
 .app-tagline {
   font-size: 1.25rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   margin: 0 0 26px;
   max-width: 600px;
   margin-left: auto;
@@ -251,19 +251,19 @@ onMounted(() => {
 
 .auth-hint {
   margin-top: 6px;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.92rem;
 }
 
 .auth-legal {
   margin: 8px 0 0;
-  color: #7f8fa8;
+  color: var(--color-text-secondary);
   font-size: 0.76rem;
   line-height: 1.45;
 }
 
 .auth-legal a {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -280,19 +280,19 @@ onMounted(() => {
 }
 
 .feature-card {
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--color-border-soft);
   border-radius: 18px;
   padding: 24px 20px;
   text-align: center;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
   transition: box-shadow 0.28s ease;
 }
 
 .feature-card.highlight {
-  border-color: rgba(129, 140, 248, 0.35);
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(135, 203, 193, 0.08));
+  border-color: var(--color-accent-border);
+  background: linear-gradient(135deg, var(--color-accent-bg-subtle), var(--color-accent-soft-bg-subtle));
 }
 
 .feature-icon {
@@ -316,11 +316,11 @@ onMounted(() => {
   font-size: 1.16rem;
   font-weight: 700;
   margin: 0 0 10px;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
 }
 
 .feature-card p {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
   line-height: 1.5;
   margin: 0;
@@ -343,26 +343,26 @@ onMounted(() => {
   box-sizing: border-box;
   align-self: center;
   container-type: inline-size;
-  background: rgba(30, 41, 59, 0.28);
+  background: var(--color-bg-surface);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--color-border-strong);
   border-radius: 20px;
   padding: 32px 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 32px var(--color-backdrop);
 }
 
 .no-sub-card h2 {
   margin: 0 0 16px;
   font-size: 1.65rem;
   font-weight: 700;
-  color: #818cf8;
+  color: var(--color-accent);
   text-align: center;
 }
 
 .no-sub-card h5 {
   font-size: 1.05rem;
   line-height: 1.5;
-  color: #87cbc1;
+  color: var(--color-accent-soft);
   text-align: center;
   margin: 0 0 6px;
 }
@@ -370,14 +370,14 @@ onMounted(() => {
 .instruction {
   font-size: 1.05rem;
   line-height: 1.5;
-  color: #cbd5e1;
+  color: var(--color-text-muted);
   text-align: center;
   margin: 18px 0 6px;
 }
 
 .instruction a,
 .benefits-list a {
-  color: #a5b4fc;
+  color: var(--color-accent-strong);
   text-decoration: underline;
   text-underline-offset: 2px;
   font-weight: 700;
@@ -385,7 +385,7 @@ onMounted(() => {
 
 .instruction a:hover,
 .benefits-list a:hover {
-  color: #c7d2fe;
+  color: var(--color-accent-strong);
 }
 
 .star-guide {
@@ -402,8 +402,8 @@ onMounted(() => {
   box-sizing: border-box;
   padding: 10px;
   border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  background: rgba(51, 65, 85, 0.24);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-hover-soft);
 }
 
 .guide-header {
@@ -417,7 +417,7 @@ onMounted(() => {
   min-width: 0;
   font-size: 0.9rem;
   font-weight: 700;
-  color: #818cf8;
+  color: var(--color-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -438,11 +438,11 @@ onMounted(() => {
 }
 
 .demo-star.inactive {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .demo-star.active {
-  color: #87cbc1;
+  color: var(--color-accent-soft);
 }
 
 .demo-calendar-btn {
@@ -450,9 +450,9 @@ onMounted(() => {
   height: 30px;
   padding: 0 10px;
   border-radius: 9px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  background: rgba(51, 65, 85, 0.24);
-  color: #9fb1c8;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-hover-soft);
+  color: var(--color-text-muted);
   font-size: 0.82rem;
   display: inline-flex;
   align-items: center;
@@ -463,7 +463,7 @@ onMounted(() => {
 }
 
 .demo-chevron {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.78rem;
   line-height: 1;
 }
@@ -473,7 +473,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   opacity: 0.85;
 }
 
@@ -505,14 +505,14 @@ onMounted(() => {
 .benefits {
   font-weight: 600;
   margin: 0 0 12px;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
 }
 
 .benefits-list {
   margin: 0 8px;
   padding: 0;
   list-style: none;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.98rem;
 }
 
@@ -526,14 +526,14 @@ onMounted(() => {
   content: "✓";
   position: absolute;
   left: 0;
-  color: #87cbc1;
+  color: var(--color-accent-soft);
   font-weight: bold;
 }
 
 .benefits-list li.benefit-note::before {
   content: "•";
   font-size: 1.05rem;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-weight: 700;
 }
 
@@ -592,5 +592,68 @@ onMounted(() => {
   .no-subscription-card {
     padding: 20px 16px;
   }
+}
+
+/* Shared token-based overrides for the schedule landing and empty states */
+.schedule-view {
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+}
+
+.pre-auth-landing,
+.hero-section,
+.feature-card,
+.no-sub-card,
+.star-state,
+.demo-calendar-btn {
+  background: var(--color-bg-surface-subtle);
+  border-color: var(--color-border-soft);
+  color: var(--color-text-primary);
+}
+
+.hero-section,
+.no-sub-card,
+.feature-card,
+.star-state {
+  box-shadow: var(--shadow-surface);
+}
+
+.app-title,
+.no-sub-card h2,
+.entity-title-demo {
+  color: var(--color-accent);
+}
+
+.app-tagline,
+.auth-hint,
+.auth-legal,
+.feature-card p,
+.instruction,
+.benefits-list,
+.demo-star.inactive,
+.demo-chevron,
+.guide-arrow {
+  color: var(--color-text-secondary);
+}
+
+.no-sub-card h5,
+.demo-star.active,
+.benefits-list li::before {
+  color: var(--color-accent-soft);
+}
+
+.feature-card.highlight {
+  border-color: var(--color-accent-border);
+  background: linear-gradient(135deg, var(--color-accent-bg), var(--color-accent-soft-bg));
+}
+
+.instruction a,
+.benefits-list a {
+  color: var(--color-accent-strong);
+}
+
+.instruction a:hover,
+.benefits-list a:hover {
+  color: var(--color-accent);
 }
 </style>

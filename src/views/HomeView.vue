@@ -81,16 +81,16 @@ function logout() {
 
 .auth,
 .home-skeleton {
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--color-border-soft);
   padding: 2rem;
   border-radius: 24px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .dashboard {
-  color: green;
+  color: var(--color-text-primary);
 }
 
 .home-skeleton {
@@ -107,9 +107,9 @@ function logout() {
 .sk-line {
   background: linear-gradient(
     90deg,
-    rgba(71, 85, 105, 0.4) 25%,
-    rgba(100, 116, 139, 0.6) 50%,
-    rgba(71, 85, 105, 0.4) 75%
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -137,8 +137,8 @@ function logout() {
   width: min(440px, 100%);
   padding: 22px 18px;
   border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(51, 65, 85, 0.22);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-bg-hover-soft);
   display: flex;
   flex-direction: column;
   align-items: center;

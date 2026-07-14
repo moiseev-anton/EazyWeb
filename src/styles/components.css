@@ -1,0 +1,7 @@
+﻿.surface-card { background: var(--color-bg-surface-subtle); border: 1px solid var(--color-border-soft); border-radius: var(--radius-xl); box-shadow: var(--shadow-card); backdrop-filter: var(--surface-backdrop); -webkit-backdrop-filter: var(--surface-backdrop); }
+.surface-card-strong { background: var(--color-bg-surface-strong); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xl); box-shadow: var(--shadow-surface); }
+.skeleton-shimmer { background: linear-gradient(90deg, var(--color-skeleton-base) 25%, var(--color-skeleton-highlight) 50%, var(--color-skeleton-base) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.4s linear infinite; }
+.themed-datepicker,
+.dashboard-datepicker,
+.classrooms-datepicker { --vdp-selected-bg: var(--color-accent); --vdp-hover-bg: var(--color-accent-bg); --vdp-hover-color: var(--color-text-primary); --vdp-selected-color: var(--color-bg-canvas); --vdp-background: var(--color-bg-surface-strong); --vdp-border: var(--color-border); --vdp-text: var(--color-text-primary); --vdp-disabled: var(--color-text-secondary); --vdp-today-color: var(--color-success); }
+@keyframes skeleton-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }

@@ -457,11 +457,11 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   margin-bottom: 12px;
   padding: 14px 18px;
   border-radius: 20px;
-  background: rgba(30, 41, 59, 0.28);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+  background: var(--color-bg-surface-subtle);
+  backdrop-filter: var(--surface-backdrop);
+  -webkit-backdrop-filter: var(--surface-backdrop);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-surface);
 }
 
 .header-top {
@@ -503,7 +503,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #818cf8;           /* индиго акцент */
+  color: var(--color-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -519,15 +519,15 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(51, 65, 85, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: var(--color-bg-surface-strong);
+  border: 1px solid var(--color-border-soft);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.18s ease;
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-raised);
 }
 
 .back-button:hover,
@@ -535,10 +535,10 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .nav-arrow:hover:not(:disabled),
 .calendar-button:hover,
 .today-button:hover {
-  background: rgba(51, 65, 85, 0.42);
-  border-color: rgba(148, 163, 184, 0.32);
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-hover);
 }
 
 .back-icon,
@@ -547,7 +547,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .dropdown-arrow {
   width: 22px;
   height: 22px;
-  color: #cbd5e1;
+  color: var(--color-text-muted);
 }
 
 .star-button {
@@ -561,7 +561,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   align-items: center;
   justify-content: center;
   transition: transform 0.18s ease, color 0.18s ease;
-  color: #6a7584;
+  color: var(--color-text-secondary);
 }
 
 .star-button:hover {
@@ -569,7 +569,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .star-button.subscribed {
-  color: #87cbc1;           /* мягкий мятный для подписки */
+  color: var(--color-success);
 }
 
 .star-icon {
@@ -587,12 +587,12 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   line-height: 1.2;
   max-width: min(72vw, 280px);
   white-space: normal;
-  color: #fbbf24;
-  background: rgba(15, 23, 42, 0.92);
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: var(--color-warning);
+  background: var(--color-overlay-strong);
+  border: 1px solid var(--color-border-strong);
   border-radius: 10px;
   padding: 6px 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-hover);
   pointer-events: none;
 }
 
@@ -611,7 +611,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   padding: 8px 14px;
   font-weight: 600;
   font-size: 0.95rem;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   text-transform: capitalize;
   min-width: 140px;
   justify-content: space-between;
@@ -620,7 +620,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .dropdown-arrow {
   width: 16px;
   height: 16px;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .today-button {
@@ -628,9 +628,9 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   min-width: 40px;
   padding: 8px 12px;
   font-weight: 700;
-  color: #87cbc1;
-  background: rgba(135, 203, 193, 0.18);
-  border-color: rgba(135, 203, 193, 0.35);
+  color: var(--color-success);
+  background: var(--color-accent-soft-bg);
+  border-color: var(--color-border-strong);
 }
 
 .week-nav {
@@ -653,7 +653,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--color-backdrop-strong);
   z-index: 1000;
   backdrop-filter: blur(4px);
 }
@@ -661,17 +661,17 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 .calendar-popup {
   position: absolute;
   z-index: 1002;
-  background: rgba(30, 41, 59, 0.9);
+  background: var(--color-bg-surface-strong);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-modal);
   overflow: hidden;
 }
 
 /* ===== МОДАЛКИ ===== */
 .modal-overlay {
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--color-overlay-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -679,15 +679,15 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .modal-dialog {
-  background: rgba(30, 41, 59, 0.92);
+  background: var(--color-bg-surface-strong);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 20px 24px;
   max-width: 420px;
   width: calc(100% - 32px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-  color: #e2e8f0;
+  box-shadow: var(--shadow-modal);
+  color: var(--color-text-primary);
 }
 
 .modal-dialog p {
@@ -696,7 +696,7 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 }
 
 .modal-dialog strong {
-  color: #818cf8;
+  color: var(--color-accent);
 }
 
 .modal-actions {
@@ -711,15 +711,15 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.18s ease;
-  background: rgba(51, 65, 85, 0.42);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  color: #e2e8f0;
+  background: var(--color-bg-hover);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-primary);
 }
 
 .modal-btn.primary {
-  background: #818cf8;
-  border-color: #818cf8;
-  color: #0f1117;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-bg-canvas);
 }
 
 .modal-btn:hover {
@@ -733,15 +733,6 @@ watch([() => props.entityId, () => props.entityType, weekStartIso], () => {
 
 /* ===== DATEPICKER OVERRIDE (vue-datepicker) ===== */
 .dashboard-datepicker {
-  --vdp-selected-bg: #818cf8;
-  --vdp-hover-bg: rgba(129, 140, 248, 0.18);
-  --vdp-hover-color: #e2e8f0;
-  --vdp-selected-color: #0f1117;
-  --vdp-background: rgba(30, 41, 59, 0.95);
-  --vdp-border: rgba(148, 163, 184, 0.22);
-  --vdp-text: #e2e8f0;
-  --vdp-disabled: #475569;
-  --vdp-today-color: #87cbc1;
   border-radius: 0 !important;
   box-shadow: none !important;
 }

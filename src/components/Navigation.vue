@@ -264,22 +264,22 @@ function handleProfileClick() {
   display: flex;
   cursor: pointer;
   text-decoration: none;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   transition: all 0.18s ease;
   border-radius: 14px;
   backdrop-filter: blur(8px);
 }
 
 .nav-item:hover {
-  background: rgba(51, 65, 85, 0.42);
-  color: #e2e8f0;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
   transform: translateY(-1px);
 }
 
 .nav-item.active {
-  background: rgba(129, 140, 248, 0.18);
-  border: 1px solid rgba(129, 140, 248, 0.28);
-  color: #818cf8;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -302,17 +302,17 @@ function handleProfileClick() {
   max-width: 420px;
   margin: 0 auto;
   height: 68px;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--color-overlay);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--color-border);
   border-radius: 28px;
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding: 0 8px;
   z-index: 1000;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-surface);
 }
 
 .bottom-nav .nav-item {
@@ -358,7 +358,7 @@ function handleProfileClick() {
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-backdrop);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -372,9 +372,9 @@ function handleProfileClick() {
   margin: 0 auto;
   padding: 10px;
   border-radius: 22px;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
+  background: var(--color-overlay-strong);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 12px 36px var(--color-shadow-strong);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -389,21 +389,21 @@ function handleProfileClick() {
   padding: 14px 16px;
   border-radius: 16px;
   background: transparent;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   cursor: pointer;
   text-align: left;
   transition: all 0.18s ease;
 }
 
 .more-item:hover {
-  background: rgba(51, 65, 85, 0.42);
-  color: #e2e8f0;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .more-item.active {
-  background: rgba(129, 140, 248, 0.18);
-  border: 1px solid rgba(129, 140, 248, 0.28);
-  color: #818cf8;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -423,21 +423,21 @@ function handleProfileClick() {
   top: 0;
   bottom: 0;
   width: 260px;
-  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
-  border-right: 1px solid rgba(148, 163, 184, 0.18);
+  background: var(--color-bg-app);
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   z-index: 1000;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
 }
 
 .logo {
   padding: 24px 20px;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #818cf8;
+  color: var(--color-accent);
   letter-spacing: -0.5px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .sidebar-nav {
@@ -450,7 +450,7 @@ function handleProfileClick() {
 
 .profile-section {
   padding: 16px 12px 24px;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .sidebar .nav-item {
@@ -474,15 +474,15 @@ function handleProfileClick() {
 }
 
 .sidebar .nav-item:hover {
-  background: rgba(51, 65, 85, 0.42);
-  color: #e2e8f0;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
   transform: translateX(4px);
 }
 
 .sidebar .nav-item.active {
-  background: rgba(129, 140, 248, 0.18);
-  border: 1px solid rgba(129, 140, 248, 0.28);
-  color: #818cf8;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-accent);
   font-weight: 600;
   transform: translateX(0);
 }

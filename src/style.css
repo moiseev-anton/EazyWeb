@@ -1,33 +1,5 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#app {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  min-height: 100svh;
-  background-color: #0f1117;
-}
-
-body {
-  min-height: 100svh;
-  min-height: 100dvh;
-  background-color: #0f1117;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#app {
-  min-height: 100svh;
-  min-height: 100dvh;
-}
+﻿@import './styles/tokens.css';
+@import './styles/themes.css';
+@import './styles/base.css';
+@import './styles/components.css';
+@import './styles/utilities.css';

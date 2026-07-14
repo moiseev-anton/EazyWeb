@@ -1,0 +1,7 @@
+﻿*, *::before, *::after { box-sizing: border-box; }
+html, body, #app { width: 100%; min-height: 100%; margin: 0; padding: 0; }
+html, body, #app { min-height: 100svh; min-height: 100dvh; }
+html, body { background-color: var(--color-bg-canvas); }
+body { color: var(--color-text-primary); overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+button, a, input, textarea, select { color: inherit; font: inherit; }
+button { border: 0; }

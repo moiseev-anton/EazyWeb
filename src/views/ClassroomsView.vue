@@ -398,28 +398,28 @@ onBeforeUnmount(() => removeRepositionListeners())
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
-  color: #e2e8f0;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 .classrooms-hero {
   padding: 20px 24px;
   border-radius: 20px;
-  background: rgba(30, 41, 59, 0.28);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(100, 116, 139, 0.22);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+  background: var(--color-bg-surface-subtle);
+  backdrop-filter: var(--surface-backdrop);
+  -webkit-backdrop-filter: var(--surface-backdrop);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-surface);
 }
 
 .traffic-panel {
   padding: 12px 14px;
   border-radius: 20px;
-  background: rgba(30, 41, 59, 0.28);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(100, 116, 139, 0.22);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+  background: var(--color-bg-surface-subtle);
+  backdrop-filter: var(--surface-backdrop);
+  -webkit-backdrop-filter: var(--surface-backdrop);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-surface);
 }
 
 .classrooms-hero h1,
@@ -427,20 +427,20 @@ onBeforeUnmount(() => removeRepositionListeners())
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #818cf8;
+  color: var(--color-accent);
   letter-spacing: -0.02em;
 }
 
 .classrooms-hero p {
   margin: 8px 0 0;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.96rem;
   line-height: 1.45;
 }
 
 .panel-copy p {
   margin: 0;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.96rem;
   line-height: 1.45;
 }
@@ -473,16 +473,16 @@ onBeforeUnmount(() => removeRepositionListeners())
   min-height: 40px;
   padding: 8px 14px;
   border-radius: 12px;
-  background: rgba(51, 65, 85, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: var(--color-bg-surface-strong);
+  border: 1px solid var(--color-border-soft);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.18s ease;
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  color: #e2e8f0;
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text-primary);
   font-weight: 600;
   text-transform: capitalize;
   gap: 8px;
@@ -497,7 +497,7 @@ onBeforeUnmount(() => removeRepositionListeners())
 
 .calendar-arrow {
   flex: 0 0 auto;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   width: 16px;
   height: 16px;
 }
@@ -505,10 +505,10 @@ onBeforeUnmount(() => removeRepositionListeners())
 .calendar-button:hover,
 .stepper-btn:hover:not(:disabled),
 .stepper-value:hover:not(:disabled) {
-  background: rgba(51, 65, 85, 0.42);
-  border-color: rgba(148, 163, 184, 0.32);
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-hover);
 }
 
 .period-stepper {
@@ -525,14 +525,14 @@ onBeforeUnmount(() => removeRepositionListeners())
 .stepper-value {
   height: 40px;
   border-radius: 12px;
-  background: rgba(51, 65, 85, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  color: #e2e8f0;
+  background: var(--color-bg-surface-strong);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-primary);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-raised);
 }
 
 .stepper-btn {
@@ -557,7 +557,7 @@ onBeforeUnmount(() => removeRepositionListeners())
 }
 
 .stepper-value.empty {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .stepper-btn:disabled,
@@ -577,21 +577,21 @@ onBeforeUnmount(() => removeRepositionListeners())
   min-height: 26px;
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(51, 65, 85, 0.32);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  color: #cbd5e1;
+  background: var(--color-bg-hover-soft);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-muted);
   font-size: 0.84rem;
   font-weight: 600;
 }
 
 .status-chip.is-error {
-  color: #fda4af;
+  color: var(--color-danger-soft);
 }
 
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--color-backdrop-strong);
   z-index: 1000;
   backdrop-filter: blur(4px);
 }
@@ -599,22 +599,22 @@ onBeforeUnmount(() => removeRepositionListeners())
 .calendar-popup {
   position: absolute;
   z-index: 1002;
-  background: rgba(30, 41, 59, 0.9);
+  background: var(--color-bg-surface-strong);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-modal);
   overflow: hidden;
 }
 
 .lesson-picker-popup {
   position: absolute;
   z-index: 1002;
-  background: rgba(30, 41, 59, 0.94);
+  background: var(--color-bg-surface-strong);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-modal);
   overflow: hidden;
   padding: 10px;
 }
@@ -629,23 +629,23 @@ onBeforeUnmount(() => removeRepositionListeners())
 .lesson-picker-option {
   height: 38px;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(51, 65, 85, 0.28);
-  color: #e2e8f0;
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-bg-surface-strong);
+  color: var(--color-text-primary);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
 }
 
 .lesson-picker-option:hover {
-  background: rgba(51, 65, 85, 0.42);
-  border-color: rgba(148, 163, 184, 0.32);
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
 }
 
 .lesson-picker-option.active {
-  background: rgba(129, 140, 248, 0.18);
-  border-color: rgba(129, 140, 248, 0.35);
-  color: #a5b4fc;
+  background: var(--color-accent-bg);
+  border-color: var(--color-accent-border);
+  color: var(--color-accent-strong);
 }
 
 .lesson-picker-option.clear {
@@ -653,15 +653,6 @@ onBeforeUnmount(() => removeRepositionListeners())
 }
 
 .classrooms-datepicker {
-  --vdp-selected-bg: #818cf8;
-  --vdp-hover-bg: rgba(129, 140, 248, 0.18);
-  --vdp-hover-color: #e2e8f0;
-  --vdp-selected-color: #0f1117;
-  --vdp-background: rgba(30, 41, 59, 0.95);
-  --vdp-border: rgba(148, 163, 184, 0.22);
-  --vdp-text: #e2e8f0;
-  --vdp-disabled: #475569;
-  --vdp-today-color: #87cbc1;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
@@ -678,21 +669,21 @@ onBeforeUnmount(() => removeRepositionListeners())
 
 .letter-section {
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--color-border-soft);
   overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .letter-header {
   padding: 12px 18px;
   font-weight: 700;
   font-size: 1.05rem;
-  color: #87cbc1;
-  background: rgba(15, 23, 42, 0.35);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  color: var(--color-success);
+  background: var(--color-overlay-soft);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .letter-content {
@@ -700,7 +691,7 @@ onBeforeUnmount(() => removeRepositionListeners())
 }
 
 .subgroup-section + .subgroup-section {
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .classrooms-list {
@@ -712,8 +703,8 @@ onBeforeUnmount(() => removeRepositionListeners())
 
 .classroom-btn {
   padding: 10px 16px;
-  background: rgba(51, 65, 85, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: var(--color-bg-surface-strong);
+  border: 1px solid var(--color-border-soft);
   border-radius: 14px;
   cursor: pointer;
   display: inline-flex;
@@ -721,36 +712,36 @@ onBeforeUnmount(() => removeRepositionListeners())
   justify-content: center;
   text-align: center;
   transition: all 0.18s ease;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   font-size: 0.94rem;
   min-width: 96px;
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-raised);
 }
 
 .classroom-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-hover);
 }
 
 .classroom-btn.is-neutral {
-  background: rgba(51, 65, 85, 0.28);
-  border-color: rgba(148, 163, 184, 0.18);
+  background: var(--color-bg-surface-strong);
+  border-color: var(--color-border-soft);
 }
 
 .classroom-btn.is-free {
-  background: rgba(135, 203, 193, 0.18);
-  border-color: rgba(135, 203, 193, 0.35);
+  background: var(--color-accent-soft-bg);
+  border-color: var(--color-accent-soft-border);
 }
 
 .classroom-btn.is-busy {
-  background: rgba(248, 113, 113, 0.16);
-  border-color: rgba(248, 113, 113, 0.34);
+  background: var(--color-danger-soft-bg);
+  border-color: var(--color-danger-soft);
 }
 
 .classroom-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-raised);
 }
 
 .classroom-name {
@@ -766,24 +757,24 @@ onBeforeUnmount(() => removeRepositionListeners())
   justify-content: center;
   text-align: center;
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  color: #cbd5e1;
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-muted);
   padding: 32px 24px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .center-state h3 {
   margin: 0;
-  color: #f1f5f9;
+  color: var(--color-text-primary);
   font-size: 1.25rem;
   font-weight: 600;
 }
 
 .center-state p {
   margin: 10px 0 0;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .error-offset {
@@ -800,10 +791,10 @@ onBeforeUnmount(() => removeRepositionListeners())
 }
 
 .letter-skel {
-  background: rgba(30, 41, 59, 0.32);
+  background: var(--color-bg-surface-strong);
   border-radius: 18px;
   padding: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--color-border-soft);
   backdrop-filter: blur(10px);
 }
 
@@ -811,9 +802,9 @@ onBeforeUnmount(() => removeRepositionListeners())
 .sk-pill {
   background: linear-gradient(
     90deg,
-    rgba(71, 85, 105, 0.4) 25%,
-    rgba(100, 116, 139, 0.6) 50%,
-    rgba(71, 85, 105, 0.4) 75%
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;

@@ -97,16 +97,16 @@ const hasSecondRow = computed(() => single.value || (sameSubject.value && props.
   padding: var(--card-pad);
   border-radius: 16px;
 
-  background: linear-gradient(135deg, 
-      rgba(129, 140, 248, 0.10) 0%, 
-      rgba(135, 203, 193, 0.06) 100%
-    ), rgba(30, 41, 59, 0.36);
+  background: linear-gradient(135deg,
+      var(--color-accent-bg-subtle) 0%,
+      var(--color-accent-soft-bg-subtle) 100%
+    ), var(--color-bg-surface-strong);
   backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgba(129, 140, 248, 0.28);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(129, 140, 248, 0.18),
-    inset 0 0 16px rgba(129, 140, 248, 0.08);
+  border: 1px solid var(--color-accent-border);
+  box-shadow:
+    0 8px 32px var(--color-backdrop),
+    0 0 0 1px var(--color-accent-bg),
+    inset 0 0 16px var(--color-accent-bg-subtle);
 
   transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -127,16 +127,16 @@ const hasSecondRow = computed(() => single.value || (sameSubject.value && props.
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: rgba(129, 140, 248, 0.18);
-  border: 1px solid rgba(129, 140, 248, 0.35);
-  color: #818cf8;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent-border);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 1.18rem;
   font-variant-numeric: tabular-nums;
-  box-shadow: inset 0 0 0 1px rgba(129, 140, 248, 0.12);
+  box-shadow: inset 0 0 0 1px var(--color-accent-bg-subtle);
   flex-shrink: 0;
 }
 
@@ -147,7 +147,7 @@ const hasSecondRow = computed(() => single.value || (sameSubject.value && props.
   gap: 6px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #87cbc1;
+  color: var(--color-accent-soft);
   white-space: nowrap;
 }
 
@@ -164,7 +164,7 @@ const hasSecondRow = computed(() => single.value || (sameSubject.value && props.
 .subject-main {
   font-weight: 700;
   font-size: 1.05rem;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   line-height: 1.3;
 }
 
@@ -175,9 +175,9 @@ const hasSecondRow = computed(() => single.value || (sameSubject.value && props.
 }
 
 .inner-block {
-  background: rgba(51, 65, 85, 0.28);
+  background: var(--color-bg-surface-elevated);
   backdrop-filter: blur(8px);
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+  box-shadow: inset 0 0 0 1px var(--color-border);
   border-radius: 12px;
   padding: 6px 2px 6px 8px;
 }

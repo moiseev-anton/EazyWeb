@@ -228,11 +228,11 @@ function toggle(i) {
 
 .day-accordion {
   border-radius: 18px;
-  background: rgba(30, 41, 59, 0.24);
+  background: var(--color-bg-surface-subtle);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--color-border-soft);
   overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .accordion-header {
@@ -241,20 +241,20 @@ function toggle(i) {
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  background: rgba(15, 23, 42, 0.35);
+  background: var(--color-overlay-soft);
   border: none;
   cursor: pointer;
   transition: all 0.22s ease;
 }
 
 .accordion-header:hover:not(.disabled) {
-  background: rgba(51, 65, 85, 0.42);
+  background: var(--color-bg-hover);
 }
 
 .accordion-header.disabled {
   opacity: 0.5;
   cursor: default;
-  background: rgba(15, 23, 42, 0.25);
+  background: var(--color-overlay-soft);
 }
 
 .accordion-header .left {
@@ -275,22 +275,22 @@ function toggle(i) {
 }
 
 .short-date {
-  color: #e2e8f0;
+  color: var(--color-text-primary);
   font-weight: 700;
 }
 
 .sep {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   margin: 0 4px;
 }
 
 .marker {
-  color: #87cbc1;           /* мягкий мятный для Сегодня/Завтра */
+  color: var(--color-accent-soft);
   font-weight: 700;
 }
 
 .weekday-full {
-  color: #cbd5e1;
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
@@ -308,10 +308,10 @@ function toggle(i) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(148, 163, 184, 0.28);
+  background: var(--color-pill-bg);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  color: #cbd5e1;
+  border: 1px solid var(--color-pill-border);
+  color: var(--color-text-muted);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -319,13 +319,13 @@ function toggle(i) {
 .chev {
   width: 20px;
   height: 20px;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   transition: transform 0.22s ease, opacity 0.18s ease;
 }
 
 .chev.expanded {
   transform: rotate(180deg);
-  color: #818cf8;
+  color: var(--color-accent);
 }
 
 .chev.disabled {
@@ -340,8 +340,8 @@ function toggle(i) {
 /* ===== ТЕЛО АККОРДЕОНА ===== */
 .accordion-body {
   padding: 12px 18px 16px;
-  background: rgba(15, 23, 42, 0.2);
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--color-overlay-soft);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .cards {
@@ -362,7 +362,7 @@ function toggle(i) {
 }
 
 .no-lessons {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   padding: 16px 0 8px;
   text-align: center;
   font-weight: 600;
@@ -379,8 +379,8 @@ function toggle(i) {
 .skeleton-day {
   padding: 16px;
   border-radius: 14px;
-  background: rgba(51, 65, 85, 0.32);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--color-bg-hover-strong);
+  border: 1px solid var(--color-border-soft);
   backdrop-filter: blur(10px);
   min-height: 90px;
   display: flex;
@@ -392,9 +392,9 @@ function toggle(i) {
   border-radius: 8px;
   background: linear-gradient(
     90deg,
-    rgba(71, 85, 105, 0.4) 25%,
-    rgba(100, 116, 139, 0.6) 50%,
-    rgba(71, 85, 105, 0.4) 75%
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;

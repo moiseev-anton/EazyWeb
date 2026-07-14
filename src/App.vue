@@ -92,42 +92,22 @@ function retry() {
 </script>
 
 <style>
-/* Глобальные переменные — теперь в нашей палитре */
-:root {
-  --bg-app: linear-gradient(135deg, #0f1117 0%, #171b26 100%);
-  --glass-bg: rgba(30, 41, 59, 0.28);
-  --glass-bg-light: rgba(30, 41, 59, 0.24);
-  --glass-bg-strong: rgba(51, 65, 85, 0.28);
-  --glass-blur: blur(14px);
-  --border: rgba(148, 163, 184, 0.18);
-  --border-light: rgba(148, 163, 184, 0.14);
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #cbd5e1;
-  --accent-indigo: #818cf8;
-  --accent-mint: #87cbc1;
-  --shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
-  --hover-bg: rgba(51, 65, 85, 0.42);
-  --danger: #f87171;
-  --success: #87cbc1;
-}
-
 html,
 body {
   min-height: 100%;
-  background: #0f1117;
+  background: var(--color-bg-canvas);
 }
 
 #app {
   min-height: 100%;
-  background: var(--bg-app);
+  background: var(--color-bg-app);
 }
 
 body {
   margin: 0;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  color: var(--text-primary);
-  background: var(--bg-app);
+  color: var(--color-text-primary);
+  background: var(--color-bg-app);
   min-height: 100svh;
   min-height: 100dvh;
   overscroll-behavior-y: none;
@@ -187,9 +167,9 @@ body {
   right: 16px;
   bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   height: 68px;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--color-overlay);
   backdrop-filter: blur(24px);
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: 28px;
   display: flex;
   justify-content: space-around;
@@ -216,8 +196,8 @@ body {
   top: 0;
   bottom: 0;
   width: 260px;
-  background: var(--bg-app);
-  border-right: 1px solid var(--border);
+  background: var(--color-bg-app);
+  border-right: 1px solid var(--color-border);
   z-index: 1000;
 }
 
@@ -242,9 +222,9 @@ body {
   padding: 24px 20px;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--accent-indigo);
+  color: var(--color-accent);
   letter-spacing: -0.5px;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .boot-sidebar {
@@ -257,7 +237,7 @@ body {
 
 .boot-sidebar-profile {
   padding: 16px 12px 24px;
-  border-top: 1px solid var(--border-light);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .boot-sidebar-item {
@@ -280,9 +260,9 @@ body {
 }
 
 .boot-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
+  background: var(--color-bg-surface);
+  backdrop-filter: var(--surface-backdrop);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 16px;
 }
@@ -290,9 +270,9 @@ body {
 .boot-sk {
   background: linear-gradient(
     90deg,
-    rgba(71, 85, 105, 0.4) 25%,
-    rgba(100, 116, 139, 0.6) 50%,
-    rgba(71, 85, 105, 0.4) 75%
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -342,7 +322,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--color-backdrop-modal);
   backdrop-filter: blur(8px);
   z-index: 9999;
   padding: 20px;
@@ -352,14 +332,14 @@ body {
 .boot-modal-card {
   width: 100%;
   max-width: 420px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
+  background: var(--color-bg-surface);
+  backdrop-filter: var(--surface-backdrop);
+  border: 1px solid var(--color-border);
   padding: 28px 24px;
   border-radius: 20px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-surface);
   text-align: center;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 
 .brand-mark {
@@ -367,8 +347,8 @@ body {
   width: fit-content;
   padding: 8px 16px;
   border-radius: 999px;
-  background: rgba(129, 140, 248, 0.18);
-  color: var(--accent-indigo);
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -383,14 +363,14 @@ body {
 }
 
 .error-sub {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: 20px;
   font-size: 0.95rem;
 }
 
 .retry-btn {
-  background: var(--accent-indigo);
-  color: #0f1117;
+  background: var(--color-accent);
+  color: var(--color-bg-canvas);
   border: none;
   border-radius: 12px;
   padding: 12px 24px;
@@ -398,14 +378,14 @@ body {
   font-size: 0.98rem;
   cursor: pointer;
   transition: all 0.18s ease;
-  box-shadow: 0 6px 20px rgba(129, 140, 248, 0.3);
+  box-shadow: var(--shadow-accent);
   min-width: 160px;
   margin-top: 1.5rem;
 }
 
 .retry-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(129, 140, 248, 0.4);
+  box-shadow: var(--shadow-accent-hover);
 }
 
 /* Анимация шиммера */
