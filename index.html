@@ -1,7 +1,20 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
+
+    <script>
+      (() => {
+        const key = 'eazyclass-theme'
+        const stored = localStorage.getItem(key)
+        const preference = ['system', 'dark', 'light'].includes(stored) ? stored : 'light'
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        const theme = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference
+
+        document.documentElement.dataset.theme = theme
+        document.documentElement.dataset.themePreference = preference
+      })()
+    </script>
 
     <!-- Основной favicon -->
     <link rel="icon" href="/favicon.ico" sizes="any">
