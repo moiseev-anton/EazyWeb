@@ -1,4 +1,4 @@
-﻿:root[data-theme='light'] {
+:root[data-theme='light'] {
   color-scheme: light;
   --color-bg-canvas: #f3f6ff;
   --color-bg-app: linear-gradient(135deg, #f3f6ff 0%, #e8eeff 100%);
@@ -14,6 +14,7 @@
   --color-overlay-soft: rgba(255, 255, 255, 0.56);
   --color-backdrop: rgba(15, 23, 42, 0.16);
   --color-backdrop-strong: rgba(15, 23, 42, 0.24);
+  --color-backdrop-modal: rgba(15, 23, 42, 0.32);
   --color-accent-bg: rgba(79, 70, 229, 0.16);
   --color-accent-bg-strong: rgba(79, 70, 229, 0.24);
   --color-accent-bg-subtle: rgba(79, 70, 229, 0.1);
@@ -38,9 +39,6 @@
   --color-accent: #4f46e5;
   --color-accent-strong: #6366f1;
   --color-accent-soft: #14b8a6;
-  --color-brand-telegram: #2f95d6;
-  --color-brand-telegram-strong: #2288c9;
-  --color-text-inverse: #f8fafc;
   --color-success: #0f766e;
   --color-danger: #dc2626;
   --color-shadow: rgba(15, 23, 42, 0.12);
