@@ -19,7 +19,7 @@
           </div>
         </div>
 
-        <button class="mode-toggle-button" @click="toggleMode" :aria-label="currentMode === 'daily' ? 'Переключить на недельный вид' : 'Переключить на дневной вид'">
+        <button class="mode-toggle-button" @click="toggleMode" :aria-label="'Режим отображения'" :title="currentMode === 'daily' ? 'Переключить на недельный вид' : 'Переключить на дневной вид'">
           <ViewColumnsIcon v-if="currentMode === 'daily'" class="mode-icon" />
           <QueueListIcon v-else class="mode-icon" />
         </button>
